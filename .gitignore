@@ -1,0 +1,18 @@
+# Go build
+bin/
+*.exe
+*.test
+*.out
+
+# Dependency directories
+vendor/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Air tmp
+tmp/
