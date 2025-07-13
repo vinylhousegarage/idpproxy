@@ -2,9 +2,14 @@ FROM golang:1.24.5
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    make \
-    && rm -rf /var/lib/apt/lists/*
+RUN go install github.com/air-verse/air@latest \
+    && go install golang.org/x/tools/cmd/goimports@latest \
+    && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
+       | sh -s -- -b /go/bin
 
-CMD ["bash"]
+COPY go.mod go.sum ./
+RUN go mod tidy
+
+COPY . .
+
+CMD ["air"]
