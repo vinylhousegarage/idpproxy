@@ -26,9 +26,9 @@ jobs:
           test -z "$(goimports -l .)" || (echo 'Please run goimports' && exit 1)
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v5
         with:
-          version: v2.2.2
+          version: latest
 
       - name: Run tests
         run: go test ./... -v
