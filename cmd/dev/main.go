@@ -1,11 +1,18 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 	r := gin.Default()
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
-	r.Run(":9000")
+
+	if err := r.Run(":9000"); err != nil {
+		log.Fatalf("failed to run server: %v", err)
+	}
 }
