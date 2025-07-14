@@ -11,6 +11,9 @@ vendor/
 .vscode/
 .idea/
 
+# Only ignore service account keys
+idpproxy-16c9c-4241626f2ef8.json
+
 # Logs
 *.log
 
