@@ -11,6 +11,9 @@ vendor/
 .vscode/
 .idea/
 
+# Only ignore service account keys
+/config/keys/*.json
+
 # Logs
 *.log
 
