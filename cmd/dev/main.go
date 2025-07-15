@@ -1,18 +1,20 @@
 package main
 
 import (
-	"log"
+	"idpproxy/internal/router"
+	"idpproxy/internal/server"
 
-	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
-
-	if err := r.Run(":9000"); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic("failed to initialize logger: " + err.Error())
 	}
+	defer logger.Sync()
+
+	r := router.NewRouter(logger)
+
+	server.StartServer(r, logger)
 }
