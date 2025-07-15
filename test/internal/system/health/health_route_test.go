@@ -5,25 +5,29 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.uber.org/zap"
+	"idpproxy/internal/router"
 
-	"yourmodule/router"
+	"github.com/stretchr/testify/require"
+
+	"go.uber.org/zap"
 )
 
-func TestHealthRouteReturns_JSONHealthy(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
+	t.Parallel()
+
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		t.Fatalf("failed to initialize logger: %v", err)
+	}
 	r := router.NewRouter(logger)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
+	req, err := http.NewRequest(http.MethodGet, "/health", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
 	r.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", w.Code)
-	}
-
-	expected := `{"status":"healthy"}`
-	if w.Body.String() != expected {
-		t.Fatalf("unexpected body: got %s, want %s", w.Body.String(), expected)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.JSONEq(t, `{"status":"healthy"}`, w.Body.String())
 }
