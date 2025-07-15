@@ -1,7 +1,7 @@
 package router
 
 import (
-	"idpproxy/internal/system/health"
+	"github.com/vinylhousegarage/idpproxy/internal/system/health"
 
 	"github.com/gin-gonic/gin"
 

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"idpproxy/internal/router"
+	"github.com/vinylhousegarage/idpproxy/internal/router"
 
 	"github.com/stretchr/testify/require"
 

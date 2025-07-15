@@ -1,8 +1,8 @@
 package main
 
 import (
-	"idpproxy/internal/router"
-	"idpproxy/internal/server"
+	"github.com/vinylhousegarage/idpproxy/internal/router"
+	"github.com/vinylhousegarage/idpproxy/internal/server"
 
 	"go.uber.org/zap"
 )
