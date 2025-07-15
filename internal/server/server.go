@@ -12,6 +12,6 @@ func StartServer(r *gin.Engine, logger *zap.Logger) {
 	logger.Info("Starting server", zap.String("port", port))
 
 	if err := r.Run(":" + port); err != nil {
-			logger.Fatal("Server failed", zap.Error(err))
+		logger.Fatal("Server failed", zap.Error(err))
 	}
 }

@@ -1,19 +1,19 @@
 package router
 
 import (
-    "idpproxy/internal/system/health"
+	"idpproxy/internal/system/health"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 
-    "go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 func NewRouter(logger *zap.Logger) *gin.Engine {
-    r := gin.New()
-    r.Use(gin.Recovery())
+	r := gin.New()
+	r.Use(gin.Recovery())
 
-    system := r.Group("")
-    health.RegisterRoutes(system, logger)
+	system := r.Group("")
+	health.RegisterRoutes(system, logger)
 
-    return r
+	return r
 }
