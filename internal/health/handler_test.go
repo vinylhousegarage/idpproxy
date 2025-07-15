@@ -7,18 +7,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
+
+	"go.uber.org/zap"
 )
 
 func TestHealthHandler_Returns200(t *testing.T) {
 	t.Parallel()
 
+	gin.SetMode(gin.TestMode)
 	router := gin.Default()
-	router.GET("/health", HealthHandler)
 
+	handler := NewHealthHandler(zap.NewNop())
+	router.GET("/health", handler.Serve)
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/health", nil)
 	router.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.JSONEq(t, `{"status":"ok"}`, w.Body.String())
+	require.JSONEq(t, `{"status":"healthy"}`, w.Body.String())
 }
