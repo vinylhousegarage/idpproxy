@@ -2,7 +2,8 @@ package root
 
 import (
 	"net/http"
-	"os"
+
+	"github.com/vinylhousegarage/idpproxy/internal/config"
 
 	"github.com/gin-gonic/gin"
 
@@ -22,7 +23,7 @@ func (h *RootHandler) Serve(c *gin.Context) {
 
 	resp := RootResponse{
 		Message: "Welcome to IdP Proxy",
-		OpenAPI: os.Getenv("OPENAPI_URL"),
+		OpenAPI: config.GetOpenAPIURL(),
 	}
 	c.JSON(http.StatusOK, resp)
 }
