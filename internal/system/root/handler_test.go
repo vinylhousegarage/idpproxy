@@ -17,7 +17,7 @@ func TestNewRootHandler_Returns200JSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	handler := NewRouteHandler(zap.NewNop())
+	handler := NewRootHandler(zap.NewNop())
 	router.GET("/", handler.Serve)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
