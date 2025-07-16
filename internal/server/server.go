@@ -4,6 +4,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 
 	"github.com/gin-gonic/gin"
+
 	"go.uber.org/zap"
 )
 
