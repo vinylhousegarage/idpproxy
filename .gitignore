@@ -19,3 +19,6 @@ vendor/
 
 # Air tmp
 tmp/
+
+# Environment files
+.env
