@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewRootHandler_Returns200JSON(t *testing.T) {
-	t.Setenv("OPENAPI_URL", "https://test.example.com/openapi.json")
+	t.Parallel()
 
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
@@ -27,6 +27,6 @@ func TestNewRootHandler_Returns200JSON(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.JSONEq(t, `{
 		"message": "Welcome to IdP Proxy",
-		"openapi": "https://test.example.com/openapi.json"
+		"openapi": "http://localhost:9000/openapi.json"
 	}`, w.Body.String())
 }
