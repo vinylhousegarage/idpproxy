@@ -27,6 +27,6 @@ func TestNewRootHandler_Returns200JSON(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.JSONEq(t, `{
 		"message": "Welcome to IdP Proxy",
-		"openapi": "https://idpproxy.com/openapi.json"
+		"openapi": "https://test.example.com/openapi.json"
 	}`, w.Body.String())
 }
