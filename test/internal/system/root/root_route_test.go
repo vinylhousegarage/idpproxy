@@ -31,6 +31,6 @@ func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.JSONEq(t, `{
 		"message":"Welcome to IdP Proxy",
-		"openapi": "http://localhost:9000/openapi.json",
+		"openapi": "http://localhost:9000/openapi.json"
 	}`, w.Body.String())
 }
