@@ -12,7 +12,6 @@ import (
 )
 
 func TestNewRootHandler_Returns200JSON(t *testing.T) {
-	t.Parallel()
 	t.Setenv("OPENAPI_URL", "https://test.example.com/openapi.json")
 
 	gin.SetMode(gin.TestMode)
