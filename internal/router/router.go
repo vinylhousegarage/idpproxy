@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
+	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,6 +15,7 @@ func NewRouter(logger *zap.Logger) *gin.Engine {
 
 	system := r.Group("")
 	health.RegisterRoutes(system, logger)
+	root.RegisterRoutes(system, logger)
 
 	return r
 }
