@@ -7,6 +7,6 @@ import (
 )
 
 func RegisterRoutes(r *gin.RouterGroup, di *deps.Dependencies) {
-	h := NewHealthHandler(di)
+	h := NewHealthHandler(di.Logger)
 	r.GET("/health", h.Serve)
 }

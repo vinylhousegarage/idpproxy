@@ -7,6 +7,6 @@ import (
 )
 
 func RegisterRoutes(r *gin.RouterGroup, di *deps.Dependencies) {
-	h := NewRootHandler(di)
+	h := NewRootHandler(di.Logger)
 	r.GET("/", h.Serve)
 }
