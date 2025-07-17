@@ -12,16 +12,23 @@ import (
 )
 
 type GoogleLoginHandler struct {
-	Config config.GoogleConfig
-	Client httpclient.HTTPClient
-	Logger *zap.Logger
+	MetadataURL string
+	Config      config.GoogleConfig
+	Client      httpclient.HTTPClient
+	Logger      *zap.Logger
 }
 
-func NewGoogleLoginHandler(cfg config.GoogleConfig, cli httpclient.HTTPClient, logger *zap.Logger) *GoogleLoginHandler {
+func NewGoogleLoginHandler(
+	metadataURL string,
+	cfg         config.GoogleConfig,
+	cli         httpclient.HTTPClient,
+	logger      *zap.Logger,
+) *GoogleLoginHandler {
 	return &GoogleLoginHandler{
-		Config: cfg,
-		Client: cli,
-		Logger: logger,
+		MetadataURL: metadataURL,
+		Config:      cfg,
+		Client:      cli,
+		Logger:      logger,
 	}
 }
 
@@ -29,7 +36,7 @@ func (h *GoogleLoginHandler) Serve(c *gin.Context) {
 	state := GenerateState()
 	http.SetCookie(c.Writer, BuildStateCookie(state))
 
-	endpoint, err := GetGoogleLoginURL(h.Config.MetadataURL, h.Client, h.Logger)
+	endpoint, err := GetGoogleLoginURL(h.MetadataURL, h.Client, h.Logger)
 	if err != nil {
 		response.WriteErrorResponse(c.Writer, err, h.Logger)
 		return
