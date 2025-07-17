@@ -24,8 +24,9 @@ func TestBuildStateCookie(t *testing.T) {
 	assert.Equal(t, http.SameSiteLaxMode, c.SameSite)
 }
 
-var mockCfg = config.Config{
+var mockCfg = config.GoogleConfig{
 	ClientID:     "client-id",
+	ClientSecret: "client-secret",
 	RedirectURI:  "https://localhost/callback",
 	ResponseType: "code",
 	Scope:        "openid email profile",
