@@ -32,7 +32,6 @@ func mockGoogleConfig() config.GoogleConfig {
 		Scope:        "openid email",
 		AccessType:   "offline",
 		Prompt:       "consent",
-		MetadataURL:  "https://example.com/.well-known/openid-configuration",
 	}
 }
 
