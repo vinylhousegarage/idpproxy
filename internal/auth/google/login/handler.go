@@ -26,13 +26,13 @@ func (h *GoogleLoginHandler) Serve(c *gin.Context) {
 
 	endpoint, err := GetGoogleLoginURL(h.Deps.MetadataURL, h.Deps.HTTPClient, h.Deps.Logger)
 	if err != nil {
-		httperror.WriteErrorResponse(c.Writer, err, h.Logger)
+		httperror.WriteErrorResponse(c.Writer, err, h.Deps.Logger)
 		return
 	}
 
 	loginURL, err := BuildGoogleLoginURL(h.Deps.Config, endpoint, state)
 	if err != nil {
-		httperror.WriteErrorResponse(c.Writer, err, h.Logger)
+		httperror.WriteErrorResponse(c.Writer, err, h.Deps.Logger)
 		return
 	}
 
