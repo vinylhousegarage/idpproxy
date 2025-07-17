@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/vinylhousegarage/idpproxy/apperror"
+	"github.com/vinylhousegarage/idpproxy/internal/apperror"
 
 	"go.uber.org/zap"
 )
