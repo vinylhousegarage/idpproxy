@@ -5,8 +5,8 @@ const (
 	GoogleOIDCMetadataURL = "https://accounts.google.com/.well-known/openid-configuration"
 
 	// for GoogleConfig
-	GoogleResponseType    = "code"
-	GoogleScope           = "openid email profile"
-	GoogleAccessType      = "offline"
-	GooglePrompt          = "consent"
+	GoogleResponseType = "code"
+	GoogleScope        = "openid email profile"
+	GoogleAccessType   = "offline"
+	GooglePrompt       = "consent"
 )
