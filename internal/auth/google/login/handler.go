@@ -8,7 +8,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/httpclient"
-	"github.com/vinylhousegarage/idpproxy/internal/response"
+	"github.com/vinylhousegarage/idpproxy/internal/httperror"
 )
 
 type GoogleLoginHandler struct {
@@ -38,13 +38,13 @@ func (h *GoogleLoginHandler) Serve(c *gin.Context) {
 
 	endpoint, err := GetGoogleLoginURL(h.MetadataURL, h.Client, h.Logger)
 	if err != nil {
-		response.WriteErrorResponse(c.Writer, err, h.Logger)
+		httperror.WriteErrorResponse(c.Writer, err, h.Logger)
 		return
 	}
 
 	loginURL, err := BuildGoogleLoginURL(h.Config, endpoint, state)
 	if err != nil {
-		response.WriteErrorResponse(c.Writer, err, h.Logger)
+		httperror.WriteErrorResponse(c.Writer, err, h.Logger)
 		return
 	}
 
