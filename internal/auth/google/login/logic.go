@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 )
