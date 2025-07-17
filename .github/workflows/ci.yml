@@ -10,6 +10,9 @@ jobs:
 
     env:
       OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
 
     steps:
       - uses: actions/checkout@v4
