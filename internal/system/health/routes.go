@@ -3,10 +3,10 @@ package health
 import (
 	"github.com/gin-gonic/gin"
 
-	"go.uber.org/zap"
+	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, logger *zap.Logger) {
-	h := NewHealthHandler(logger)
+func RegisterRoutes(r *gin.RouterGroup, di *deps.Dependencies) {
+	h := NewHealthHandler(di)
 	r.GET("/health", h.Serve)
 }
