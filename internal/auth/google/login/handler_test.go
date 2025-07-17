@@ -36,6 +36,8 @@ func mockGoogleConfig() config.GoogleConfig {
 	}
 }
 
+var mockMeta = `{"authorization_endpoint": "https://accounts.google.com/o/oauth2/auth"}`
+
 func TestGoogleLoginHandler_Serve_Success(t *testing.T) {
 	t.Parallel()
 
@@ -44,8 +46,6 @@ func TestGoogleLoginHandler_Serve_Success(t *testing.T) {
 
 	cfg := mockGoogleConfig()
 	logger := zaptest.NewLogger(t)
-
-	mockMeta := `{"authorization_endpoint": "https://accounts.google.com/o/oauth2/auth"}`
 
 	client := &mockHTTPClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
@@ -57,7 +57,7 @@ func TestGoogleLoginHandler_Serve_Success(t *testing.T) {
 		},
 	}
 
-	handler := NewGoogleLoginHandler(cfg, client, logger)
+	handler := NewGoogleLoginHandler(mockMeta, cfg, client, logger)
 	router.GET("/google/login", handler.Serve)
 
 	w := httptest.NewRecorder()
@@ -87,7 +87,7 @@ func TestGoogleLoginHandler_Serve_MetadataError(t *testing.T) {
 		},
 	}
 
-	handler := NewGoogleLoginHandler(cfg, client, logger)
+	handler := NewGoogleLoginHandler(mockMeta, cfg, client, logger)
 	router.GET("/google/login", handler.Serve)
 
 	w := httptest.NewRecorder()
