@@ -20,9 +20,9 @@ type GoogleLoginHandler struct {
 
 func NewGoogleLoginHandler(
 	metadataURL string,
-	cfg         config.GoogleConfig,
-	cli         httpclient.HTTPClient,
-	logger      *zap.Logger,
+	cfg config.GoogleConfig,
+	cli httpclient.HTTPClient,
+	logger *zap.Logger,
 ) *GoogleLoginHandler {
 	return &GoogleLoginHandler{
 		MetadataURL: metadataURL,
