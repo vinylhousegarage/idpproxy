@@ -40,7 +40,7 @@ func TestBuildGoogleLoginURL_Success(t *testing.T) {
 	endpoint := "https://auth.example.com/oauth2/authorize"
 	state := "sample-state-value"
 
-	result, err := BuildLoginURL(mockCfg, endpoint, state)
+	result, err := BuildGoogleLoginURL(mockCfg, endpoint, state)
 	assert.NoError(t, err)
 
 	parsed, err := url.Parse(result)
@@ -59,7 +59,7 @@ func TestBuildGoogleLoginURL_Success(t *testing.T) {
 func TestBuildGoogleLoginURL_InvalidEndpoint(t *testing.T) {
 	t.Parallel()
 
-	_, err := BuildLoginURL(mockCfg, "://invalid-url", "state")
+	_, err := BuildGoogleLoginURL(mockCfg, "://invalid-url", "state")
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, ErrFailedToParseLoginURL)
 }
