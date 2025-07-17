@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestGetLoginURL(t *testing.T) {
+func TestGetGoogleLoginURL(t *testing.T) {
 	t.Parallel()
 
 	logger := zap.NewNop()
@@ -24,7 +24,7 @@ func TestGetLoginURL(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		endpoint, err := GetLoginURL(ts.URL, http.DefaultClient, logger)
+		endpoint, err := GetGoogleLoginURL(ts.URL, http.DefaultClient, logger)
 		assert.NoError(t, err)
 		assert.Equal(t, "https://example.com/oauth2/authorize", endpoint)
 	})
@@ -32,14 +32,14 @@ func TestGetLoginURL(t *testing.T) {
 	t.Run("RequestCreationError", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := GetLoginURL(":", http.DefaultClient, logger)
+		_, err := GetGoogleLoginURL(":", http.DefaultClient, logger)
 		assert.ErrorIs(t, err, ErrFailedToCreateRequest)
 	})
 
 	t.Run("HTTPClientError", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := GetLoginURL("http://invalid.host.local", http.DefaultClient, logger)
+		_, err := GetGoogleLoginURL("http://invalid.host.local", http.DefaultClient, logger)
 		assert.ErrorIs(t, err, ErrFailedToFetchMetadata)
 	})
 
@@ -51,7 +51,7 @@ func TestGetLoginURL(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		_, err := GetLoginURL(ts.URL, http.DefaultClient, logger)
+		_, err := GetGoogleLoginURL(ts.URL, http.DefaultClient, logger)
 		assert.ErrorIs(t, err, ErrUnexpectedMetadataStatusCode)
 	})
 
@@ -64,7 +64,7 @@ func TestGetLoginURL(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		_, err := GetLoginURL(ts.URL, http.DefaultClient, logger)
+		_, err := GetGoogleLoginURL(ts.URL, http.DefaultClient, logger)
 		assert.ErrorIs(t, err, ErrFailedToDecodeMetadata)
 	})
 
@@ -77,7 +77,7 @@ func TestGetLoginURL(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		_, err := GetLoginURL(ts.URL, http.DefaultClient, logger)
+		_, err := GetGoogleLoginURL(ts.URL, http.DefaultClient, logger)
 		assert.ErrorIs(t, err, ErrMissingAuthorizationEndpoint)
 	})
 }
