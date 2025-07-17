@@ -34,7 +34,7 @@ func TestLoadGoogleConfig_Success(t *testing.T) {
 	os.Setenv("GOOGLE_ACCESS_TYPE", "unused")
 	os.Setenv("GOOGLE_PROMPT", "unused")
 
-	cfg, err := config.LoadGoogleConfig()
+	cfg, err := LoadGoogleConfig()
 	require.NoError(t, err)
 	require.Equal(t, "test-client-id", cfg.ClientID)
 	require.Equal(t, "test-client-secret", cfg.ClientSecret)
@@ -48,7 +48,7 @@ func TestLoadGoogleConfig_Success(t *testing.T) {
 func TestLoadGoogleConfig_MissingVariables(t *testing.T) {
 	os.Clearenv()
 
-	cfg, err := config.LoadGoogleConfig()
+	cfg, err := LoadGoogleConfig()
 	require.Nil(t, cfg)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "missing required environment variables")
