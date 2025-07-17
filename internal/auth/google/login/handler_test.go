@@ -97,5 +97,5 @@ func TestGoogleLoginHandler_Serve_MetadataError(t *testing.T) {
 
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, hhttp.StatusBadGateway, w.Code)
+	assert.Equal(t, http.StatusBadGateway, w.Code)
 }
