@@ -14,11 +14,11 @@ func NewRouter(di *deps.Dependencies) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	googleGroup := r.Group("google")
-	login.RegisterRoutes(googleGroup, di.MetadataURL, di.Config, di.HTTPClient, di.Logger)
+	login.RegisterRoutes(googleGroup, di)
 
 	systemGroup := r.Group("")
-	health.RegisterRoutes(systemGroup, di.Logger)
-	root.RegisterRoutes(systemGroup, di.Logger)
+	health.RegisterRoutes(systemGroup, di)
+	root.RegisterRoutes(systemGroup, di)
 
 	return r
 }
