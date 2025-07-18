@@ -22,10 +22,12 @@ func main() {
 
 	cfg, err := config.LoadGoogleConfig()
 	if err != nil {
-		panic("failed to initialize cfg: " + err.Error())
+		panic("failed to load cfg: " + err.Error())
 	}
 
-	di := deps.New(cfg, logger)
+	metadataURL := config.GoogleOIDCMetadataURL
+
+	di := deps.New(metadataURL, cfg, logger)
 
 	r := router.NewRouter(di)
 
