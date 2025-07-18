@@ -53,3 +53,19 @@ func TestLoadGoogleConfig_MissingVariables(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "missing required environment variables")
 }
+
+func TestLoadFernetKeyString(t *testing.T) {
+	t.Setenv("FERNET_KEY", "dummy_key")
+	defer os.Unsetenv("FERNET_KEY")
+
+	key, err := LoadFernetKeyString()
+	require.NoError(t, err)
+	require.Equal(t, "dummy_key", key)
+}
+
+func TestLoadFernetKeyString_Missing(t *testing.T) {
+	t.Unsetenv("FERNET_KEY")
+	_, err := LoadFernetKeyString()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "FERNET_KEY is not set")
+}
