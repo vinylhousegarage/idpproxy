@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
+	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
 type mockHTTPClient struct {
@@ -23,8 +24,8 @@ func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.DoFunc(req)
 }
 
-func mockGoogleConfig() config.GoogleConfig {
-	return config.GoogleConfig{
+func mockGoogleConfig() *config.GoogleConfig {
+	return &config.GoogleConfig{
 		ClientID:     "test-client-id",
 		ClientSecret: "secret",
 		RedirectURI:  "https://idpproxy.com/callback",
@@ -32,6 +33,14 @@ func mockGoogleConfig() config.GoogleConfig {
 		Scope:        "openid email",
 		AccessType:   "offline",
 		Prompt:       "consent",
+	}
+}
+
+func newMockDeps(t *testing.T) *deps.Dependencies {
+	return &deps.Dependencies{
+		MetadataURL: mockMetadataURL,
+		Config:      mockGoogleConfig(),
+		Logger:      zaptest.NewLogger(t),
 	}
 }
 
@@ -43,23 +52,18 @@ const (
 func TestGoogleLoginHandler_Serve_Success(t *testing.T) {
 	t.Parallel()
 
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-
-	cfg := mockGoogleConfig()
-	logger := zaptest.NewLogger(t)
-
-	client := &mockHTTPClient{
+	di := newMockDeps(t)
+	di.HTTPClient = &mockHTTPClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
 			body := io.NopCloser(strings.NewReader(mockMeta))
-			return &http.Response{
-				StatusCode: http.StatusOK,
-				Body:       body,
-			}, nil
+			return &http.Response{StatusCode: 200, Body: body}, nil
 		},
 	}
 
-	handler := NewGoogleLoginHandler(mockMetadataURL, cfg, client, logger)
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+
+	handler := NewGoogleLoginHandler(di)
 	router.GET("/google/login", handler.Serve)
 
 	w := httptest.NewRecorder()
@@ -77,19 +81,17 @@ func TestGoogleLoginHandler_Serve_Success(t *testing.T) {
 func TestGoogleLoginHandler_Serve_MetadataError(t *testing.T) {
 	t.Parallel()
 
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-
-	cfg := mockGoogleConfig()
-	logger := zaptest.NewLogger(t)
-
-	client := &mockHTTPClient{
+	di := newMockDeps(t)
+	di.HTTPClient = &mockHTTPClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
 			return nil, errors.New("failed to fetch metadata")
 		},
 	}
 
-	handler := NewGoogleLoginHandler(mockMetadataURL, cfg, client, logger)
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+
+	handler := NewGoogleLoginHandler(di)
 	router.GET("/google/login", handler.Serve)
 
 	w := httptest.NewRecorder()

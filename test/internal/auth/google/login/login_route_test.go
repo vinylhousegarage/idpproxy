@@ -1,4 +1,4 @@
-package root_test
+package login_test
 
 import (
 	"net/http"
@@ -12,7 +12,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
+func TestGoogleLoginRoute_RedirectsToGoogle(t *testing.T) {
 	t.Parallel()
 
 	logger, err := zap.NewDevelopment()
@@ -23,14 +23,13 @@ func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 	r := router.NewRouter(di)
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	req, err := http.NewRequest(http.MethodGet, "/google/login", nil)
 	require.NoError(t, err)
 
 	r.ServeHTTP(w, req)
 
-	require.Equal(t, http.StatusOK, w.Code)
-	require.JSONEq(t, `{
-		"message":"Welcome to IdP Proxy",
-		"openapi": "http://localhost:9000/openapi.json"
-	}`, w.Body.String())
+	require.Equal(t, http.StatusFound, w.Code)
+	require.Contains(t, w.Header().Get("Location"), "https://accounts.google.com/o/oauth2/v2/auth")
+	require.Contains(t, w.Header().Get("Location"), "client_id=")
+	require.Contains(t, w.Header().Get("Set-Cookie"), "oauth_state=")
 }

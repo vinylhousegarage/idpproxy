@@ -1,10 +1,12 @@
 package main
 
 import (
+	"go.uber.org/zap"
+
+	"github.com/vinylhousegarage/idpproxy/internal/config"
+	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
-
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -18,7 +20,16 @@ func main() {
 		}
 	}()
 
-	r := router.NewRouter(logger)
+	cfg, err := config.LoadGoogleConfig()
+	if err != nil {
+		panic("failed to load cfg: " + err.Error())
+	}
+
+	metadataURL := config.GoogleOIDCMetadataURL
+
+	di := deps.New(metadataURL, cfg, logger)
+
+	r := router.NewRouter(di)
 
 	server.StartServer(r, logger)
 }
