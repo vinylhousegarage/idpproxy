@@ -24,7 +24,7 @@ func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.DoFunc(req)
 }
 
-func mockGoogleConfig() config.GoogleConfig {
+func mockGoogleConfig() *config.GoogleConfig {
 	return config.GoogleConfig{
 		ClientID:     "test-client-id",
 		ClientSecret: "secret",
