@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"cloud.google.com/go/firestore"
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
