@@ -48,7 +48,7 @@ type FirestoreConfig struct {
 }
 
 func LoadFirestoreConfig() *FirestoreConfig {
-	return &FirestoreConfig{ProjectID: os.Getenv("FIRESTORE_PROJECT_ID")}
+	return &FirestoreConfig{ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT")}
 }
 
 func GetPort() string {
