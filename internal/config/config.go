@@ -43,6 +43,14 @@ func LoadGoogleConfig() (*GoogleConfig, error) {
 	}, nil
 }
 
+type FirestoreConfig struct {
+	ProjectID string
+}
+
+func LoadFirestoreConfig() *FirestoreConfig {
+	return &FirestoreConfig{ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT")}
+}
+
 func GetPort() string {
 	port := os.Getenv("PORT")
 	if port == "" {

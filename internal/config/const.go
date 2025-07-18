@@ -9,4 +9,7 @@ const (
 	GoogleScope        = "openid email profile"
 	GoogleAccessType   = "offline"
 	GooglePrompt       = "consent"
+
+	// for GoogleTokenRepository
+	CollectionGoogleTokens = "google_tokens"
 )
