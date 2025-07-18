@@ -1,7 +1,6 @@
 package deps
 
 import (
-	"cloud.google.com/go/firestore"
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
@@ -18,11 +17,11 @@ type Dependencies struct {
 }
 
 func New(
-	metadataURL     string,
-	googleConfig    *config.GoogleConfig,
-	httpClient      httpclient.HTTPClient,
+	metadataURL string,
+	googleConfig *config.GoogleConfig,
+	httpClient httpclient.HTTPClient,
 	firestoreClient repository.GoogleTokenStore,
-	logger          *zap.Logger,
+	logger *zap.Logger,
 ) *Dependencies {
 	return &Dependencies{
 		MetadataURL:     metadataURL,
