@@ -28,7 +28,6 @@ func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
 
 	r.ServeHTTP(w, req)
 
-
 	require.Equal(t, http.StatusOK, w.Code)
 	require.JSONEq(t, `{"status":"healthy"}`, w.Body.String())
 }
