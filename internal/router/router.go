@@ -3,8 +3,8 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/vinylhousegarage/idpproxy/internal/auth/google/login"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/login"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
