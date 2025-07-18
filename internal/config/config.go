@@ -66,3 +66,11 @@ func GetOpenAPIURL() string {
 	}
 	return url
 }
+
+func LoadFernetKeyString() (string, error) {
+	raw := os.Getenv("FERNET_KEY")
+	if raw == "" {
+		return "", fmt.Errorf("FERNET_KEY is not set")
+	}
+	return raw, nil
+}
