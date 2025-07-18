@@ -1,8 +1,6 @@
 package deps
 
 import (
-	"net/http"
-
 	"cloud.google.com/go/firestore"
 	"go.uber.org/zap"
 
