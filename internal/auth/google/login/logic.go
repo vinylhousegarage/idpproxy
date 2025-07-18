@@ -29,7 +29,7 @@ func BuildStateCookie(state string) *http.Cookie {
 	}
 }
 
-func BuildGoogleLoginURL(cfg config.GoogleConfig, endpoint, state string) (string, error) {
+func BuildGoogleLoginURL(cfg *config.GoogleConfig, endpoint, state string) (string, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return "", ErrFailedToParseLoginURL
