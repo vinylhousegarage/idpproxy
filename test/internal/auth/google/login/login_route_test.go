@@ -29,7 +29,7 @@ func TestGoogleLoginRoute_RedirectsToGoogle(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusFound, w.Code)
-	require.Contains(t, w.Header().Get("Location"), "https://accounts.google.com/o/oauth2/auth")
+	require.Contains(t, w.Header().Get("Location"), "https://accounts.google.com/o/oauth2/v2/auth")
 	require.Contains(t, w.Header().Get("Location"), "client_id=")
 	require.Contains(t, w.Header().Get("Set-Cookie"), "oauth_state=")
 }
