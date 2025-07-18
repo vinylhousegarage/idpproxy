@@ -11,14 +11,14 @@ import (
 
 type Dependencies struct {
 	MetadataURL string
-	Config      config.GoogleConfig
+	Config      *config.GoogleConfig
 	HTTPClient  httpclient.HTTPClient
 	Logger      *zap.Logger
 }
 
-func New(cfg config.GoogleConfig, logger *zap.Logger) *Dependencies {
+func New(metadataURL string, cfg *config.GoogleConfig, logger *zap.Logger) *Dependencies {
 	return &Dependencies{
-		MetadataURL: config.GoogleOIDCMetadataURL,
+		MetadataURL: metadataURL,
 		Config:      cfg,
 		HTTPClient:  &http.Client{},
 		Logger:      logger,
