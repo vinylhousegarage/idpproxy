@@ -25,7 +25,7 @@ func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func mockGoogleConfig() *config.GoogleConfig {
-	return config.GoogleConfig{
+	return &config.GoogleConfig{
 		ClientID:     "test-client-id",
 		ClientSecret: "secret",
 		RedirectURI:  "https://idpproxy.com/callback",
