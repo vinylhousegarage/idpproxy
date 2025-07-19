@@ -9,7 +9,6 @@ import (
 
 func TestGetPort(t *testing.T) {
 	t.Run("with env var", func(t *testing.T) {
-		t.Parallel()
 		t.Setenv("PORT", "12345")
 
 		require.Equal(t, "12345", GetPort())
@@ -25,7 +24,6 @@ func TestGetPort(t *testing.T) {
 }
 
 func TestGetOpenAPIURL(t *testing.T) {
-	t.Parallel()
 	t.Setenv("OPENAPI_URL", "https://test.example.com/openapi.json")
 
 	require.Equal(t, "https://test.example.com/openapi.json", GetOpenAPIURL())
@@ -33,7 +31,6 @@ func TestGetOpenAPIURL(t *testing.T) {
 
 func TestLoadGoogleConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		t.Parallel()
 		t.Setenv("GOOGLE_CLIENT_ID", "test-client-id")
 		t.Setenv("GOOGLE_CLIENT_SECRET", "test-client-secret")
 		t.Setenv("GOOGLE_REDIRECT_URI", "http://localhost:9000/callback")
@@ -54,8 +51,8 @@ func TestLoadGoogleConfig(t *testing.T) {
 	})
 
 	t.Run("missing required variables", func(t *testing.T) {
-		originalID :=       os.Getenv("GOOGLE_CLIENT_ID")
-		originalSecret :=   os.Getenv("GOOGLE_CLIENT_SECRET")
+		originalID := os.Getenv("GOOGLE_CLIENT_ID")
+		originalSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 		originalRedirect := os.Getenv("GOOGLE_REDIRECT_URI")
 		os.Unsetenv("GOOGLE_CLIENT_ID")
 		os.Unsetenv("GOOGLE_CLIENT_SECRET")
@@ -75,7 +72,6 @@ func TestLoadGoogleConfig(t *testing.T) {
 
 func TestLoadFernetKeyString(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		t.Parallel()
 		t.Setenv("FERNET_KEY", "dummy_key")
 
 		key, err := LoadFernetKeyString()
