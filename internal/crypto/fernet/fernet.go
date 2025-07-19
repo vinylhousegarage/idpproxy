@@ -12,6 +12,7 @@ func Encrypt(key *fernet.Key, plaintext []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(token), nil
 }
 
