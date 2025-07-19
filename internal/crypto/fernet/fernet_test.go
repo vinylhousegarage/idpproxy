@@ -2,6 +2,7 @@ package fernet
 
 import (
 	"testing"
+	"time"
 
 	"github.com/fernet/fernet-go"
 	"github.com/stretchr/testify/require"
