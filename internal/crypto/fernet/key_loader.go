@@ -7,9 +7,10 @@ import (
 )
 
 func DecodeFernetKey(raw string) (*fernet.Key, error) {
-	var key fernet.Key
-	if err := key.Decode(raw); err != nil {
+	keys, err := fernet.DecodeKeys(raw)
+	if err != nil || len(keys) == 0 || keys[0] == nil {
 		return nil, fmt.Errorf("failed to decode fernet key: %w", err)
 	}
-	return &key, nil
+
+	return keys[0], nil
 }
