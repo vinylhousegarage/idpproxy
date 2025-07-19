@@ -49,8 +49,6 @@ func TestDecrypt_Errors(t *testing.T) {
 	})
 
 	t.Run("expired token", func(t *testing.T) {
-		t.Parallel()
-
 		key := &fernet.Key{}
 		require.NoError(t, key.Generate())
 
@@ -58,7 +56,9 @@ func TestDecrypt_Errors(t *testing.T) {
 		token, err := fernet.EncryptAndSign(plaintext, key)
 		require.NoError(t, err)
 
-		_, err = DecryptWithTTL(key, string(token), 0)
+		time.Sleep(2 * time.Second)
+
+		_, err = DecryptWithTTL(key, string(token), 1)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid or expired token")
 	})
