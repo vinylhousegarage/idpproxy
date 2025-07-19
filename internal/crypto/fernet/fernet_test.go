@@ -19,7 +19,7 @@ func TestEncryptDecrypt(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
-	decrypted, err := Decrypt(key, token)
+	decrypted, err := DecryptWithTTL(key, token, 30)
 	require.NoError(t, err)
 	require.Equal(t, plaintext, decrypted)
 }
@@ -34,7 +34,7 @@ func TestDecrypt_Errors(t *testing.T) {
 		require.NoError(t, key.Generate())
 
 		invalidToken := "this_is_not_a_valid_token"
-		_, err := Decrypt(key, invalidToken)
+		_, err := DecryptWithTTL(key, invalidToken, 30)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid or expired token")
 	})
@@ -44,7 +44,7 @@ func TestDecrypt_Errors(t *testing.T) {
 
 		var emptyKey *fernet.Key
 		token := "dummy"
-		_, err := Decrypt(emptyKey, token)
+		_, err := DecryptWithTTL(emptyKey, token, 30)
 		require.Error(t, err)
 	})
 
@@ -55,9 +55,10 @@ func TestDecrypt_Errors(t *testing.T) {
 		require.NoError(t, key.Generate())
 
 		plaintext := []byte("secret")
-		token := fernet.EncryptAndSign(plaintext, key)
+		token, err := fernet.EncryptAndSign(plaintext, key)
+		require.NoError(t, err)
 
-		_, err := Decrypt(key, string(token))
+		_, err = DecryptWithTTL(key, string(token), 0)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid or expired token")
 	})
