@@ -8,7 +8,7 @@ import (
 )
 
 func TestGenerateSessionID(t *testing.T) {
-	id := GenerateSessionID()
+	id := generateSessionID()
 
 	require.NotEmpty(t, id, "UUID should not be empty")
 
