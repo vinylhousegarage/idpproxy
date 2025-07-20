@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/vinylhousegarage/idpproxy/internal/httclient"
+	"github.com/vinylhousegarage/idpproxy/internal/httpclient"
 
 	"go.uber.org/zap"
 )
