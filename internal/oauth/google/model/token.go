@@ -3,6 +3,8 @@ package model
 import "time"
 
 type GoogleToken struct {
+	Sub          string    `firestore:"sub"`
+	SessionID    string    `firestore:"session_id"`
 	AccessToken  string    `firestore:"access_token"`
 	RefreshToken string    `firestore:"refresh_token"`
 	CreatedAt    time.Time `firestore:"created_at"`
