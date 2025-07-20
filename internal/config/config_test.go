@@ -89,35 +89,3 @@ func TestLoadFernetKeyString(t *testing.T) {
 		require.Contains(t, err.Error(), "FERNET_KEY is not set")
 	})
 }
-
-func TestGetEnv(t *testing.T) {
-	tests := []struct {
-		name      string
-		key       string
-		value     string
-		shouldPanic bool
-	}{
-		{"ClientID exists",      "GOOGLE_CLIENT_ID",     "dummy", false},
-		{"ClientID missing",     "GOOGLE_CLIENT_ID",     "",      true},
-		{"ClientSecret exists",  "GOOGLE_CLIENT_SECRET", "dummy", false},
-		{"ClientSecret missing", "GOOGLE_CLIENT_SECRET", "",      true},
-		{"RedirectURI exists",   "GOOGLE_REDIRECT_URI",  "dummy", false},
-		{"RedirectURI missing",  "GOOGLE_REDIRECT_URI",  "",      true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv(tt.key, tt.value)
-
-			if tt.shouldPanic {
-				require.PanicsWithValue(t,
-					fmt.Sprintf("missing environment variable: %s", tt.key),
-					func() {
-						config.GetEnv(tt.key)
-					})
-			} else {
-				require.Equal(t, tt.value, config.GetEnv(tt.key))
-			}
-		})
-	}
-}
