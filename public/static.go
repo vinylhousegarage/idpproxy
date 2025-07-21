@@ -1,6 +1,10 @@
 package public
 
-import "embed"
+import (
+	"embed"
+	"fmt"
+	"io/fs"
+)
 
 //go:embed login.html
 var PublicFS embed.FS
