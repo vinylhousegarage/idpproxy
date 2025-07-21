@@ -9,11 +9,11 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
 
-func NewRouter(di *deps.Dependencies) *gin.Engine {
+func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.Static("/public", "./public")
+	r.StatiFS("/public", publicFS)
 
 	googleGroup := r.Group("google")
 	login.RegisterRoutes(googleGroup, di)
