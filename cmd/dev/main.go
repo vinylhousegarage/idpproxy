@@ -14,7 +14,6 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 )
 
-
 func main() {
 	logger, err := zap.NewProduction()
 	if err != nil {
