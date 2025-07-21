@@ -12,6 +12,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/repository"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
+	"github.com/vinylhousegarage/idpproxy/public"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 
 	di := deps.New(metadataURL, googleConfig, httpClient, tokenRepo, logger)
 
-	r := router.NewRouter(di)
+	r := router.NewRouter(di, http.FS(public.PublicFS))
 
 	server.StartServer(r, logger)
 }

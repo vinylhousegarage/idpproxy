@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/router"
+	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
@@ -20,7 +21,7 @@ func TestGoogleLoginRoute_RedirectsToGoogle(t *testing.T) {
 
 	di := testhelpers.NewMockDeps(logger)
 
-	r := router.NewRouter(di)
+	r := router.NewRouter(di, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/google/login", nil)

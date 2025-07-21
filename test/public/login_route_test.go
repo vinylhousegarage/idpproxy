@@ -1,4 +1,4 @@
-package health_test
+package public_test
 
 import (
 	"net/http"
@@ -13,22 +13,20 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
+func TestLoginHTMLServed(t *testing.T) {
 	t.Parallel()
 
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
+	logger := zap.NewNop()
 	di := testhelpers.NewMockDeps(logger)
 
 	r := router.NewRouter(di, http.FS(public.PublicFS))
 
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/health", nil)
-	require.NoError(t, err)
+	req := httptest.NewRequest(http.MethodGet, "/public/login.html", nil)
+	resp := httptest.NewRecorder()
 
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(resp, req)
 
-	require.Equal(t, http.StatusOK, w.Code)
-	require.JSONEq(t, `{"status":"healthy"}`, w.Body.String())
+	require.Equal(t, http.StatusOK, resp.Code)
+	require.Contains(t, resp.Body.String(), "<!DOCTYPE html>")
+	require.Contains(t, resp.Body.String(), "ログイン")
 }
