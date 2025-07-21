@@ -3,6 +3,7 @@ package public_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,6 +12,14 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
+
+func TestMain(m *testing.M) {
+	if err := os.Chdir("/app"); err != nil {
+		panic("failed to change working directory to /app: " + err.Error())
+	}
+
+	os.Exit(m.Run())
+}
 
 func TestLoginHTMLServed(t *testing.T) {
 	t.Parallel()
