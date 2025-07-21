@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login with Firebase</title>
+  <link rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.css">
+</head>
+<body>
+  <h2>ログイン</h2>
+  <div id="firebaseui-auth-container"></div>
+  <pre id="user-info"></pre>
+
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC83qTlESieL6BpByJ0K3y6rk86ZAya1LU",
+      authDomain: "idpproxy-16c9c.firebaseapp.com",
+      projectId: "idpproxy-16c9c",
+      storageBucket: "idpproxy-16c9c.firebasestorage.app",
+      messagingSenderId: "418735380421",
+      appId: "1:418735380421:web:5e59215b33dc0a0b2d9dac"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+    const uiConfig = {
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      ],
+      callbacks: {
+        signInSuccessWithAuthResult: async (authResult) => {
+          const user = authResult.user;
+          const idToken = await user.getIdToken();
+
+          document.getElementById("user-info").textContent = JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName,
+            idToken: idToken,
+          }, null, 2);
+
+          return false;
+        }
+      }
+    };
+
+    ui.start("#firebaseui-auth-container", uiConfig);
+  </script>
+</body>
+</html>
