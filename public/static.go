@@ -2,5 +2,5 @@ package public
 
 import "embed"
 
-//go:embed login.html
+//go:embed *.html
 var PublicFS embed.FS
