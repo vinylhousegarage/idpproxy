@@ -13,6 +13,8 @@ func NewRouter(di *deps.Dependencies) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	r.Static("/public", "./internal/public")
+
 	googleGroup := r.Group("google")
 	login.RegisterRoutes(googleGroup, di)
 
