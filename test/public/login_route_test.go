@@ -14,8 +14,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if err := os.Chdir("/app"); err != nil {
-		panic("failed to change working directory to /app: " + err.Error())
+	if _, err := os.Stat("/app"); err == nil {
+		_ = os.Chdir("/app")
 	}
 
 	os.Exit(m.Run())
