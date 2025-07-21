@@ -10,7 +10,7 @@ import (
 var PublicFS embed.FS
 
 func init() {
-	entries, err := fs.ReadDir(content, ".")
+	entries, err := fs.ReadDir(PublicFS, ".")
 	if err != nil {
 		panic(err)
 	}
