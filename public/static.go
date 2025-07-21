@@ -2,19 +2,7 @@ package public
 
 import (
 	"embed"
-	"fmt"
-	"io/fs"
 )
 
-//go:embed login.html
+//go:embed *.html
 var PublicFS embed.FS
-
-func init() {
-	entries, err := fs.ReadDir(PublicFS, ".")
-	if err != nil {
-		panic(err)
-	}
-	for _, e := range entries {
-		fmt.Println("🔍 embedded file:", e.Name())
-	}
-}

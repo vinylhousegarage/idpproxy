@@ -21,7 +21,7 @@ func TestLoginHTMLServed(t *testing.T) {
 
 	r := router.NewRouter(di, http.FS(public.PublicFS))
 
-	req := httptest.NewRequest(http.MethodGet, "/static/login.html", nil)
+	req := httptest.NewRequest(http.MethodGet, "/public/login.html", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
