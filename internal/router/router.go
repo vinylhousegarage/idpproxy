@@ -1,7 +1,6 @@
 package router
 
 import (
-	"embed"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,14 +11,11 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
 
-//go:embed ../../public/*
-var publicFS embed.FS
-
-func NewRouter(di *deps.Dependencies) *gin.Engine {
+func NewRouter(di *deps.Dependencies, public http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.StaticFS("/public", http.FS(publicFS))
+	r.StaticFS("/public", public)
 
 	googleGroup := r.Group("google")
 	login.RegisterRoutes(googleGroup, di)
