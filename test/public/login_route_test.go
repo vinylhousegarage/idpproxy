@@ -6,15 +6,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
+	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
 func TestLoginHTMLServed(t *testing.T) {
 	t.Parallel()
 
-	di := deps.NewTestDependencies(t)
+	logger := zap.NewNop()
+	di := testhelpers.NewMockDeps(logger)
 	r := router.NewRouter(di)
 
 	req := httptest.NewRequest(http.MethodGet, "/public/login.html", nil)
