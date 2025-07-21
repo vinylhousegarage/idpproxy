@@ -1,6 +1,7 @@
 package health_test
 
 import (
+	"embed"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,9 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
+//go:embed public/*
+var publicFS embed.FS
+
 func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
 	t.Parallel()
 
@@ -20,7 +24,7 @@ func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
 
 	di := testhelpers.NewMockDeps(logger)
 
-	r := router.NewRouter(di)
+	r := router.NewRouter(di, http.FS(publicFS))
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/health", nil)

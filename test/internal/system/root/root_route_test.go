@@ -1,6 +1,7 @@
 package root_test
 
 import (
+	"embed"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,9 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
+//go:embed public/*
+var publicFS embed.FS
+
 func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 	t.Parallel()
 
@@ -20,7 +24,7 @@ func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 
 	di := testhelpers.NewMockDeps(logger)
 
-	r := router.NewRouter(di)
+	r := router.NewRouter(di, http.FS(publicFS))
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/", nil)
@@ -30,7 +34,7 @@ func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.JSONEq(t, `{
-		"message":"Welcome to IdP Proxy",
+		"message": "Welcome to IdP Proxy",
 		"openapi": "http://localhost:9000/openapi.json"
 	}`, w.Body.String())
 }
