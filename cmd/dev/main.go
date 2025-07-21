@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"net/http"
 
 	"cloud.google.com/go/firestore"
@@ -15,8 +14,6 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 )
 
-//go:embed public/*
-var publicFS embed.FS
 
 func main() {
 	logger, err := zap.NewProduction()
@@ -47,7 +44,7 @@ func main() {
 
 	di := deps.New(metadataURL, googleConfig, httpClient, tokenRepo, logger)
 
-	r := router.NewRouter(di, http.FS(publicFS))
+	r := router.NewRouter(di)
 
 	server.StartServer(r, logger)
 }
