@@ -12,7 +12,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
 
-//go:embed public/*
+//go:embed ../../public/*
 var publicFS embed.FS
 
 func NewRouter(di *deps.Dependencies) *gin.Engine {
