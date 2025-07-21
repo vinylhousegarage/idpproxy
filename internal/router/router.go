@@ -1,8 +1,6 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
@@ -11,11 +9,11 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
 
-func NewRouter(di *deps.Dependencies, public http.FileSystem) *gin.Engine {
+func NewRouter(di *deps.Dependencies) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.StaticFS("/public", public)
+	r.Static("/public", "./public")
 
 	googleGroup := r.Group("google")
 	login.RegisterRoutes(googleGroup, di)
