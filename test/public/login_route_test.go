@@ -1,9 +1,9 @@
 package public_test
 
 import (
+	"embed"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,20 +13,16 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestMain(m *testing.M) {
-	if _, err := os.Stat("/app"); err == nil {
-		_ = os.Chdir("/app")
-	}
-
-	os.Exit(m.Run())
-}
+//go:embed public/*
+var publicFS embed.FS
 
 func TestLoginHTMLServed(t *testing.T) {
 	t.Parallel()
 
 	logger := zap.NewNop()
 	di := testhelpers.NewMockDeps(logger)
-	r := router.NewRouter(di)
+
+	r := router.NewRouter(di, http.FS(publicFS))
 
 	req := httptest.NewRequest(http.MethodGet, "/public/login.html", nil)
 	resp := httptest.NewRecorder()
