@@ -15,7 +15,7 @@ func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.StaticFS("/", publicFS)
+	r.StaticFS("/static", publicFS)
 
 	googleGroup := r.Group("google")
 	login.RegisterRoutes(googleGroup, di)
