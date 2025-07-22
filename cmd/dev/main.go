@@ -25,12 +25,14 @@ func main() {
 		}
 	}()
 
-	app, err := deps.NewFirebaseApp()
+	ctx := context.Background()
+
+	app, err := deps.NewFirebaseApp(ctx)
 	if err != nil {
 		logger.Fatal("failed to initialize Firebase App", zap.Error(err))
 	}
 
-	firestoreClient, err := deps.NewFirestoreClient(app, logger)
+	firestoreClient, err := deps.NewFirestoreClient(ctx, app, logger)
 	if err != nil {
 		logger.Fatal("failed to initialize Firestore client", zap.Error(err))
 	}

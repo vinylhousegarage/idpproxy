@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewFirebaseApp() (*firebase.App, error) {
-	app, err := firebase.NewApp(context.Background(), nil)
+func NewFirebaseApp(ctx context.Context) (*firebase.App, error) {
+	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,8 +17,11 @@ func NewFirebaseApp() (*firebase.App, error) {
 	return app, nil
 }
 
-func NewFirestoreClient(app *firebase.App, logger *zap.Logger) (*firestore.Client, error) {
-	ctx := context.Background()
+func NewFirestoreClient(
+	ctx context.Context,
+	app *firebase.App,
+	logger *zap.Logger,
+) (*firestore.Client, error) {
 	client, err := app.Firestore(ctx)
 	if err != nil {
 		logger.Error("failed to initialize Firestore via Firebase App", zap.Error(err))
