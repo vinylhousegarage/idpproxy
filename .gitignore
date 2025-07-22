@@ -11,7 +11,7 @@ vendor/
 .vscode/
 .idea/
 
-# Only ignore service account keys
+# Firebase / Service Account
 /config/keys/*.json
 
 # Logs
