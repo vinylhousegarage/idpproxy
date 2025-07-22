@@ -13,7 +13,6 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
       GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
       OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
 
@@ -42,6 +41,7 @@ jobs:
         uses: golangci/golangci-lint-action@v5
         with:
           version: v1.64.8
+          args: --timeout 5m --out-format=colored-line-number
 
       - name: Run tests
         run: go test ./... -v
