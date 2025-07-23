@@ -1,47 +1,24 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Login with Firebase (Custom Token)</title>
-</head>
-<body>
-  <h2>ログイン</h2>
-  <button id="login-button">ログイン開始</button>
-  <pre id="user-info"></pre>
+<h2>ログイン</h2>
 
-  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js"></script>
+<form id="consent-form">
+  <label>
+    <input type="checkbox" id="agree">
+    <a href="/terms" target="_blank">利用規約</a> と
+    <a href="/privacy" target="_blank">プライバシーポリシー</a> に同意します
+  </label>
+  <br><br>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC83qTlESieL6BpByJ0K3y6rk86ZAya1LU",
-      authDomain: "idpproxy-16c9c.firebaseapp.com",
-      projectId: "idpproxy-16c9c",
-      storageBucket: "idpproxy-16c9c.firebasestorage.app",
-      messagingSenderId: "418735380421",
-      appId: "1:418735380421:web:5e59215b33dc0a0b2d9dac"
-    };
-    firebase.initializeApp(firebaseConfig);
+  <button type="button" onclick="login('google')">Googleでログイン</button>
+  <button type="button" onclick="login('github')">GitHubでログイン</button>
+</form>
 
-    document.getElementById("login-button").addEventListener("click", async () => {
-      try {
-        const res = await fetch("/api/custom-token", { method: "POST", credentials: "include" });
-        const data = await res.json();
-        const customToken = data.customToken;
-
-        const result = await firebase.auth().signInWithCustomToken(customToken);
-        const user = result.user;
-
-        document.getElementById("user-info").textContent = JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName,
-        }, null, 2);
-      } catch (err) {
-        console.error("ログイン失敗:", err);
-        alert("ログインに失敗しました");
-      }
-    });
-  </script>
-</body>
-</html>
+<script>
+  function login(provider) {
+    if (!document.getElementById('agree').checked) {
+      alert("利用規約とプライバシーポリシーに同意してください。");
+      return;
+    }
+    location.href = `/login/${provider}`;
+  }
+</script>
