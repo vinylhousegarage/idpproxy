@@ -2,17 +2,15 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Login with Firebase</title>
-  <link rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.css">
+  <title>Login with Firebase (Custom Token)</title>
 </head>
 <body>
   <h2>ログイン</h2>
-  <div id="firebaseui-auth-container"></div>
+  <button id="login-button">ログイン開始</button>
   <pre id="user-info"></pre>
 
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js"></script>
-  <script src="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -25,31 +23,25 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+    document.getElementById("login-button").addEventListener("click", async () => {
+      try {
+        const res = await fetch("/api/custom-token", { method: "POST", credentials: "include" });
+        const data = await res.json();
+        const customToken = data.customToken;
 
-    const uiConfig = {
-      signInOptions: [
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.GithubAuthProvider.PROVIDER_ID,
-      ],
-      callbacks: {
-        signInSuccessWithAuthResult: async (authResult) => {
-          const user = authResult.user;
-          const idToken = await user.getIdToken();
+        const result = await firebase.auth().signInWithCustomToken(customToken);
+        const user = result.user;
 
-          document.getElementById("user-info").textContent = JSON.stringify({
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName,
-            idToken: idToken,
-          }, null, 2);
-
-          return false;
-        }
+        document.getElementById("user-info").textContent = JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+        }, null, 2);
+      } catch (err) {
+        console.error("ログイン失敗:", err);
+        alert("ログインに失敗しました");
       }
-    };
-
-    ui.start("#firebaseui-auth-container", uiConfig);
+    });
   </script>
 </body>
 </html>
