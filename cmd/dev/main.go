@@ -7,7 +7,6 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/repository"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 	"github.com/vinylhousegarage/idpproxy/public"
