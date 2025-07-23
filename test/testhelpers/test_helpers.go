@@ -11,7 +11,7 @@ import (
 func NewMockDeps(logger *zap.Logger) *deps.Dependencies {
 	return &deps.Dependencies{
 		MetadataURL: "https://accounts.google.com/.well-known/openid-configuration",
-		HTTPClient: http.DefaultClient,
-		Logger:     logger,
+		HTTPClient:  http.DefaultClient,
+		Logger:      logger,
 	}
 }
