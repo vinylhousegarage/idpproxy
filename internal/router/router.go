@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/login"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
 	"github.com/vinylhousegarage/idpproxy/internal/system/root"
 )
@@ -16,9 +15,6 @@ func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.StaticFS("/public", publicFS)
-
-	googleGroup := r.Group("google")
-	login.RegisterRoutes(googleGroup, di)
 
 	systemGroup := r.Group("")
 	health.RegisterRoutes(systemGroup, di)
