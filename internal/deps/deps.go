@@ -7,9 +7,9 @@ import (
 )
 
 type Dependencies struct {
-	MetadataURL     string
-	HTTPClient      httpclient.HTTPClient
-	Logger          *zap.Logger
+	MetadataURL string
+	HTTPClient  httpclient.HTTPClient
+	Logger      *zap.Logger
 }
 
 func New(
@@ -18,8 +18,8 @@ func New(
 	logger *zap.Logger,
 ) *Dependencies {
 	return &Dependencies{
-		MetadataURL:     metadataURL,
-		HTTPClient:      httpClient,
-		Logger:          logger,
+		MetadataURL: metadataURL,
+		HTTPClient:  httpClient,
+		Logger:      logger,
 	}
 }
