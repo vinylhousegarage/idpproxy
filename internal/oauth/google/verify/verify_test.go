@@ -23,6 +23,8 @@ func TestVerifyIDToken(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("valid token returns token object", func(t *testing.T) {
+		t.Parallel()
+
 		mock := &mockAuthClient{
 			mockVerify: func(ctx context.Context, idToken string) (*auth.Token, error) {
 				return &auth.Token{
@@ -32,20 +34,22 @@ func TestVerifyIDToken(t *testing.T) {
 			},
 		}
 
-		token, err := verify.VerifyIDToken(ctx, mock, "valid_token")
+		token, err := VerifyIDToken(ctx, mock, "valid_token")
 		require.NoError(t, err)
 		require.Equal(t, "user123", token.UID)
 		require.Equal(t, "test@example.com", token.Claims["email"])
 	})
 
 	t.Run("invalid token returns error", func(t *testing.T) {
+		t.Parallel()
+
 		mock := &mockAuthClient{
 			mockVerify: func(ctx context.Context, idToken string) (*auth.Token, error) {
 				return nil, errors.New("invalid token")
 			},
 		}
 
-		token, err := verify.VerifyIDToken(ctx, mock, "invalid_token")
+		token, err := VerifyIDToken(ctx, mock, "invalid_token")
 		require.Error(t, err)
 		require.Nil(t, token)
 		require.Contains(t, err.Error(), "invalid token")
