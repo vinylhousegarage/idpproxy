@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"firebase.google.com/go/v4/auth"
+	"github.com/stretchr/testify/require"
 )
 
 type mockAuthClient struct {
