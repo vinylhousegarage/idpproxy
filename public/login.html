@@ -1,24 +1,128 @@
 <!DOCTYPE html>
-<h2>ログイン</h2>
-
-<form id="consent-form">
-  <label>
-    <input type="checkbox" id="agree">
-    <a href="/terms" target="_blank">利用規約</a> と
-    <a href="/privacy" target="_blank">プライバシーポリシー</a> に同意します
-  </label>
-  <br><br>
-
-  <button type="button" onclick="login('google')">Googleでログイン</button>
-  <button type="button" onclick="login('github')">GitHubでログイン</button>
-</form>
-
-<script>
-  function login(provider) {
-    if (!document.getElementById('agree').checked) {
-      alert("利用規約とプライバシーポリシーに同意してください。");
-      return;
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login with Firebase</title>
+  <link rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.css">
+  <style>
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
     }
-    location.href = `/login/${provider}`;
-  }
-</script>
+  </style>
+</head>
+<body>
+  <h2>ログイン</h2>
+
+  <!-- 同意チェック -->
+  <form id="consent-form">
+    <label>
+      <input type="checkbox" id="agree">
+      <a href="/terms" target="_blank">利用規約</a> と
+      <a href="/privacy" target="_blank">プライバシーポリシー</a> に同意します
+    </label>
+  </form>
+  <br>
+
+  <!-- Firebase UI ログインエリア -->
+  <div id="firebaseui-auth-container"></div>
+
+  <!-- レスポンス表示（開発用） -->
+  <pre id="user-info"></pre>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/6.1.0/firebaseui.js"></script>
+
+  <script>
+    // Firebase初期化
+    const firebaseConfig = {
+      apiKey: "AIzaSyC83qTlESieL6BpByJ0K3y6rk86ZAya1LU",
+      authDomain: "idpproxy-16c9c.firebaseapp.com",
+      projectId: "idpproxy-16c9c",
+      storageBucket: "idpproxy-16c9c.firebasestorage.app",
+      messagingSenderId: "418735380421",
+      appId: "1:418735380421:web:5e59215b33dc0a0b2d9dac"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Firebase UI構成
+    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+    const uiConfig = {
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      ],
+      callbacks: {
+        signInSuccessWithAuthResult: async (authResult) => {
+          const agreeChecked = document.getElementById("agree").checked;
+          if (!agreeChecked) {
+            alert("利用規約とプライバシーポリシーに同意してください。");
+            return false;
+          }
+
+          const user = authResult.user;
+          const idToken = await user.getIdToken(true);
+
+          try {
+            const res = await fetch("/login/google/firebase", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ id_token: idToken })
+            });
+
+            if (!res.ok) {
+              throw new Error(`Server responded with ${res.status}`);
+            }
+
+            // リダイレクト
+            window.location.href = "/";
+
+          } catch (err) {
+            console.error("Login API failed:", err);
+            alert("ログイン処理に失敗しました。しばらくしてから再度お試しください。");
+          }
+
+          // false を返して Firebase UI のリダイレクトを防ぐ
+          return false;
+        }
+      }
+    };
+
+    // Firebase UI 日本語表示
+    firebase.auth().languageCode = 'ja';
+
+    // Firebase UI 表示（常に表示）
+    ui.start("#firebaseui-auth-container", uiConfig);
+
+    // UIログインボタンを無効化
+    function disableFirebaseUIButtons() {
+      const buttons = document.querySelectorAll('.firebaseui-idp-button');
+      buttons.forEach(btn => btn.classList.add('disabled'));
+    }
+
+    function enableFirebaseUIButtons() {
+      const buttons = document.querySelectorAll('.firebaseui-idp-button');
+      buttons.forEach(btn => btn.classList.remove('disabled'));
+    }
+
+    // 初期状態：無効化
+    window.addEventListener("load", () => {
+      setTimeout(disableFirebaseUIButtons, 500);
+    });
+
+    // 同意チェック切り替え
+    document.getElementById("agree").addEventListener("change", function (e) {
+      if (e.target.checked) {
+        enableFirebaseUIButtons();
+      } else {
+        disableFirebaseUIButtons();
+      }
+    });
+  </script>
+</body>
+</html>
