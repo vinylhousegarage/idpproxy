@@ -8,6 +8,7 @@
     .disabled {
       pointer-events: none;
       opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -84,7 +85,7 @@
 
           } catch (err) {
             console.error("Login API failed:", err);
-            alert("ログイン処理に失敗しました。しばらくしてから再度お試しください。");
+            alert("ログイン処理に失敗しました。");
           }
 
           // false を返して Firebase UI のリダイレクトを防ぐ
