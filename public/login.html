@@ -98,7 +98,15 @@
     firebase.auth().languageCode = 'ja';
 
     // Firebase UI 表示（常に表示）
-    ui.start("#firebaseui-auth-container", uiConfig);
+    ui.start("#firebaseui-auth-container", {
+      ...uiConfig,
+      callbacks: {
+        ...uiConfig.callbacks,
+        uiShown: () => {
+          disableFirebaseUIButtons();
+        }
+      }
+    });
 
     // UIログインボタンを無効化
     function disableFirebaseUIButtons() {
@@ -110,11 +118,6 @@
       const buttons = document.querySelectorAll('.firebaseui-idp-button');
       buttons.forEach(btn => btn.classList.remove('disabled'));
     }
-
-    // 初期状態：無効化
-    window.addEventListener("load", () => {
-      setTimeout(disableFirebaseUIButtons, 500);
-    });
 
     // 同意チェック切り替え
     document.getElementById("agree").addEventListener("change", function (e) {
