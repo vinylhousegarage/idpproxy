@@ -1,4 +1,4 @@
-package public_test
+package root_test
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestLoginHTMLServed(t *testing.T) {
+func TestRootServesLoginHTML(t *testing.T) {
 	t.Parallel()
 
 	logger := zap.NewNop()
@@ -21,7 +21,7 @@ func TestLoginHTMLServed(t *testing.T) {
 
 	r := router.NewRouter(di, http.FS(public.PublicFS))
 
-	req := httptest.NewRequest(http.MethodGet, "/public/login.html", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
