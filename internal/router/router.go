@@ -14,11 +14,11 @@ func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.StaticFS("/", publicFS)
-
 	r.GET("/", func(c *gin.Context) {
 		c.FileFromFS("login.html", publicFS)
 	})
+
+	r.StaticFS("/public", publicFS)
 
 	systemGroup := r.Group("")
 	health.RegisterRoutes(systemGroup, di)
