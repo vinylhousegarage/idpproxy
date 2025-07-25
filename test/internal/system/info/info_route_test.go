@@ -1,4 +1,4 @@
-package root_test
+package info_test
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
+func TestInfoRoute_Returns200AndJSONHealthy(t *testing.T) {
 	t.Parallel()
 
 	logger, err := zap.NewDevelopment()
@@ -24,7 +24,7 @@ func TestRootRoute_Returns200AndJSONHealthy(t *testing.T) {
 	r := router.NewRouter(di, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	req, err := http.NewRequest(http.MethodGet, "/info", nil)
 	require.NoError(t, err)
 
 	r.ServeHTTP(w, req)

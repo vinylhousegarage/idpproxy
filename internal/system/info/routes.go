@@ -1,4 +1,4 @@
-package root
+package info
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,6 +7,6 @@ import (
 )
 
 func RegisterRoutes(r *gin.RouterGroup, di *deps.Dependencies) {
-	h := NewRootHandler(di.Logger)
-	r.GET("/", h.Serve)
+	h := NewInfoHandler(di.Logger)
+	r.GET("/info", h.Serve)
 }

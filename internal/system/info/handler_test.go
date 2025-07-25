@@ -1,4 +1,4 @@
-package root
+package info
 
 import (
 	"net/http"
@@ -11,16 +11,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNewRootHandler_Returns200JSON(t *testing.T) {
+func TestNewInfoHandler_Returns200JSON(t *testing.T) {
 	t.Parallel()
 
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	handler := NewRootHandler(zap.NewNop())
-	router.GET("/", handler.Serve)
+	handler := NewInfoHandler(zap.NewNop())
+	router.GET("/info", handler.Serve)
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/info", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

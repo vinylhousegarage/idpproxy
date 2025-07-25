@@ -7,7 +7,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
-	"github.com/vinylhousegarage/idpproxy/internal/system/root"
+	"github.com/vinylhousegarage/idpproxy/internal/system/info"
 )
 
 func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
@@ -18,7 +18,7 @@ func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 
 	systemGroup := r.Group("")
 	health.RegisterRoutes(systemGroup, di)
-	root.RegisterRoutes(systemGroup, di)
+	info.RegisterRoutes(systemGroup, di)
 
 	return r
 }
