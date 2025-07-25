@@ -45,6 +45,7 @@ func TestLoadFirebaseConfig(t *testing.T) {
 		err = tmpfile.Close()
 		require.NoError(t, err)
 
+		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "")
 		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", tmpfile.Name())
 
 		cfg, err := LoadFirebaseConfig()
