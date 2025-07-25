@@ -7,18 +7,22 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
-	"github.com/vinylhousegarage/idpproxy/internal/system/root"
+	"github.com/vinylhousegarage/idpproxy/internal/system/info"
 )
 
 func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	r.GET("/", func(c *gin.Context) {
+		c.FileFromFS("login.html", publicFS)
+	})
+
 	r.StaticFS("/public", publicFS)
 
 	systemGroup := r.Group("")
 	health.RegisterRoutes(systemGroup, di)
-	root.RegisterRoutes(systemGroup, di)
+	info.RegisterRoutes(systemGroup, di)
 
 	return r
 }

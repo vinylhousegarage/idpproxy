@@ -1,4 +1,4 @@
-package root
+package info
 
 import (
 	"net/http"
@@ -10,18 +10,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type RootHandler struct {
+type InfoHandler struct {
 	Logger *zap.Logger
 }
 
-func NewRootHandler(logger *zap.Logger) *RootHandler {
-	return &RootHandler{Logger: logger}
+func NewInfoHandler(logger *zap.Logger) *InfoHandler {
+	return &InfoHandler{Logger: logger}
 }
 
-func (h *RootHandler) Serve(c *gin.Context) {
-	h.Logger.Info("/ access invoked")
+func (h *InfoHandler) Serve(c *gin.Context) {
+	h.Logger.Info("/info access invoked")
 
-	resp := RootResponse{
+	resp := InfoResponse{
 		Message: "Welcome to IdP Proxy",
 		OpenAPI: config.GetOpenAPIURL(),
 	}

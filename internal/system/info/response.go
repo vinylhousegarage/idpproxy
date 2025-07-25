@@ -1,6 +1,6 @@
-package root
+package info
 
-type RootResponse struct {
+type InfoResponse struct {
 	Message string `json:"message"`
 	OpenAPI string `json:"openapi"`
 }
