@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSetCookie(t *testing.T) {
+func TestSetIDTokenCookie(t *testing.T) {
 	t.Parallel()
 
 	idToken := "dummy.token.value"
 	rr := httptest.NewRecorder()
 
-	SetCookie(rr, idToken)
+	SetIDTokenCookie(rr, idToken)
 
 	cookies := rr.Result().Cookies()
 	require.Len(t, cookies, 1)
