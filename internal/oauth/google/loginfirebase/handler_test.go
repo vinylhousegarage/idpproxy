@@ -83,6 +83,6 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		logger := zap.NewNop()
 		err := handler.LoginFirebaseHandler(rr, req, logger)
 
-		require.ErrorIs(t, err, ErrUnAuthorizdedIDToken)
+		require.ErrorIs(t, err, ErrInvalidIDToken)
 	})
 }
