@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseRequest(t *testing.T) {
+func TestParseGoogleLoginRequest(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -27,17 +27,17 @@ func TestParseRequest(t *testing.T) {
 		{
 			name:    "empty id_token",
 			body:    `{"id_token":""}`,
-			wantErr: ErrInvalidRequest,
+			wantErr: ErrInvalidGoogleLoginRequest,
 		},
 		{
 			name:    "missing id_token field",
 			body:    `{}`,
-			wantErr: ErrInvalidRequest,
+			wantErr: ErrInvalidGoogleLoginRequest,
 		},
 		{
 			name:    "invalid json",
 			body:    `{"id_token":}`,
-			wantErr: ErrInvalidRequest,
+			wantErr: ErrInvalidGoogleLoginRequest,
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestParseRequest(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/login/google/firebase", strings.NewReader(tt.body))
 
-			parsed, err := ParseRequest(req)
+			parsed, err := ParseGoogleLoginRequest(req)
 
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
