@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) LoginFirebaseHandler(w http.ResponseWriter, r *http.Request, logger *zap.Logger) error {
-	req, err := ParseIDTokenRequest(r)
+	req, err := ParseGoogleLoginRequest(r)
 	if err != nil {
 		logger.Error("invalid request", zap.Error(err))
 
