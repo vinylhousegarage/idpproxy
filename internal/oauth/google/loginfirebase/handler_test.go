@@ -38,7 +38,7 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &Handler{Verifier: mockVerifier}
+		handler := &LoginFirebaseHandler{Verifier: mockVerifier}
 		logger := zap.NewNop()
 		err := handler.LoginFirebaseHandler(rr, req, logger)
 
@@ -58,7 +58,7 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &Handler{}
+		handler := &LoginFirebaseHandler{}
 		logger := zap.NewNop()
 		err := handler.LoginFirebaseHandler(rr, req, logger)
 
@@ -79,7 +79,7 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &Handler{Verifier: mockVerifier}
+		handler := &LoginFirebaseHandler{Verifier: mockVerifier}
 		logger := zap.NewNop()
 		err := handler.LoginFirebaseHandler(rr, req, logger)
 
