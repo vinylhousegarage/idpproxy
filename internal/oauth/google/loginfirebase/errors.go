@@ -3,7 +3,7 @@ package loginfirebase
 import (
 	"net/http"
 
-	"github/vinylhousegarage/idpproxy/internal/apperror"
+	"github.com/vinylhousegarage/idpproxy/internal/apperror"
 )
 
 var (

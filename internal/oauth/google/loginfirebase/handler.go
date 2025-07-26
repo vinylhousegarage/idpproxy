@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github/vinylhousegarage/idpproxy/internal/cookie"
-	"github/vinylhousegarage/idpproxy/internal/oauth/google/verify"
+	"github.com/vinylhousegarage/idpproxy/internal/cookie"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/verify"
 )
 
 type LoginFirebaseHandler struct {
