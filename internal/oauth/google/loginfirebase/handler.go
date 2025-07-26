@@ -17,7 +17,7 @@ func (h *Handler) LoginFirebaseHandler(w http.ResponseWriter, r *http.Request, l
 		return ErrInvalidRequest
 	}
 
-	_, err := verify.VerifyIDToken(r.Context(), h.verifier, req.IDToken)
+	_, err = verify.VerifyIDToken(r.Context(), h.verifier, req.IDToken)
 	if err != nil {
 		logger.Error("unauthorized id_token", zap.Error(err))
 
