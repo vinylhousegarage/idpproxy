@@ -13,6 +13,10 @@ type GoogleLoginRequest struct {
 var ErrInvalidGoogleLoginRequest = errors.New("invalid or missing google id_token")
 
 func ParseGoogleLoginRequest(r *http.Request) (*GoogleLoginRequest, error) {
+	if r.Body == nil {
+		return nil, ErrInvalidGoogleLoginRequest
+	}
+
 	var req GoogleLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, ErrInvalidGoogleLoginRequest

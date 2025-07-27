@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
+	firebase "firebase.google.com/go/v4"
 	"go.uber.org/zap"
+	"google.golang.org/api/option"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
@@ -25,10 +28,27 @@ func main() {
 
 	metadataURL := config.GoogleOIDCMetadataURL
 	httpClient := &http.Client{}
+	systemDeps := deps.NewSystemDeps(metadataURL, httpClient, logger)
 
-	di := deps.New(metadataURL, httpClient, logger)
+	ctx := context.Background()
+	firebaseCfg, err := config.LoadFirebaseConfig()
+	if err != nil {
+		logger.Fatal("failed to load Firebase config", zap.Error(err))
+	}
 
-	r := router.NewRouter(di, http.FS(public.PublicFS))
+	opt := option.WithCredentialsJSON(firebaseCfg.CredentialsJSON)
+	app, err := firebase.NewApp(ctx, nil, opt)
+	if err != nil {
+		logger.Fatal("failed to initialize Firebase App", zap.Error(err))
+	}
 
+	authClient, err := app.Auth(ctx)
+	if err != nil {
+		logger.Fatal("failed to initialize Firebase Auth client", zap.Error(err))
+	}
+
+	googleDeps := deps.NewGoogleDeps(authClient, logger)
+
+	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
 	server.StartServer(r, logger)
 }
