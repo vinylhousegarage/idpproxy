@@ -25,7 +25,7 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/loginfirebase", nil)
+	req, err := http.NewRequest(http.MethodGet, "/login/google/firebase", nil)
 	require.NoError(t, err)
 
 	r.ServeHTTP(w, req)
