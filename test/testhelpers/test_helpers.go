@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"cloud.google.com/go/auth"
+	firebaseauth "firebase.google.com/go/v4/auth"
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
@@ -19,19 +19,22 @@ func NewMockSystemDeps(logger *zap.Logger) *deps.SystemDependencies {
 }
 
 type MockVerifier struct {
-	VerifyFunc func(ctx context.Context, idToken string) (*auth.Token, error)
+	VerifyFunc func(ctx context.Context, idToken string) (*firebaseauth.Token, error)
 }
 
-func (m *MockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	return m.VerifyFunc(ctx, idToken)
+func (m *MockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*firebaseauth.Token, error) {
+	if m.VerifyFunc != nil {
+		return m.VerifyFunc(ctx, idToken)
+	}
+	return &firebaseauth.Token{UID: "default-mock"}, nil
 }
 
 func NewMockGoogleDeps(logger *zap.Logger) *deps.GoogleDependencies {
 	return &deps.GoogleDependencies{
 		Logger: logger,
 		Verifier: &MockVerifier{
-			VerifyFunc: func(ctx context.Context, idToken string) (*auth.Token, error) {
-				return &auth.Token{UID: "test-user"}, nil
+			VerifyFunc: func(ctx context.Context, idToken string) (*firebaseauth.Token, error) {
+				return &firebaseauth.Token{UID: "test-user"}, nil
 			},
 		},
 	}
