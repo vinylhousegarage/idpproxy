@@ -10,6 +10,7 @@ import (
 
 	firebaseauth "firebase.google.com/go/v4/auth"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
@@ -31,7 +32,10 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &LoginFirebaseHandler{Verifier: mockVerifier}
+		handler := &LoginFirebaseHandler{
+			Logger:   zap.NewNop(),
+			Verifier: mockVerifier,
+		}
 		err := handler.LoginFirebaseHandler(rr, req)
 
 		require.NoError(t, err)
@@ -70,7 +74,10 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &LoginFirebaseHandler{Verifier: mockVerifier}
+		handler := &LoginFirebaseHandler{
+			Logger:   zap.NewNop(),
+			Verifier: mockVerifier,
+		}
 		err := handler.LoginFirebaseHandler(rr, req)
 
 		require.ErrorIs(t, err, ErrInvalidIDToken)
