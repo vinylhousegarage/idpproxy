@@ -19,7 +19,7 @@ func TestInfoRoute_Returns200AndJSONHealthy(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	di := testhelpers.NewMockDeps(logger)
+	di := testhelpers.NewMockSystemDeps(logger)
 
 	r := router.NewRouter(di, http.FS(public.PublicFS))
 
