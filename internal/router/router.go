@@ -10,7 +10,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/system/info"
 )
 
-func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
+func NewRouter(systemDeps *deps.SystemDependencies, publicFS http.FileSystem) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
@@ -21,8 +21,8 @@ func NewRouter(di *deps.Dependencies, publicFS http.FileSystem) *gin.Engine {
 	r.StaticFS("/public", publicFS)
 
 	systemGroup := r.Group("")
-	health.RegisterRoutes(systemGroup, di)
-	info.RegisterRoutes(systemGroup, di)
+	health.RegisterRoutes(systemGroup, systemDeps)
+	info.RegisterRoutes(systemGroup, systemDeps)
 
 	return r
 }
