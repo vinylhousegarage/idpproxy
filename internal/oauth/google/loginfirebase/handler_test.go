@@ -54,7 +54,7 @@ func TestLoginFirebaseHandler(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 
-		handler := &LoginFirebaseHandler{}
+		handler := &LoginFirebaseHandler{Logger: zap.NewNop()}
 		err := handler.LoginFirebaseHandler(rr, req)
 
 		require.ErrorIs(t, err, ErrInvalidRequest)
