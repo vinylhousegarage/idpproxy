@@ -36,7 +36,7 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	require.NotEmpty(t, cookies)
 
 	var idTokenFound bool
-	for _, c := range cookie {
+	for _, c := range cookies {
 		if c.Name == "id_token" {
 			idTokenFound = true
 			require.NotEmpty(t, c.Value)
