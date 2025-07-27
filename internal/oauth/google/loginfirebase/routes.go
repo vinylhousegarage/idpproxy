@@ -8,5 +8,5 @@ import (
 
 func RegisterRoutes(r gin.IRoutes, googleDeps *deps.GoogleDependencies) {
 	h := NewLoginFirebaseHandler(googleDeps.Verifier, googleDeps.Logger)
-	r.GET("/login/google/firebase", h.Serve)
+	r.POST("/login/google/firebase", h.Serve)
 }
