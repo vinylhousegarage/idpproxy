@@ -19,9 +19,9 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	di := testhelpers.NewMockDeps(logger)
+	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 
-	r := router.NewRouter(di, http.FS(public.PublicFS))
+	r := router.NewRouter(googleDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/loginfirebase", nil)
