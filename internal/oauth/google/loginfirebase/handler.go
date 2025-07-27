@@ -5,6 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/gin-gonic/gin"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/cookie"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/verify"
 )

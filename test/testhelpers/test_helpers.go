@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"cloud.google.com/go/auth"
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"

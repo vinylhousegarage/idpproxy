@@ -5,9 +5,8 @@ import (
 	"net/http"
 
 	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/auth"
-	"google.golang.org/api/option"
 	"go.uber.org/zap"
+	"google.golang.org/api/option"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
