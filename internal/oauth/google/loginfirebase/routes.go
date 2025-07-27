@@ -2,12 +2,11 @@ package loginfirebase
 
 import (
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/verify"
+	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, verifier verify.Verifier, logger *zap.Logger) {
-	h := NewLoginFirebaseHandler(verifier, logger)
+func RegisterRoutes(r *gin.RouterGroup, googleDeps *deps.GoogleDependencies) {
+	h := NewLoginFirebaseHandler(googleDeps.Logger)
 	r.GET("/loginfirebase", h.Serve)
 }
