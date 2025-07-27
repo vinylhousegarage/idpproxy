@@ -26,9 +26,9 @@ func main() {
 	metadataURL := config.GoogleOIDCMetadataURL
 	httpClient := &http.Client{}
 
-	di := deps.New(metadataURL, httpClient, logger)
+	systemDeps := deps.NewSystemDeps(metadataURL, httpClient, logger)
 
-	r := router.NewRouter(di, http.FS(public.PublicFS))
+	r := router.NewRouter(systemDeps, http.FS(public.PublicFS))
 
 	server.StartServer(r, logger)
 }
