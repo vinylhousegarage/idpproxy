@@ -19,9 +19,9 @@ func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	di := testhelpers.NewMockSystemDeps(logger)
+	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	r := router.NewRouter(di, http.FS(public.PublicFS))
+	r := router.NewRouter(systemDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/health", nil)
