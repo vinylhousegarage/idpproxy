@@ -16,10 +16,13 @@ import (
 func TestRootServesLoginHTML(t *testing.T) {
 	t.Parallel()
 
-	logger := zap.NewNop()
-	di := testhelpers.NewMockDeps(logger)
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
 
-	r := router.NewRouter(di, http.FS(public.PublicFS))
+	googleDeps := testhelpers.NewMockGoogleDeps(logger)
+	systemDeps := testhelpers.NewMockSystemDeps(logger)
+
+	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	resp := httptest.NewRecorder()
