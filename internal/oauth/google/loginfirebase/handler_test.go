@@ -8,18 +8,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"firebase.google.com/go/v4/auth"
+	firebaseauth "firebase.google.com/go/v4/auth"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/vinylhousegarage/idpproxy/internal/apperror"
+	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
-
-type mockVerifier struct {
-	VerifyIDTokenFunc func(ctx context.Context, idToken string) (*auth.Token, error)
-}
-
-func (m *mockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	return m.VerifyIDTokenFunc(ctx, idToken)
-}
 
 func TestLoginFirebaseHandler(t *testing.T) {
 	t.Parallel()
@@ -27,9 +22,9 @@ func TestLoginFirebaseHandler(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockVerifier := &mockVerifier{
-			VerifyIDTokenFunc: func(ctx context.Context, idToken string) (*auth.Token, error) {
-				return &auth.Token{UID: "test-uid"}, nil
+		mockVerifier := &testhelpers.MockVerifier{
+			VerifyFunc: func(ctx context.Context, idToken string) (*firebaseauth.Token, error) {
+				return &firebaseauth.Token{UID: "test-uid"}, nil
 			},
 		}
 
@@ -68,9 +63,9 @@ func TestLoginFirebaseHandler(t *testing.T) {
 	t.Run("invalid token", func(t *testing.T) {
 		t.Parallel()
 
-		mockVerifier := &mockVerifier{
-			VerifyIDTokenFunc: func(ctx context.Context, idToken string) (*auth.Token, error) {
-				return nil, errors.New("token invalid")
+		mockVerifier := &testhelpers.MockVerifier{
+			VerifyFunc: func(ctx context.Context, idToken string) (*firebaseauth.Token, error) {
+				return nil, errors.New("invalid token")
 			},
 		}
 
