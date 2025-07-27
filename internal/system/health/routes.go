@@ -6,7 +6,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, systemDeps *deps.SystemDependencies) {
+func RegisterRoutes(r *gin.IRoutes, systemDeps *deps.SystemDependencies) {
 	h := NewHealthHandler(systemDeps.Logger)
 	r.GET("/health", h.Serve)
 }

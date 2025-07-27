@@ -25,12 +25,9 @@ func NewRouter(
 
 	r.StaticFS("/public", publicFS)
 
-	googleGroup := r.Group("/google")
-	loginfirebase.RegisterRoutes(googleGroup, googleDeps)
-
-	systemGroup := r.Group("")
-	health.RegisterRoutes(systemGroup, systemDeps)
-	info.RegisterRoutes(systemGroup, systemDeps)
+	loginfirebase.RegisterRoutes(r, googleDeps)
+	health.RegisterRoutes(r, systemDeps)
+	info.RegisterRoutes(r, systemDeps)
 
 	return r
 }

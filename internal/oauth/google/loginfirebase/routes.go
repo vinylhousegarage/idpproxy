@@ -6,7 +6,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, googleDeps *deps.GoogleDependencies) {
+func RegisterRoutes(r *gin.IRoutes, googleDeps *deps.GoogleDependencies) {
 	h := NewLoginFirebaseHandler(googleDeps.Verifier, googleDeps.Logger)
-	r.GET("/loginfirebase", h.Serve)
+	r.GET("/login/google/firebase", h.Serve)
 }
