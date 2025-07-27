@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/apperror"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
