@@ -6,7 +6,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/httpclient"
 )
 
-type Dependencies struct {
+type SystemDependencies struct {
 	MetadataURL string
 	HTTPClient  httpclient.HTTPClient
 	Logger      *zap.Logger
@@ -16,8 +16,8 @@ func New(
 	metadataURL string,
 	httpClient httpclient.HTTPClient,
 	logger *zap.Logger,
-) *Dependencies {
-	return &Dependencies{
+) *SystemDependencies {
+	return &SystemDependencies{
 		MetadataURL: metadataURL,
 		HTTPClient:  httpClient,
 		Logger:      logger,
