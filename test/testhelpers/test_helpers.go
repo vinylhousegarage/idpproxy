@@ -1,17 +1,17 @@
 package testhelpers
 
 import (
-	"net/http"
+	"context"
 
 	"go.uber.org/zap"
-
-	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func NewMockSystemDeps(logger *zap.Logger) *deps.Dependencies {
-	return &deps.Dependencies{
-		MetadataURL: "https://accounts.google.com/.well-known/openid-configuration",
-		HTTPClient:  http.DefaultClient,
-		Logger:      logger,
-	}
+var MockLogger = zap.NewNop()
+
+type MockVerifier struct {
+	VerifyFunc func(ctx context.Context, idToken string) (*auth.Token, error)
+}
+
+func (m *MockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
+	return m.VerifyFunc(ctx, idToken)
 }
