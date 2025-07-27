@@ -15,6 +15,7 @@ var ErrInvalidGoogleLoginRequest = errors.New("invalid or missing google id_toke
 func ParseGoogleLoginRequest(r *http.Request) (*GoogleLoginRequest, error) {
 	if r.Body == nil {
 		return nil, ErrInvalidGoogleLoginRequest
+	}
 
 	var req GoogleLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
