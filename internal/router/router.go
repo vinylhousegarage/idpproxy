@@ -28,8 +28,9 @@ func NewRouter(
 	googleGroup := r.Group("/google")
 	loginfirebase.RegisterRoutes(googleGroup, googleDeps)
 
-	health.RegisterRoutes(r, systemDeps)
-	info.RegisterRoutes(r, systemDeps)
+	systemGroup := r.Group("")
+	health.RegisterRoutes(systemGroup, systemDeps)
+	info.RegisterRoutes(systemGroup, systemDeps)
 
 	return r
 }
