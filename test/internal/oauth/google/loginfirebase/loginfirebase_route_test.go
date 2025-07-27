@@ -1,6 +1,7 @@
 package loginfirebase_test
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,8 +26,10 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/login/google/firebase", nil)
+	body := bytes.NewBufferString(`{"id_token":"dummy.token.value"}`)
+	req, err := http.NewRequest(http.MethodPost, "/login/google/firebase", body)
 	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
 
 	r.ServeHTTP(w, req)
 
