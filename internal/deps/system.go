@@ -12,7 +12,7 @@ type SystemDependencies struct {
 	Logger      *zap.Logger
 }
 
-func New(
+func NewSystemDeps(
 	metadataURL string,
 	httpClient httpclient.HTTPClient,
 	logger *zap.Logger,
