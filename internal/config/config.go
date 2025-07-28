@@ -27,21 +27,15 @@ type FirebaseConfig struct {
 }
 
 func LoadFirebaseConfig() (*FirebaseConfig, error) {
-	if path := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"); path != "" {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read credentials from file: %w", err)
-		}
-		return &FirebaseConfig{CredentialsJSON: data}, nil
+	b64 := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64")
+	if b64 == "" {
+		return nil, fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set")
 	}
 
-	if b64 := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64"); b64 != "" {
-		decoded, err := base64.StdEncoding.DecodeString(b64)
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64: %w", err)
-		}
-		return &FirebaseConfig{CredentialsJSON: decoded}, nil
+	decoded, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64: %w", err)
 	}
 
-	return nil, fmt.Errorf("no Firebase credentials found in environment")
+	return &FirebaseConfig{CredentialsJSON: decoded}, nil
 }
