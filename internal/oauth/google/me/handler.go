@@ -26,12 +26,13 @@ func NewMeHandler(
 }
 
 func (h *MeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Vary", "Origin")
+	w.Header().Set("Allow", "GET, OPTIONS")
+
 	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Vary", "Origin")
-		w.Header().Set("Allow", "GET, OPTIONS")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -55,8 +56,6 @@ func (h *MeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Exp: int64(token.Claims["exp"].(float64)),
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Vary", "Origin")
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		h.Logger.Error("failed to write user response", zap.Error(err))
