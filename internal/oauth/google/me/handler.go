@@ -28,9 +28,10 @@ func NewMeHandler(
 func (h *MeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Vary", "Origin")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Vary", "Origin")
+		w.Header().Set("Allow", "GET, OPTIONS")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
