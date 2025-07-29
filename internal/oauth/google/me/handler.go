@@ -1,9 +1,9 @@
 package me
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/httperror"
