@@ -43,7 +43,7 @@ func TestMeHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.ServeHTTP(w, req)
+		handler.Serve(w, req)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusNoContent, resp.StatusCode)
@@ -73,7 +73,7 @@ func TestMeHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		handler := NewMeHandler(mock, zap.NewNop())
-		handler.ServeHTTP(w, req)
+		handler.Serve(w, req)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -94,7 +94,7 @@ func TestMeHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.ServeHTTP(w, req)
+		handler.Serve(w, req)
 
 		resp := w.Result()
 		require.Equal(t, ErrMissingAuthorizationHeader.Code, resp.StatusCode)
@@ -109,7 +109,7 @@ func TestMeHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.ServeHTTP(w, req)
+		handler.Serve(w, req)
 
 		resp := w.Result()
 		require.Equal(t, ErrInvalidAuthorizationHeaderFormat.Code, resp.StatusCode)
@@ -125,7 +125,7 @@ func TestMeHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.ServeHTTP(w, req)
+		handler.Serve(w, req)
 
 		resp := w.Result()
 		require.Equal(t, ErrEmptyBearerToken.Code, resp.StatusCode)
@@ -155,7 +155,7 @@ func TestMeHandler(t *testing.T) {
 		bw := &brokenWriter{ResponseWriter: rr}
 
 		handler := NewMeHandler(mock, zap.NewNop())
-		handler.ServeHTTP(bw, req)
+		handler.Serve(bw, req)
 
 		resp := rr.Result()
 		require.Equal(t, ErrFailedToWriteUserResponse.Code, resp.StatusCode)
