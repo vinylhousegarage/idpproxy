@@ -25,7 +25,7 @@ func NewMeHandler(
 	}
 }
 
-func (h *MeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *MeHandler) Serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
