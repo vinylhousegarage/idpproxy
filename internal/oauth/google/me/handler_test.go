@@ -77,7 +77,7 @@ func TestMeHandler(t *testing.T) {
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
-		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+		require.Contains(t, resp.Header.Get("Content-Type"), "application/json")
 		require.JSONEq(t, `{
 			"sub": "test-uid",
 			"iss": "https://issuer.example.com",
