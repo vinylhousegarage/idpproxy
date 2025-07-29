@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/apperror"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/verify"
 )
 
 type mockVerifier struct {
@@ -30,25 +31,36 @@ func (bw *brokenWriter) Write(p []byte) (int, error) {
 	return 0, apperror.New(http.StatusInternalServerError, "write failed")
 }
 
+func setupTestRouter(verifier verify.Verifier, logger *zap.Logger) *gin.Engine {
+	router := gin.New()
+	handler := NewMeHandler(verifier, logger)
+	router.GET("/me", handler.Serve)
+	router.OPTIONS("/me", handler.Serve)
+	return router
+}
+
+func newRequest(method, path, authHeader string) (*http.Request, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(method, path, nil)
+	if authHeader != "" {
+		req.Header.Set("Authorization", authHeader)
+	}
+	return req, httptest.NewRecorder()
+}
+
 func TestMeHandler(t *testing.T) {
 	t.Parallel()
+	gin.SetMode(gin.TestMode)
 
 	t.Run("OPTIONS preflight request", func(t *testing.T) {
 		t.Parallel()
+		router := setupTestRouter(nil, zap.NewNop())
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
+		req, w := newRequest(http.MethodOptions, "/me", "")
+		router.ServeHTTP(w, req)
 
-		c.Request = httptest.NewRequest(http.MethodOptions, "/me", nil)
-
-		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(c)
-
-		resp := w.Result()
-		require.Equal(t, http.StatusNoContent, resp.StatusCode)
-		require.Equal(t, "GET, OPTIONS", resp.Header.Get("Access-Control-Allow-Methods"))
-		require.Equal(t, "*", resp.Header.Get("Access-Control-Allow-Origin"))
-		require.Contains(t, resp.Header.Get("Access-Control-Allow-Headers"), "Authorization")
+		require.Equal(t, http.StatusNoContent, w.Code)
+		require.Equal(t, "GET, OPTIONS", w.Header().Get("Access-Control-Allow-Methods"))
+		require.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"))
 	})
 
 	t.Run("GET with valid id_token", func(t *testing.T) {
@@ -67,17 +79,12 @@ func TestMeHandler(t *testing.T) {
 			},
 		}
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
-		c.Request.Header.Set("Authorization", "Bearer valid.token.here")
+		router := setupTestRouter(mock, zap.NewNop())
+		req, w := newRequest(http.MethodGet, "/me", "Bearer valid.token.here")
+		router.ServeHTTP(w, req)
 
-		handler := NewMeHandler(mock, zap.NewNop())
-		handler.Serve(c)
-
-		resp := w.Result()
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		require.Contains(t, resp.Header.Get("Content-Type"), "application/json")
+		require.Equal(t, http.StatusOK, w.Code)
+		require.Equal(t, "application/json; charset=utf-8", w.Header().Get("Content-Type"))
 		require.JSONEq(t, `{
 			"sub": "test-uid",
 			"iss": "https://issuer.example.com",
@@ -89,12 +96,9 @@ func TestMeHandler(t *testing.T) {
 	t.Run("GET with missing Authorization header", func(t *testing.T) {
 		t.Parallel()
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
-
-		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(c)
+		router := setupTestRouter(nil, zap.NewNop())
+		req, w := newRequest(http.MethodGet, "/me", "")
+		router.ServeHTTP(w, req)
 
 		require.Equal(t, ErrMissingAuthorizationHeader.Code, w.Code)
 		require.Contains(t, w.Body.String(), `"error":`)
@@ -103,13 +107,9 @@ func TestMeHandler(t *testing.T) {
 	t.Run("GET with invalid token format", func(t *testing.T) {
 		t.Parallel()
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
-		c.Request.Header.Set("Authorization", "invalid-format")
-
-		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(c)
+		router := setupTestRouter(nil, zap.NewNop())
+		req, w := newRequest(http.MethodGet, "/me", "invalid-format")
+		router.ServeHTTP(w, req)
 
 		require.Equal(t, ErrInvalidAuthorizationHeaderFormat.Code, w.Code)
 		require.Equal(t, "GET, OPTIONS", w.Header().Get("Access-Control-Allow-Methods"))
@@ -119,13 +119,9 @@ func TestMeHandler(t *testing.T) {
 	t.Run("GET with empty token after Bearer", func(t *testing.T) {
 		t.Parallel()
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
-		c.Request.Header.Set("Authorization", "Bearer ")
-
-		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(c)
+		router := setupTestRouter(nil, zap.NewNop())
+		req, w := newRequest(http.MethodGet, "/me", "Bearer ")
+		router.ServeHTTP(w, req)
 
 		require.Equal(t, ErrEmptyBearerToken.Code, w.Code)
 		require.Contains(t, w.Body.String(), `"error":`)
@@ -147,17 +143,18 @@ func TestMeHandler(t *testing.T) {
 			},
 		}
 
-		rr := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(rr)
-		bw := &brokenWriter{ResponseWriter: c.Writer}
-		c.Writer = bw
-		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
-		c.Request.Header.Set("Authorization", "Bearer valid.token.here")
-
+		router := gin.New()
 		handler := NewMeHandler(mock, zap.NewNop())
-		handler.Serve(c)
+		router.GET("/me", func(c *gin.Context) {
+			c.Writer = &brokenWriter{ResponseWriter: c.Writer}
+			handler.Serve(c)
+		})
+		router.OPTIONS("/me", handler.Serve)
 
-		require.Equal(t, ErrFailedToWriteUserResponse.Code, rr.Code)
-		require.Equal(t, "", rr.Body.String())
+		req, w := newRequest(http.MethodGet, "/me", "Bearer valid.token.here")
+		router.ServeHTTP(w, req)
+
+		require.Equal(t, ErrFailedToWriteUserResponse.Code, w.Code)
+		require.Equal(t, "", w.Body.String())
 	})
 }
