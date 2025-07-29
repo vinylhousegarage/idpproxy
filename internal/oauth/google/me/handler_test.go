@@ -9,6 +9,8 @@ import (
 	"firebase.google.com/go/v4/auth"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/vinylhousegarage/idpproxy/internal/apperror"
 )
 
 type mockVerifier struct {
@@ -24,7 +26,7 @@ type brokenWriter struct {
 }
 
 func (bw *brokenWriter) Write(p []byte) (int, error) {
-	return 0, errors.New("write failed")
+	return 0, apperror.New(http.StatusInternalServerError, "write failed")
 }
 
 func (bw *brokenWriter) WriteHeader(statusCode int) {
@@ -157,6 +159,6 @@ func TestMeHandler(t *testing.T) {
 
 		resp := rr.Result()
 		require.Equal(t, ErrFailedToWriteUserResponse.Code, resp.StatusCode)
-		require.Contains(t, rr.Body.String(), `"error":`)
+		require.Equal(t, "", rr.Body.String())
 	})
 }
