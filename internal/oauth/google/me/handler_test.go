@@ -98,7 +98,7 @@ func TestMeHandler(t *testing.T) {
 		handler.ServeHTTP(w, req)
 
 		resp := w.Result()
-		require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 		require.Equal(t, "GET, OPTIONS", resp.Header.Get("Access-Control-Allow-Methods"))
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
