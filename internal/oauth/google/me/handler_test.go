@@ -83,7 +83,7 @@ func TestMeHandler(t *testing.T) {
 		handler.ServeHTTP(w, req)
 
 		resp := w.Result()
-		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		require.Equal(t, ErrMissingAuthorizationHeader.Code, resp.StatusCode)
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
 
@@ -98,7 +98,7 @@ func TestMeHandler(t *testing.T) {
 		handler.ServeHTTP(w, req)
 
 		resp := w.Result()
-		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		require.Equal(t, ErrInvalidAuthorizationHeaderFormat.Code, resp.StatusCode)
 		require.Equal(t, "GET, OPTIONS", resp.Header.Get("Access-Control-Allow-Methods"))
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
