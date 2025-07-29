@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	firebaseauth "firebase.google.com/go/v4/auth"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
@@ -19,7 +20,7 @@ import (
 func newMockGoogleDepsWithFunc(logger *zap.Logger, fn func(ctx context.Context, idToken string) (*firebaseauth.Token, error)) *deps.GoogleDependencies {
 	return &deps.GoogleDependencies{
 		Logger: logger,
-		Verifier: &MockVerifier{
+		Verifier: &testhelpers.MockVerifier{
 			VerifyFunc: fn,
 		},
 	}
