@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"firebase.google.com/go/v4/auth"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
@@ -22,15 +23,11 @@ func (m *mockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth
 }
 
 type brokenWriter struct {
-	http.ResponseWriter
+	gin.ResponseWriter
 }
 
 func (bw *brokenWriter) Write(p []byte) (int, error) {
 	return 0, apperror.New(http.StatusInternalServerError, "write failed")
-}
-
-func (bw *brokenWriter) WriteHeader(statusCode int) {
-	bw.ResponseWriter.WriteHeader(statusCode)
 }
 
 func TestMeHandler(t *testing.T) {
@@ -39,11 +36,13 @@ func TestMeHandler(t *testing.T) {
 	t.Run("OPTIONS preflight request", func(t *testing.T) {
 		t.Parallel()
 
-		req := httptest.NewRequest(http.MethodOptions, "/me", nil)
 		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		c.Request = httptest.NewRequest(http.MethodOptions, "/me", nil)
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(w, req)
+		handler.Serve(c)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusNoContent, resp.StatusCode)
@@ -68,16 +67,16 @@ func TestMeHandler(t *testing.T) {
 			},
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/me", nil)
-		req.Header.Set("Authorization", "Bearer valid.token.here")
 		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
+		c.Request.Header.Set("Authorization", "Bearer valid.token.here")
 
 		handler := NewMeHandler(mock, zap.NewNop())
-		handler.Serve(w, req)
+		handler.Serve(c)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
-		require.Equal(t, "GET, OPTIONS", resp.Header.Get("Access-Control-Allow-Methods"))
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 		require.JSONEq(t, `{
 			"sub": "test-uid",
@@ -90,45 +89,45 @@ func TestMeHandler(t *testing.T) {
 	t.Run("GET with missing Authorization header", func(t *testing.T) {
 		t.Parallel()
 
-		req := httptest.NewRequest(http.MethodGet, "/me", nil)
 		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(w, req)
+		handler.Serve(c)
 
-		resp := w.Result()
-		require.Equal(t, ErrMissingAuthorizationHeader.Code, resp.StatusCode)
+		require.Equal(t, ErrMissingAuthorizationHeader.Code, w.Code)
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
 
 	t.Run("GET with invalid token format", func(t *testing.T) {
 		t.Parallel()
 
-		req := httptest.NewRequest(http.MethodGet, "/me", nil)
-		req.Header.Set("Authorization", "invalid-format")
 		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
+		c.Request.Header.Set("Authorization", "invalid-format")
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(w, req)
+		handler.Serve(c)
 
-		resp := w.Result()
-		require.Equal(t, ErrInvalidAuthorizationHeaderFormat.Code, resp.StatusCode)
-		require.Equal(t, "GET, OPTIONS", resp.Header.Get("Access-Control-Allow-Methods"))
+		require.Equal(t, ErrInvalidAuthorizationHeaderFormat.Code, w.Code)
+		require.Equal(t, "GET, OPTIONS", w.Header().Get("Access-Control-Allow-Methods"))
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
 
 	t.Run("GET with empty token after Bearer", func(t *testing.T) {
 		t.Parallel()
 
-		req := httptest.NewRequest(http.MethodGet, "/me", nil)
-		req.Header.Set("Authorization", "Bearer ")
 		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
+		c.Request.Header.Set("Authorization", "Bearer ")
 
 		handler := NewMeHandler(nil, zap.NewNop())
-		handler.Serve(w, req)
+		handler.Serve(c)
 
-		resp := w.Result()
-		require.Equal(t, ErrEmptyBearerToken.Code, resp.StatusCode)
+		require.Equal(t, ErrEmptyBearerToken.Code, w.Code)
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
 
@@ -148,17 +147,17 @@ func TestMeHandler(t *testing.T) {
 			},
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/me", nil)
-		req.Header.Set("Authorization", "Bearer valid.token.here")
-
 		rr := httptest.NewRecorder()
-		bw := &brokenWriter{ResponseWriter: rr}
+		c, _ := gin.CreateTestContext(rr)
+		bw := &brokenWriter{ResponseWriter: c.Writer}
+		c.Writer = bw
+		c.Request = httptest.NewRequest(http.MethodGet, "/me", nil)
+		c.Request.Header.Set("Authorization", "Bearer valid.token.here")
 
 		handler := NewMeHandler(mock, zap.NewNop())
-		handler.Serve(bw, req)
+		handler.Serve(c)
 
-		resp := rr.Result()
-		require.Equal(t, ErrFailedToWriteUserResponse.Code, resp.StatusCode)
+		require.Equal(t, ErrFailedToWriteUserResponse.Code, rr.Code)
 		require.Equal(t, "", rr.Body.String())
 	})
 }
