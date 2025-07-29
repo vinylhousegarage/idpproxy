@@ -16,5 +16,10 @@ func ExtractAuthHeaderToken(r *http.Request) (string, error) {
 		return "", ErrInvalidAuthorizationHeaderFormat
 	}
 
-	return parts[1], nil
+	token := strings.TrimSpace(parts[1])
+	if token == "" {
+		return "", ErrEmptyBearerToken
+	}
+
+	return token, nil
 }
