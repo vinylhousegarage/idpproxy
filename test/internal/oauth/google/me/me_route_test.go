@@ -57,7 +57,7 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	require.Equal(t, "application/json; charset=utf-8", w.Header().Get("Content-Type"))
 
 	var body map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&body)
