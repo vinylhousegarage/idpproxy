@@ -19,6 +19,18 @@ func (m *mockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth
 	return m.VerifyIDTokenFunc(ctx, idToken)
 }
 
+type brokenWriter struct {
+	http.ResponseWriter
+}
+
+func (bw *brokenWriter) Write(p []byte) (int, error) {
+	return 0, errors.New("write failed")
+}
+
+func (bw *brokenWriter) WriteHeader(statusCode int) {
+	bw.ResponseWriter.WriteHeader(statusCode)
+}
+
 func TestMeHandler(t *testing.T) {
 	t.Parallel()
 
@@ -116,5 +128,35 @@ func TestMeHandler(t *testing.T) {
 		resp := w.Result()
 		require.Equal(t, ErrEmptyBearerToken.Code, resp.StatusCode)
 		require.Contains(t, w.Body.String(), `"error":`)
+	})
+
+	t.Run("GET with JSON encoding error", func(t *testing.T) {
+		t.Parallel()
+
+		mock := &mockVerifier{
+			VerifyIDTokenFunc: func(ctx context.Context, idToken string) (*auth.Token, error) {
+				return &auth.Token{
+					UID: "test-uid",
+					Claims: map[string]interface{}{
+						"iss": "https://issuer.example.com",
+						"aud": "test-audience",
+						"exp": float64(1234567890),
+					},
+				}, nil
+			},
+		}
+
+		req := httptest.NewRequest(http.MethodGet, "/me", nil)
+		req.Header.Set("Authorization", "Bearer valid.token.here")
+
+		rr := httptest.NewRecorder()
+		bw := &brokenWriter{ResponseWriter: rr}
+
+		handler := NewMeHandler(mock, zap.NewNop())
+		handler.ServeHTTP(bw, req)
+
+		resp := rr.Result()
+		require.Equal(t, ErrFailedToWriteUserResponse.Code, resp.StatusCode)
+		require.Contains(t, rr.Body.String(), `"error":`)
 	})
 }
