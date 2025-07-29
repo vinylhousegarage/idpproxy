@@ -9,4 +9,5 @@ import (
 func RegisterRoutes(r gin.IRoutes, googleDeps *deps.GoogleDependencies) {
 	h := NewMeHandler(googleDeps.Verifier, googleDeps.Logger)
 	r.GET("/me", h.Serve)
+	r.OPTIONS("/me", h.Serve)
 }
