@@ -36,3 +36,13 @@ func TestExtractAuthHeaderToken_InvalidFormat(t *testing.T) {
 	_, err := ExtractAuthHeaderToken(req)
 	assert.ErrorIs(t, err, ErrInvalidAuthorizationHeaderFormat)
 }
+
+func TestExtractAuthHeaderToken_EmptyBearerToken(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequest("GET", "/me", nil)
+	req.Header.Set("Authorization", "Bearer ")
+
+	_, err := ExtractAuthHeaderToken(req)
+	assert.ErrorIs(t, err, ErrEmptyBearerToken)
+}
