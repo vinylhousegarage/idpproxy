@@ -114,7 +114,7 @@ func TestMeHandler(t *testing.T) {
 		handler.ServeHTTP(w, req)
 
 		resp := w.Result()
-		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		require.Equal(t, ErrEmptyBearerToken.Code, resp.StatusCode)
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
 }
