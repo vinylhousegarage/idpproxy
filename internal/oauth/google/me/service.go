@@ -6,13 +6,13 @@ import (
 )
 
 func ExtractAuthHeaderToken(r *http.Request) (string, error) {
-	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
-	if authHeader == "" {
+	authHeader := r.Header.Get("Authorization")
+	if strings.TrimSpace(authHeader) == "" {
 		return "", ErrMissingAuthorizationHeader
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+	if len(parts) != 2 || strings.ToLower(strings.TrimSpace(parts[0])) != "bearer" {
 		return "", ErrInvalidAuthorizationHeaderFormat
 	}
 
