@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/apperror"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/verify"
 )
 
@@ -21,14 +20,6 @@ type mockVerifier struct {
 
 func (m *mockVerifier) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
 	return m.VerifyIDTokenFunc(ctx, idToken)
-}
-
-type brokenWriter struct {
-	gin.ResponseWriter
-}
-
-func (bw *brokenWriter) Write(p []byte) (int, error) {
-	return 0, apperror.New(http.StatusInternalServerError, "write failed")
 }
 
 func setupTestRouter(verifier verify.Verifier, logger *zap.Logger) *gin.Engine {
