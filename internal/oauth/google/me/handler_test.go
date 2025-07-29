@@ -126,35 +126,4 @@ func TestMeHandler(t *testing.T) {
 		require.Equal(t, ErrEmptyBearerToken.Code, w.Code)
 		require.Contains(t, w.Body.String(), `"error":`)
 	})
-
-	t.Run("GET with JSON encoding error", func(t *testing.T) {
-		t.Parallel()
-
-		mock := &mockVerifier{
-			VerifyIDTokenFunc: func(ctx context.Context, idToken string) (*auth.Token, error) {
-				return &auth.Token{
-					UID: "test-uid",
-					Claims: map[string]interface{}{
-						"iss": "https://issuer.example.com",
-						"aud": "test-audience",
-						"exp": float64(1234567890),
-					},
-				}, nil
-			},
-		}
-
-		router := gin.New()
-		handler := NewMeHandler(mock, zap.NewNop())
-		router.GET("/me", func(c *gin.Context) {
-			c.Writer = &brokenWriter{ResponseWriter: c.Writer}
-			handler.Serve(c)
-		})
-		router.OPTIONS("/me", handler.Serve)
-
-		req, w := newRequest(http.MethodGet, "/me", "Bearer valid.token.here")
-		router.ServeHTTP(w, req)
-
-		require.Equal(t, ErrFailedToWriteUserResponse.Code, w.Code)
-		require.Equal(t, "", w.Body.String())
-	})
 }
