@@ -24,6 +24,10 @@ func NewRouter(
 		c.FileFromFS("login.html", publicFS)
 	})
 
+	r.GET("/privacy", func(c *gin.Context) {
+		c.FileFromFS("privacy.html", publicFS)
+	})
+
 	r.StaticFS("/public", publicFS)
 
 	loginfirebase.RegisterRoutes(r, googleDeps)
