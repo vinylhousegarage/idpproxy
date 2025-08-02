@@ -27,7 +27,7 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	body := bytes.NewBufferString(`{"id_token":"dummy.token.value"}`)
-	req, err := http.NewRequest(http.MethodPost, "/login/google/firebase", body)
+	req, err := http.NewRequest(http.MethodPost, "/google/login/firebase", body)
 	require.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 
