@@ -46,13 +46,11 @@ func TestLoadFirebaseConfig(t *testing.T) {
 func TestLoadGitHubConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
-		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
 
 		cfg, err := LoadGitHubConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-client-id", cfg.ClientID)
-		require.Equal(t, "test-github-client-secret", cfg.ClientSecret)
 		require.Equal(t, "https://idpproxy.com/github/callback", cfg.RedirectURI)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
@@ -60,7 +58,6 @@ func TestLoadGitHubConfig(t *testing.T) {
 
 	t.Run("missing required variables", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
-		t.Setenv("GITHUB_CLIENT_SECRET", "")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubConfig()
@@ -73,13 +70,11 @@ func TestLoadGitHubConfig(t *testing.T) {
 func TestLoadGitHubDevConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
-		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
 
 		cfg, err := LoadGitHubDevConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-dev-client-id", cfg.ClientID)
-		require.Equal(t, "test-github-dev-client-secret", cfg.ClientSecret)
 		require.Equal(t, "http://localhost:9000/github/callback", cfg.RedirectURI)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
@@ -87,7 +82,6 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 
 	t.Run("missing required variables", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
-		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubDevConfig()
