@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/base64"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
