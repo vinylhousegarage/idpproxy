@@ -39,3 +39,39 @@ func LoadFirebaseConfig() (*FirebaseConfig, error) {
 
 	return &FirebaseConfig{CredentialsJSON: decoded}, nil
 }
+
+type GitHubConfig struct {
+	ClientID    string
+	RedirectURI string
+	Scope       string
+	AllowSignup string
+}
+
+func LoadGitHubConfig() (*GitHubConfig, error) {
+	clientID := os.Getenv("GITHUB_CLIENT_ID")
+	redirectURI := os.Getenv("GITHUB_REDIRECT_URI")
+	if clientID == "" || redirectURI == "" {
+		return nil, fmt.Errorf("missing GitHub client ID or redirect URI")
+	}
+
+	return &GitHubConfig{
+		ClientID:    clientID,
+		RedirectURI: redirectURI,
+		Scope:       "read:user",
+		AllowSignup: "true",
+	}, nil
+}
+func LoadGitHubDevConfig() (*GitHubConfig, error) {
+	clientID := os.Getenv("GITHUB_DEV_CLIENT_ID")
+	redirectURI := os.Getenv("GITHUB_DEV_REDIRECT_URI")
+	if clientID == "" || redirectURI == "" {
+		return nil, fmt.Errorf("missing GitHub client ID or redirect URI")
+	}
+
+	return &GitHubConfig{
+		ClientID:    clientID,
+		RedirectURI: redirectURI,
+		Scope:       "read:user",
+		AllowSignup: "true",
+	}, nil
+}
