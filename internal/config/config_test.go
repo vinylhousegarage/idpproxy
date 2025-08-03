@@ -56,14 +56,34 @@ func TestLoadGitHubConfig(t *testing.T) {
 		require.Equal(t, "true", cfg.AllowSignup)
 	})
 
-	t.Run("missing required variables", func(t *testing.T) {
+	t.Run("missing both variables", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "missing required environment variables")
+		require.EqualError(t, err, "GITHUB_CLIENT_ID and GITHUB_REDIRECT_URI are not set")
+	})
+
+	t.Run("missing client ID", func(t *testing.T) {
+		t.Setenv("GITHUB_CLIENT_ID", "")
+		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
+
+		cfg, err := LoadGitHubConfig()
+		require.Nil(t, cfg)
+		require.Error(t, err)
+		require.EqualError(t, err, "GITHUB_CLIENT_ID is not set")
+	})
+
+	t.Run("missing redirect URI", func(t *testing.T) {
+		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
+		t.Setenv("GITHUB_REDIRECT_URI", "")
+
+		cfg, err := LoadGitHubConfig()
+		require.Nil(t, cfg)
+		require.Error(t, err)
+		require.EqualError(t, err, "GITHUB_REDIRECT_URI is not set")
 	})
 }
 
@@ -80,13 +100,33 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		require.Equal(t, "true", cfg.AllowSignup)
 	})
 
-	t.Run("missing required variables", func(t *testing.T) {
+	t.Run("missing both variables", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubDevConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "missing required environment variables")
+		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID and GITHUB_DEV_REDIRECT_URI are not set")
+	})
+
+	t.Run("missing client ID", func(t *testing.T) {
+		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
+		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
+
+		cfg, err := LoadGitHubDevConfig()
+		require.Nil(t, cfg)
+		require.Error(t, err)
+		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID is not set")
+	})
+
+	t.Run("missing redirect URI", func(t *testing.T) {
+		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
+		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
+
+		cfg, err := LoadGitHubDevConfig()
+		require.Nil(t, cfg)
+		require.Error(t, err)
+		require.EqualError(t, err, "GITHUB_DEV_REDIRECT_URI is not set")
 	})
 }
