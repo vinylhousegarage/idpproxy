@@ -6,11 +6,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/config"
-	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
