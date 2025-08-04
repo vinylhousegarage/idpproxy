@@ -12,4 +12,10 @@ const (
 
 	// for GoogleTokenRepository
 	CollectionGoogleTokens = "google_tokens"
+
+	// for GenerateState
+	StateLength = 16
+
+	// for BuildGitHubLoginURL
+	GitHubAuthorizeURL = "https://github.com/login/oauth/authorize"
 )
