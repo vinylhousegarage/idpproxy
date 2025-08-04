@@ -7,6 +7,7 @@ import (
 	firebaseauth "firebase.google.com/go/v4/auth"
 	"go.uber.org/zap"
 
+	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
@@ -37,5 +38,17 @@ func NewMockGoogleDeps(logger *zap.Logger) *deps.GoogleDependencies {
 				return &firebaseauth.Token{UID: "test-user"}, nil
 			},
 		},
+	}
+}
+
+func NewMockGitHubDeps(logger *zap.Logger) *deps.GitHubDependencies {
+	return &deps.GitHubDependencies{
+		Config: &config.GitHubConfig{
+			ClientID:    "test-client-id",
+			RedirectURI: "https://example.com/callback",
+			Scope:       "read:user",
+			AllowSignup: "false",
+		},
+		Logger: logger,
 	}
 }
