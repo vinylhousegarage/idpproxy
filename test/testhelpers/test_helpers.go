@@ -41,7 +41,13 @@ func NewMockGoogleDeps(logger *zap.Logger) *deps.GoogleDependencies {
 }
 
 func NewMockGitHubDeps(logger *zap.Logger) *deps.GitHubDependencies {
-	return &deps.GitHubDependencies{
-		Logger: logger,
-	}
+    return &deps.GitHubDependencies{
+        Logger: logger,
+        Config: &config.GitHubConfig{
+            ClientID:    "dummy-client-id",
+            RedirectURI: "https://example.com/callback",
+            Scope:       "read:user",
+            AllowSignup: "false",
+        },
+    }
 }
