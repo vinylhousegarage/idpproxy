@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/login"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/loginfirebase"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/me"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
@@ -13,6 +14,7 @@ import (
 )
 
 func NewRouter(
+	githubDeps *deps.GitHubDependencies,
 	googleDeps *deps.GoogleDependencies,
 	systemDeps *deps.SystemDependencies,
 	publicFS http.FileSystem,
@@ -33,6 +35,8 @@ func NewRouter(
 	})
 
 	r.StaticFS("/public", publicFS)
+
+	login.RegisterRoutes(r, githubDeps)
 
 	loginfirebase.RegisterRoutes(r, googleDeps)
 	me.RegisterRoutes(r, googleDeps)

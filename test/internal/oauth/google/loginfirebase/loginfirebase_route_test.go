@@ -20,10 +20,11 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	githubDeps := testhelpers.NewMockGitHubDeps(logger)
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
+	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
 	body := bytes.NewBufferString(`{"id_token":"dummy.token.value"}`)
