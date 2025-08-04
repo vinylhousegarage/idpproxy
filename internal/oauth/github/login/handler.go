@@ -6,8 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	"github.com/vinylhousegarage/idpproxy/internal/httperror"
+	"github.com/vinylhousegarage/idpproxy/internatperror"
 )
 
 type GitHubLoginHandler struct {
