@@ -49,6 +49,13 @@ func main() {
 
 	googleDeps := deps.NewGoogleDeps(authClient, logger)
 
-	r := router.NewRouter(googleDeps, systemDeps, http.FS(public.PublicFS))
+	githubCfg, err := config.LoadGitHubDevConfig()
+	if err != nil {
+		logger.Fatal("failed to load GitHub config", zap.Error(err))
+	}
+
+	githubDeps := deps.NewGitHubDeps(githubCfg, logger)
+
+	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 	server.StartServer(r, logger)
 }
