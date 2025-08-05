@@ -1,4 +1,4 @@
-package info_test
+package system_test
 
 import (
 	"net/http"
