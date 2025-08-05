@@ -1,4 +1,4 @@
-package loginfirebase_test
+package google_test
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package health_test
+package system_test
 
 import (
 	"net/http"
