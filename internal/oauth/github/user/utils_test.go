@@ -1,4 +1,4 @@
-package firebase
+package user
 
 import (
 	"bytes"
