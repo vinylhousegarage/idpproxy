@@ -38,7 +38,7 @@ func ExtractAccessTokenFromResponse(resp *http.Response) (string, error) {
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, snippetLimit))
-		return "", fmt.Errorf("%w: status=%d body=%q", ErrNon2xx, resp.StatusCode, string(snippet))
+		return "", fmt.Errorf("%w: status=%d body=%q", ErrNon2xxStatus, resp.StatusCode, string(snippet))
 	}
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxReadBytes))
