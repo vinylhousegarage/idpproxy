@@ -11,6 +11,7 @@ import (
 
 func TestNewGitHubUserRequest_SetsMethodURLAndHeaders(t *testing.T) {
 	t.Parallel()
+
 	token := "testtoken123"
 
 	req, err := NewGitHubUserRequest(context.Background(), token)
@@ -43,6 +44,7 @@ func TestNewGitHubUserRequest_SetsMethodURLAndHeaders(t *testing.T) {
 
 func TestNewGitHubUserRequest_EmptyTokenReturnsError(t *testing.T) {
 	t.Parallel()
+
 	if _, err := NewGitHubUserRequest(context.Background(), ""); !errors.Is(err, ErrEmptyBearerToken) {
 		t.Fatalf("want ErrEmptyBearerToken, got %v", err)
 	}
@@ -51,6 +53,7 @@ func TestNewGitHubUserRequest_EmptyTokenReturnsError(t *testing.T) {
 //nolint:staticcheck // SA1012: intentionally passing nil to verify ErrNilContext
 func TestNewGitHubUserRequest_NilContextReturnsError(t *testing.T) {
 	t.Parallel()
+
 	if _, err := NewGitHubUserRequest(nil, "token"); !errors.Is(err, ErrNilContext) {
 		t.Fatalf("want ErrNilContext, got %v", err)
 	}
