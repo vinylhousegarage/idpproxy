@@ -22,6 +22,6 @@ const (
 	// for NewGitHubUserRequest
 	GitHubAPIBaseURL = "https://api.github.com"
 	GitHubUserURL    = GitHubAPIBaseURL + "/user"
-	GitHubAPIVersion  = "2022-11-28"
-	UserAgentProduct  = "idpproxy"
+	GitHubAPIVersion = "2022-11-28"
+	UserAgentProduct = "idpproxy"
 )
