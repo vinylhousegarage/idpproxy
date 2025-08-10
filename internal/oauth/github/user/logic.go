@@ -31,5 +31,8 @@ func NewGitHubUserRequest(ctx context.Context, accessToken string) (*http.Reques
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", config.GitHubAPIVersion)
+	req.Header.Set("User-Agent", config.UserAgent())
+
 	return req, nil
 }
