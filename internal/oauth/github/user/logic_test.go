@@ -1,12 +1,17 @@
 package user
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/vinylhousegarage/idpproxy/internal/config"
+	"github.com/vinylhousegarage/idpproxy/internal/response"
 )
 
 func TestNewGitHubUserRequest_SetsMethodURLAndHeaders(t *testing.T) {
@@ -57,4 +62,129 @@ func TestNewGitHubUserRequest_NilContextReturnsError(t *testing.T) {
 	if _, err := NewGitHubUserRequest(nil, "token"); !errors.Is(err, ErrNilContext) {
 		t.Fatalf("want ErrNilContext, got %v", err)
 	}
+}
+
+type testReadCloser struct {
+	r      io.Reader
+	closed *bool
+}
+
+func (t *testReadCloser) Read(p []byte) (int, error) { return t.r.Read(p) }
+func (t *testReadCloser) Close() error {
+	if t.closed != nil {
+		*t.closed = true
+	}
+	return nil
+}
+
+func newHTTPResponse(t *testing.T, status int, body string, closed *bool) *http.Response {
+	t.Helper()
+
+	return &http.Response{
+		StatusCode: status,
+		Body:       &testReadCloser{r: bytes.NewBufferString(body), closed: closed},
+		Header:     make(http.Header),
+	}
+}
+
+func TestDecodeGitHubUserResponse(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+
+		body := `{"id":123,"login":"octocat","email":"octo@example.com","name":"The Octocat"}`
+		closed := false
+		resp := newHTTPResponse(http.StatusOK, body, &closed)
+
+		got, err := DecodeGitHubUserResponse(resp)
+		require.NoError(t, err)
+		require.True(t, closed)
+
+		want := &response.GitHubUserAPIResponse{
+			ID:    123,
+			Login: "octocat",
+			Email: "octo@example.com",
+			Name:  "The Octocat",
+		}
+		require.Equal(t, want, got)
+	})
+
+	t.Run("Non2xx", func(t *testing.T) {
+		t.Parallel()
+
+		closed := false
+		resp := newHTTPResponse(http.StatusUnauthorized, `{"message":"bad creds"}`, &closed)
+
+		got, err := DecodeGitHubUserResponse(resp)
+		require.Error(t, err)
+		require.Nil(t, got)
+		require.True(t, closed)
+		require.Contains(t, err.Error(), "non-2xx status")
+		require.Contains(t, err.Error(), "401")
+		require.Contains(t, err.Error(), "bad creds")
+	})
+
+	t.Run("InvalidJSON", func(t *testing.T) {
+		t.Parallel()
+
+		closed := false
+		resp := newHTTPResponse(http.StatusOK, `{"id": 1, "login":`, &closed)
+
+		got, err := DecodeGitHubUserResponse(resp)
+		require.Error(t, err)
+		require.Nil(t, got)
+		require.True(t, closed)
+		require.Contains(t, err.Error(), "failed to decode GitHub user response")
+	})
+
+	t.Run("OmittedFields", func(t *testing.T) {
+		t.Parallel()
+
+		closed := false
+		resp := newHTTPResponse(http.StatusOK, `{"id":123,"login":"octocat"}`, &closed)
+
+		got, err := DecodeGitHubUserResponse(resp)
+		require.NoError(t, err)
+		require.True(t, closed)
+		require.Equal(t, int64(123), got.ID)
+		require.Equal(t, "octocat", got.Login)
+		require.Empty(t, got.Email)
+		require.Empty(t, got.Name)
+	})
+
+	t.Run("EmptyBody", func(t *testing.T) {
+		t.Parallel()
+
+		closed := false
+		resp := newHTTPResponse(http.StatusOK, ``, &closed)
+
+		got, err := DecodeGitHubUserResponse(resp)
+		require.Error(t, err)
+		require.Nil(t, got)
+		require.True(t, closed)
+		require.Contains(t, err.Error(), "failed to decode GitHub user response")
+	})
+
+	t.Run("Non2xx_SnippetIsTruncated", func(t *testing.T) {
+		t.Parallel()
+
+		long := make([]byte, 300)
+		for i := range long {
+			long[i] = 'x'
+		}
+		closed := false
+		resp := newHTTPResponse(http.StatusForbidden, string(long), &closed)
+
+		_, err := DecodeGitHubUserResponse(resp)
+		require.Error(t, err)
+		require.True(t, closed)
+
+		msg := err.Error()
+		require.Contains(t, msg, "non-2xx status")
+		require.Contains(t, msg, "403")
+
+		require.Contains(t, msg, string(long[:256]))
+		require.NotContains(t, msg, string(long[256:]))
+	})
 }
