@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
-	"github.com/vinylhousegarage/idpproxy/internal/response"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/response"
 )
 
 func TestNewGitHubUserRequest_SetsMethodURLAndHeaders(t *testing.T) {
