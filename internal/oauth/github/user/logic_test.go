@@ -150,12 +150,12 @@ func TestDecodeGitHubUserResponse(t *testing.T) {
 	t.Run("Non2xx_SnippetIsTruncated", func(t *testing.T) {
 		t.Parallel()
 
-		long := make([]byte, 300)
-		for i := range long {
-			long[i] = 'x'
-		}
+		head := bytes.Repeat([]byte{'x'}, 256)
+		tail := bytes.Repeat([]byte{'Y'}, 44)
+		payload := append(head, tail...)
+
 		closed := false
-		resp := newHTTPResponse(t, http.StatusForbidden, string(long), &closed)
+		resp := newHTTPResponse(t, http.StatusForbidden, string(payload), &closed)
 
 		_, err := DecodeGitHubUserResponse(resp)
 		require.Error(t, err)
@@ -165,7 +165,7 @@ func TestDecodeGitHubUserResponse(t *testing.T) {
 		require.Contains(t, msg, "non-2xx status")
 		require.Contains(t, msg, "403")
 
-		require.Contains(t, msg, string(long[:256]))
-		require.NotContains(t, msg, string(long[256:]))
+		require.Contains(t, msg, string(head))
+		require.NotContains(t, msg, string(tail))
 	})
 }
