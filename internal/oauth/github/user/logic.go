@@ -14,11 +14,31 @@ import (
 )
 
 var (
-	ErrNilContext       = errors.New("nil context")
-	ErrEmptyBearerToken = errors.New("empty bearer token")
+	ErrEmptyBearerToken                 = errors.New("empty bearer token")
+	ErrInvalidAuthorizationHeaderFormat = errors.New("invalid Authorization header format")
+	ErrMissingAuthorizationHeader       = errors.New("missing Authorization header")
+	ErrNilContext                       = errors.New("nil context")
 )
 
 var githubUserURL = config.GitHubUserURL
+
+func ExtractAuthHeaderToken(r *http.Request) (string, error) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" {
+		return "", ErrMissingAuthorizationHeader
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		return "", ErrInvalidAuthorizationHeaderFormat
+	}
+
+	token := strings.TrimSpace(parts[1])
+	if token == "" {
+		return "", ErrEmptyBearerToken
+	}
+	return token, nil
+}
 
 func NewGitHubUserRequest(ctx context.Context, accessToken string) (*http.Request, error) {
 	if ctx == nil {
