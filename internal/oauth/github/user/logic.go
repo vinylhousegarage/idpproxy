@@ -23,21 +23,22 @@ var (
 var githubUserURL = config.GitHubUserURL
 
 func ExtractAuthHeaderToken(r *http.Request) (string, error) {
-	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
-	if authHeader == "" {
-		return "", ErrMissingAuthorizationHeader
-	}
+    authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+    if authHeader == "" {
+        return "", ErrMissingAuthorizationHeader
+    }
 
-	parts := strings.SplitN(authHeader, " ", 2)
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-		return "", ErrInvalidAuthorizationHeaderFormat
-	}
+    fields := strings.Fields(authHeader)
+    if len(fields) < 2 || strings.ToLower(fields[0]) != "bearer" {
+        return "", ErrInvalidAuthorizationHeaderFormat
+    }
 
-	token := strings.TrimSpace(parts[1])
-	if token == "" {
-		return "", ErrEmptyBearerToken
-	}
-	return token, nil
+    token := strings.TrimSpace(fields[1])
+    if token == "" {
+        return "", ErrEmptyBearerToken
+    }
+
+    return token, nil
 }
 
 func NewGitHubUserRequest(ctx context.Context, accessToken string) (*http.Request, error) {
