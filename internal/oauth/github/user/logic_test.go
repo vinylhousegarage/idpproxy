@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,6 +13,68 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/response"
 )
+
+func TestExtractAuthHeaderToken(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		header    string
+		wantToken string
+		wantErr   error
+	}{
+		{
+			name:      "Success",
+			header:    "Bearer ghp_abc123",
+			wantToken: "ghp_abc123",
+			wantErr:   nil,
+		},
+		{
+			name:    "MissingHeader",
+			header:  "",
+			wantErr: ErrMissingAuthorizationHeader,
+		},
+		{
+			name:    "InvalidFormat",
+			header:  "Token ghp_abc123",
+			wantErr: ErrInvalidAuthorizationHeaderFormat,
+		},
+		{
+			name:    "EmptyToken",
+			header:  "Bearer    ",
+			wantErr: ErrEmptyBearerToken,
+		},
+		{
+			name:      "CaseInsensitiveAndSpaces",
+			header:    "  bearer   ghp_case_ok  ",
+			wantToken: "ghp_case_ok",
+			wantErr:   nil,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodGet, "/user", nil)
+			if tt.header != "" {
+				req.Header.Set("Authorization", tt.header)
+			}
+
+			got, err := ExtractAuthHeaderToken(req)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr)
+				require.Empty(t, got)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, tt.wantToken, got)
+		})
+	}
+}
 
 func TestNewGitHubUserRequest_SetsMethodURLAndHeaders(t *testing.T) {
 	t.Parallel()
