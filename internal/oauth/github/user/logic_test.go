@@ -40,11 +40,6 @@ func TestExtractAuthHeaderToken(t *testing.T) {
 			wantErr: ErrInvalidAuthorizationHeaderFormat,
 		},
 		{
-			name:    "EmptyToken",
-			header:  "Bearer    ",
-			wantErr: ErrEmptyBearerToken,
-		},
-		{
 			name:      "CaseInsensitiveAndSpaces",
 			header:    "  bearer   ghp_case_ok  ",
 			wantToken: "ghp_case_ok",
