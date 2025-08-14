@@ -10,10 +10,10 @@ import (
 )
 
 type GitHubLoginHandler struct {
-	Deps *deps.GitHubDependencies
+	Deps *deps.GitHubOAuthDependencies
 }
 
-func NewGitHubLoginHandler(githubDeps *deps.GitHubDependencies) *GitHubLoginHandler {
+func NewGitHubLoginHandler(githubDeps *deps.GitHubOAuthDependencies) *GitHubLoginHandler {
 	return &GitHubLoginHandler{
 		Deps: githubDeps,
 	}

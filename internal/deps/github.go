@@ -6,13 +6,13 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 )
 
-type GitHubDependencies struct {
+type GitHubOAuthDependencies struct {
 	Config *config.GitHubConfig
 	Logger *zap.Logger
 }
 
-func NewGitHubDeps(cfg *config.GitHubConfig, logger *zap.Logger) *GitHubDependencies {
-	return &GitHubDependencies{
+func NewGitHubDeps(cfg *config.GitHubConfig, logger *zap.Logger) *GitHubOAuthDependencies {
+	return &GitHubOAuthDependencies{
 		Config: cfg,
 		Logger: logger,
 	}

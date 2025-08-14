@@ -41,8 +41,8 @@ func NewMockGoogleDeps(logger *zap.Logger) *deps.GoogleDependencies {
 	}
 }
 
-func NewMockGitHubDeps(logger *zap.Logger) *deps.GitHubDependencies {
-	return &deps.GitHubDependencies{
+func NewMockGitHubDeps(logger *zap.Logger) *deps.GitHubOAuthDependencies {
+	return &deps.GitHubOAuthDependencies{
 		Logger: logger,
 		Config: &config.GitHubConfig{
 			ClientID:    "test-client-id",

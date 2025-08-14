@@ -14,7 +14,7 @@ import (
 )
 
 func NewRouter(
-	githubDeps *deps.GitHubDependencies,
+	githubDeps *deps.GitHubOAuthDependencies,
 	googleDeps *deps.GoogleDependencies,
 	systemDeps *deps.SystemDependencies,
 	publicFS http.FileSystem,
