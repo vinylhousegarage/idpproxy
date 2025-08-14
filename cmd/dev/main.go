@@ -54,7 +54,7 @@ func main() {
 		logger.Fatal("failed to load GitHub config", zap.Error(err))
 	}
 
-	githubDeps := deps.NewGitHubDeps(githubCfg, logger)
+	githubDeps := deps.NewGitHubOAuthDeps(githubCfg, logger)
 
 	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 	server.StartServer(r, logger)
