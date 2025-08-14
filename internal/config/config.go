@@ -88,3 +88,17 @@ func LoadGitHubDevConfig() (*GitHubOAuthConfig, error) {
 		AllowSignup: "true",
 	}, nil
 }
+
+type GitHubAPIConfig struct {
+	APIVersion string
+	BaseURL    string
+	UserAgent  string
+}
+
+func LoadGitHubAPIConfig() *GitHubAPIConfig {
+	return &GitHubAPIConfig{
+		APIVersion: GitHubAPIVersion,
+		BaseURL:    GitHubAPIBaseURL,
+		UserAgent:  UserAgent(),
+	}
+}
