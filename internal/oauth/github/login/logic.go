@@ -28,7 +28,7 @@ func BuildStateCookie(state string) *http.Cookie {
 	}
 }
 
-func BuildGitHubLoginURL(cfg *config.GitHubConfig, state string) string {
+func BuildGitHubLoginURL(cfg *config.GitHubOAuthConfig, state string) string {
 	v := url.Values{}
 	v.Set("client_id", cfg.ClientID)
 	v.Set("redirect_uri", cfg.RedirectURI)

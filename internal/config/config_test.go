@@ -43,12 +43,12 @@ func TestLoadFirebaseConfig(t *testing.T) {
 	})
 }
 
-func TestLoadGitHubConfig(t *testing.T) {
+func TestLoadGitHubOAuthConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
 		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
 
-		cfg, err := LoadGitHubConfig()
+		cfg, err := LoadGitHubOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-client-id", cfg.ClientID)
 		require.Equal(t, "https://idpproxy.com/github/callback", cfg.RedirectURI)
@@ -60,7 +60,7 @@ func TestLoadGitHubConfig(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
-		cfg, err := LoadGitHubConfig()
+		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_CLIENT_ID and GITHUB_REDIRECT_URI are not set")
@@ -70,7 +70,7 @@ func TestLoadGitHubConfig(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
 		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
 
-		cfg, err := LoadGitHubConfig()
+		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_CLIENT_ID is not set")
@@ -80,7 +80,7 @@ func TestLoadGitHubConfig(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
-		cfg, err := LoadGitHubConfig()
+		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_REDIRECT_URI is not set")

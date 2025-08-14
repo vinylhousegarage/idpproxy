@@ -39,7 +39,7 @@ func TestBuildStateCookie(t *testing.T) {
 func TestBuildGitHubLoginURL(t *testing.T) {
 	t.Parallel()
 
-	cfg := &config.GitHubConfig{
+	cfg := &config.GitHubOAuthConfig{
 		ClientID:    "test-client-id",
 		RedirectURI: "https://example.com/callback",
 		Scope:       "read:user",
