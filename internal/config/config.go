@@ -68,7 +68,7 @@ func LoadGitHubOAuthConfig() (*GitHubOAuthConfig, error) {
 	}, nil
 }
 
-func LoadGitHubDevConfig() (*GitHubOAuthConfig, error) {
+func LoadGitHubDevOAuthConfig() (*GitHubOAuthConfig, error) {
 	clientID := os.Getenv("GITHUB_DEV_CLIENT_ID")
 	redirectURI := os.Getenv("GITHUB_DEV_REDIRECT_URI")
 	if clientID == "" && redirectURI == "" {
