@@ -7,7 +7,7 @@ import (
 )
 
 type GitHubOAuthDependencies struct {
-	Config *config.
+	Config *config.GitHubOAuthConfig
 	Logger *zap.Logger
 }
 
