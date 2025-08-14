@@ -49,7 +49,7 @@ func main() {
 
 	googleDeps := deps.NewGoogleDeps(authClient, logger)
 
-	githubCfg, err := config.LoadGitHubDevConfig()
+	githubCfg, err := config.LoadGitHubDevOAuthConfig()
 	if err != nil {
 		logger.Fatal("failed to load GitHub config", zap.Error(err))
 	}
