@@ -7,11 +7,11 @@ import (
 )
 
 type GitHubOAuthDependencies struct {
-	Config *config.GitHubConfig
+	Config *config.
 	Logger *zap.Logger
 }
 
-func NewGitHubOAuthDeps(cfg *config.GitHubConfig, logger *zap.Logger) *GitHubOAuthDependencies {
+func NewGitHubOAuthDeps(cfg *config.GitHubOAuthConfig, logger *zap.Logger) *GitHubOAuthDependencies {
 	return &GitHubOAuthDependencies{
 		Config: cfg,
 		Logger: logger,

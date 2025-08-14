@@ -40,14 +40,14 @@ func LoadFirebaseConfig() (*FirebaseConfig, error) {
 	return &FirebaseConfig{CredentialsJSON: decoded}, nil
 }
 
-type GitHubConfig struct {
+type GitHubOAuthConfig struct {
 	ClientID    string
 	RedirectURI string
 	Scope       string
 	AllowSignup string
 }
 
-func LoadGitHubConfig() (*GitHubConfig, error) {
+func LoadGitHubOAuthConfig() (*GitHubOAuthConfig, error) {
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	redirectURI := os.Getenv("GITHUB_REDIRECT_URI")
 	if clientID == "" && redirectURI == "" {
@@ -60,7 +60,7 @@ func LoadGitHubConfig() (*GitHubConfig, error) {
 		return nil, fmt.Errorf("GITHUB_REDIRECT_URI is not set")
 	}
 
-	return &GitHubConfig{
+	return &GitHubOAuthConfig{
 		ClientID:    clientID,
 		RedirectURI: redirectURI,
 		Scope:       "read:user",
@@ -68,7 +68,7 @@ func LoadGitHubConfig() (*GitHubConfig, error) {
 	}, nil
 }
 
-func LoadGitHubDevConfig() (*GitHubConfig, error) {
+func LoadGitHubDevConfig() (*GitHubOAuthConfig, error) {
 	clientID := os.Getenv("GITHUB_DEV_CLIENT_ID")
 	redirectURI := os.Getenv("GITHUB_DEV_REDIRECT_URI")
 	if clientID == "" && redirectURI == "" {
@@ -81,7 +81,7 @@ func LoadGitHubDevConfig() (*GitHubConfig, error) {
 		return nil, fmt.Errorf("GITHUB_DEV_REDIRECT_URI is not set")
 	}
 
-	return &GitHubConfig{
+	return &GitHubOAuthConfig{
 		ClientID:    clientID,
 		RedirectURI: redirectURI,
 		Scope:       "read:user",
