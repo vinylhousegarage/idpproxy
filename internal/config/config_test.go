@@ -92,7 +92,7 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
 
-		cfg, err := LoadGitHubDevConfig()
+		cfg, err := LoadGitHubDevOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-dev-client-id", cfg.ClientID)
 		require.Equal(t, "http://localhost:9000/github/callback", cfg.RedirectURI)
@@ -104,7 +104,7 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
-		cfg, err := LoadGitHubDevConfig()
+		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID and GITHUB_DEV_REDIRECT_URI are not set")
@@ -114,7 +114,7 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
 
-		cfg, err := LoadGitHubDevConfig()
+		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID is not set")
@@ -124,7 +124,7 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
-		cfg, err := LoadGitHubDevConfig()
+		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_DEV_REDIRECT_URI is not set")
