@@ -6,7 +6,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func RegisterRoutes(r *gin.Engine, githubDeps *deps.GitHubDependencies) {
+func RegisterRoutes(r *gin.Engine, githubDeps *deps.GitHubOAuthDependencies) {
 	h := NewGitHubLoginHandler(githubDeps)
 	r.GET("/github/login", h.Serve)
 }
