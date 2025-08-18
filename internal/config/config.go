@@ -95,7 +95,7 @@ type GitHubAPIConfig struct {
 	UserAgent  string
 }
 
-func LoadGitHubAPIConfig() *GitHubAPIConfig {
+func LoadGitHubDevAPIConfig() *GitHubAPIConfig {
 	return &GitHubAPIConfig{
 		APIVersion: GitHubAPIVersion,
 		BaseURL:    GitHubAPIBaseURL,
