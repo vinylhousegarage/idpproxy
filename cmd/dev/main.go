@@ -23,7 +23,7 @@ func main() {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	httpClient := &http.Client{ Timeout: 10 * time.Second }
+	httpClient := &http.Client{Timeout: 10 * time.Second}
 	systemDeps := deps.NewSystemDeps(config.GoogleOIDCMetadataURL, httpClient, logger)
 
 	ctx := context.Background()
