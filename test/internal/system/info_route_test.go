@@ -20,6 +20,7 @@ func TestInfoRoute_Returns200AndJSONHealthy(t *testing.T) {
 	require.NoError(t, err)
 
 	githubDeps := testhelpers.NewMockGitHubDeps(logger)
+	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
