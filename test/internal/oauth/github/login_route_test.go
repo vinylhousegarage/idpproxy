@@ -19,10 +19,10 @@ func TestGitHubLoginRoute_Returns302Redirect(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	githubDeps :=    testhelpers.NewMockGitHubDeps(logger)
+	githubDeps := testhelpers.NewMockGitHubDeps(logger)
 	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
-	googleDeps :=    testhelpers.NewMockGoogleDeps(logger)
-	systemDeps :=    testhelpers.NewMockSystemDeps(logger)
+	googleDeps := testhelpers.NewMockGoogleDeps(logger)
+	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
 	r := router.NewRouter(githubDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 
