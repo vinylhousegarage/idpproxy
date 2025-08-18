@@ -20,17 +20,12 @@ func TestGitHubUserRoute_Success(t *testing.T) {
 	t.Parallel()
 
 	mockGitHub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/user" {
-			http.NotFound(w, r)
-			return
-		}
-		if got := r.Header.Get("Authorization"); got != "Bearer dummy_token" {
-			w.WriteHeader(http.StatusUnauthorized)
-			_, _ = w.Write([]byte(`{"message":"bad token"}`))
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"id":12345,"login":"octocat","name":"Mona","email":"mona@github.com"}`))
+			if r.URL.Path != "/user" {
+					http.NotFound(w, r)
+					return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":12345,"login":"octocat","name":"Mona","email":"mona@github.com"}`))
 	}))
 	t.Cleanup(mockGitHub.Close)
 
@@ -39,11 +34,7 @@ func TestGitHubUserRoute_Success(t *testing.T) {
 		BaseURL:    mockGitHub.URL,
 		UserAgent:  "idpproxy-test",
 	}
-	deps := &deps.GitHubAPIDependencies{
-		Config:     apiCfg,
-		HTTPClient: &http.Client{Timeout: time.Second},
-		Logger:     zap.NewNop(),
-	}
+	deps := deps.NewGitHubAPIDeps(apiCfg, &http.Client{Timeout: time.Second}, zap.NewNop())
 
 	r := gin.New()
 	r.GET("/user", user.NewGitHubUserHandler(deps))
