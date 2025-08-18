@@ -44,8 +44,9 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	})
 
 	githubDeps := testhelpers.NewMockGitHubDeps(logger)
+	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
-	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	r := router.NewRouter(githubDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	req, err := http.NewRequest(http.MethodGet, "/me", nil)
 	require.NoError(t, err)

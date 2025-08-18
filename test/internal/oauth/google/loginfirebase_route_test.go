@@ -21,10 +21,11 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	require.NoError(t, err)
 
 	githubDeps := testhelpers.NewMockGitHubDeps(logger)
+	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	r := router.NewRouter(githubDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	w := httptest.NewRecorder()
 	body := bytes.NewBufferString(`{"id_token":"dummy.token.value"}`)

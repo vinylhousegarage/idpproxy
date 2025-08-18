@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"time"
 
 	firebase "firebase.google.com/go/v4"
 	"go.uber.org/zap"
@@ -20,15 +21,10 @@ func main() {
 	if err != nil {
 		panic("failed to initialize logger: " + err.Error())
 	}
-	defer func() {
-		if err := logger.Sync(); err != nil {
-			logger.Error("failed to sync logger", zap.Error(err))
-		}
-	}()
+	defer func() { _ = logger.Sync() }()
 
-	metadataURL := config.GoogleOIDCMetadataURL
-	httpClient := &http.Client{}
-	systemDeps := deps.NewSystemDeps(metadataURL, httpClient, logger)
+	httpClient := &http.Client{Timeout: 10 * time.Second}
+	systemDeps := deps.NewSystemDeps(config.GoogleOIDCMetadataURL, httpClient, logger)
 
 	ctx := context.Background()
 	firebaseCfg, err := config.LoadFirebaseConfig()
@@ -36,8 +32,7 @@ func main() {
 		logger.Fatal("failed to load Firebase config", zap.Error(err))
 	}
 
-	opt := option.WithCredentialsJSON(firebaseCfg.CredentialsJSON)
-	app, err := firebase.NewApp(ctx, nil, opt)
+	app, err := firebase.NewApp(ctx, nil, option.WithCredentialsJSON(firebaseCfg.CredentialsJSON))
 	if err != nil {
 		logger.Fatal("failed to initialize Firebase App", zap.Error(err))
 	}
@@ -56,6 +51,12 @@ func main() {
 
 	githubDeps := deps.NewGitHubOAuthDeps(githubCfg, logger)
 
-	r := router.NewRouter(githubDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	githubAPICfg := config.LoadGitHubAPIConfig()
+
+	githubAPIDeps := deps.NewGitHubAPIDeps(githubAPICfg, httpClient, logger)
+
+	r := router.NewRouter(githubDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+
+	logger.Info("starting idpproxy (dev)", zap.String("addr", ":"+config.GetPort()))
 	server.StartServer(r, logger)
 }
