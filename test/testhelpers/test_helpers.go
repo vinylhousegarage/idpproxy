@@ -54,7 +54,7 @@ func NewMockGoogleDeps(logger *zap.Logger) *deps.GoogleDependencies {
 
 // ---- GitHub OAuth deps mock ----
 
-func NewMockGitHubDeps(logger *zap.Logger) *deps.GitHubOAuthDependencies {
+func NewMockGitHubOAuthDeps(logger *zap.Logger) *deps.GitHubOAuthDependencies {
 	if logger == nil {
 		logger = zap.NewNop()
 	}

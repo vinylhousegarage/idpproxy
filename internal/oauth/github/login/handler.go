@@ -13,9 +13,9 @@ type GitHubLoginHandler struct {
 	Deps *deps.GitHubOAuthDependencies
 }
 
-func NewGitHubLoginHandler(githubDeps *deps.GitHubOAuthDependencies) *GitHubLoginHandler {
+func NewGitHubLoginHandler(githubOAuthDeps *deps.GitHubOAuthDependencies) *GitHubLoginHandler {
 	return &GitHubLoginHandler{
-		Deps: githubDeps,
+		Deps: githubOAuthDeps,
 	}
 }
 
