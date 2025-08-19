@@ -49,13 +49,13 @@ func main() {
 		logger.Fatal("failed to load GitHub config", zap.Error(err))
 	}
 
-	githubDeps := deps.NewGitHubOAuthDeps(githubCfg, logger)
+	githubOAuthDeps := deps.NewGitHubOAuthDeps(githubCfg, logger)
 
 	githubAPICfg := config.LoadGitHubAPIConfig()
 
 	githubAPIDeps := deps.NewGitHubAPIDeps(githubAPICfg, httpClient, logger)
 
-	r := router.NewRouter(githubDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	r := router.NewRouter(githubOAuthDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
 
 	logger.Info("starting idpproxy (dev)", zap.String("addr", ":"+config.GetPort()))
 	server.StartServer(r, logger)

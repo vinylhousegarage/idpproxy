@@ -15,7 +15,7 @@ import (
 )
 
 func NewRouter(
-	githubDeps *deps.GitHubOAuthDependencies,
+	githubOAuthDeps *deps.GitHubOAuthDependencies,
 	githubAPIDeps *deps.GitHubAPIDependencies,
 	googleDeps *deps.GoogleDependencies,
 	systemDeps *deps.SystemDependencies,
@@ -38,7 +38,7 @@ func NewRouter(
 
 	r.StaticFS("/public", publicFS)
 
-	login.RegisterRoutes(r, githubDeps)
+	login.RegisterRoutes(r, githubOAuthDeps)
 	user.RegisterRoutes(r, githubAPIDeps)
 
 	loginfirebase.RegisterRoutes(r, googleDeps)

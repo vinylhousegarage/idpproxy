@@ -17,7 +17,7 @@ func TestGitHubLoginHandler_Serve(t *testing.T) {
 	t.Parallel()
 
 	logger := zap.NewNop()
-	dependencies := testhelpers.NewMockGitHubDeps(logger)
+	dependencies := testhelpers.NewMockGitHubOAuthDeps(logger)
 	handler := NewGitHubLoginHandler(dependencies)
 
 	w := httptest.NewRecorder()
