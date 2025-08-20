@@ -23,9 +23,6 @@ func main() {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	httpClient := &http.Client{Timeout: 10 * time.Second}
-	systemDeps := deps.NewSystemDeps(config.GoogleOIDCMetadataURL, httpClient, logger)
-
 	ctx := context.Background()
 	firebaseCfg, err := config.LoadFirebaseConfig()
 	if err != nil {
@@ -51,11 +48,14 @@ func main() {
 
 	githubOAuthDeps := deps.NewGitHubOAuthDeps(githubCfg, logger)
 
+	httpClient := &http.Client{Timeout: 10 * time.Second}
 	githubAPICfg := config.LoadGitHubAPIConfig()
-
 	githubAPIDeps := deps.NewGitHubAPIDeps(githubAPICfg, httpClient, logger)
 
-	r := router.NewRouter(githubOAuthDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	systemDeps := deps.NewSystemDeps(config.GoogleOIDCMetadataURL, httpClient, logger)
+
+	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, systemDeps)
+	r := router.NewRouter(d)
 
 	logger.Info("starting idpproxy (dev)", zap.String("addr", ":"+config.GetPort()))
 	server.StartServer(r, logger)
