@@ -15,11 +15,11 @@ type RouterDeps struct {
 }
 
 func NewRouterDeps(
-	fsys        fs.FS,
-	githubAPI   *deps.GitHubAPIDependencies,
+	fsys fs.FS,
+	githubAPI *deps.GitHubAPIDependencies,
 	githubOAuth *deps.GitHubOAuthDependencies,
-	google      *deps.GoogleDependencies,
-	system      *deps.SystemDependencies,
+	google *deps.GoogleDependencies,
+	system *deps.SystemDependencies,
 ) RouterDeps {
 	return RouterDeps{
 		FS:          fsys,
