@@ -6,7 +6,11 @@ import (
 
 func NewRouter(d RouterDeps) *gin.Engine {
 	r := gin.New()
-	r.SetTrustedProxies(nil)
+
+	if err := r.SetTrustedProxies(nil); err != nil {
+		panic("router: failed to set trusted proxies: " + err.Error())
+	}
+
 	r.Use(gin.Recovery())
 
 	RegisterRoutes(r, d)
