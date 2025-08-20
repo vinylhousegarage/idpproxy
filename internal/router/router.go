@@ -6,13 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(
-	githubOAuthDeps *deps.GitHubOAuthDependencies,
-	githubAPIDeps *deps.GitHubAPIDependencies,
-	googleDeps *deps.GoogleDependencies,
-	systemDeps *deps.SystemDependencies,
-	publicFS http.FileSystem,
-) *gin.Engine {
+func NewRouter(d RouterDeps) *gin.Engine {
 	r := gin.New()
 	r.SetTrustedProxies(nil)
 	r.Use(gin.Recovery())
