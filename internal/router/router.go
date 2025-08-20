@@ -1,17 +1,9 @@
 package router
 
 import (
-	"net/http"
+	"io/fs"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/login"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/loginfirebase"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/me"
-	"github.com/vinylhousegarage/idpproxy/internal/system/health"
-	"github.com/vinylhousegarage/idpproxy/internal/system/info"
 )
 
 func NewRouter(
@@ -22,30 +14,10 @@ func NewRouter(
 	publicFS http.FileSystem,
 ) *gin.Engine {
 	r := gin.New()
+	r.SetTrustedProxies(nil)
 	r.Use(gin.Recovery())
 
-	r.GET("/", func(c *gin.Context) {
-		c.FileFromFS("login.html", publicFS)
-	})
-
-	r.GET("/privacy", func(c *gin.Context) {
-		c.FileFromFS("privacy.html", publicFS)
-	})
-
-	r.GET("/terms", func(c *gin.Context) {
-		c.FileFromFS("terms.html", publicFS)
-	})
-
-	r.StaticFS("/public", publicFS)
-
-	login.RegisterRoutes(r, githubOAuthDeps)
-	user.RegisterRoutes(r, githubAPIDeps)
-
-	loginfirebase.RegisterRoutes(r, googleDeps)
-	me.RegisterRoutes(r, googleDeps)
-
-	health.RegisterRoutes(r, systemDeps)
-	info.RegisterRoutes(r, systemDeps)
+	RegisterRoutes(r, d)
 
 	return r
 }
