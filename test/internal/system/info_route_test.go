@@ -19,12 +19,13 @@ func TestInfoRoute_Returns200AndJSONHealthy(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
 	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
+	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	r := router.NewRouter(githubOAuthDeps, githubAPIDeps, googleDeps, systemDeps, http.FS(public.PublicFS))
+	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, systemDeps)
+	r := router.NewRouter(d)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/info", nil)
