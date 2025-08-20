@@ -1,8 +1,6 @@
 package router
 
 import (
-	"io/fs"
-
 	"github.com/gin-gonic/gin"
 )
 

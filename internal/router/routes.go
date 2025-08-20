@@ -1,7 +1,6 @@
 package router
 
 import (
-	"io/fs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,13 +15,13 @@ import (
 
 func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 	if d.GitHubAPI == nil || d.GitHubOAuth == nil || d.Google == nil || d.System == nil {
-			panic("router: missing dependencies")
+		panic("router: missing dependencies")
 	}
 
 	if d.FS != nil {
-		r.GET("/",        func(c *gin.Context) { c.FileFromFS("login.html",   http.FS(d.FS)) })
+		r.GET("/", func(c *gin.Context) { c.FileFromFS("login.html", http.FS(d.FS)) })
 		r.GET("/privacy", func(c *gin.Context) { c.FileFromFS("privacy.html", http.FS(d.FS)) })
-		r.GET("/terms",   func(c *gin.Context) { c.FileFromFS("terms.html",   http.FS(d.FS)) })
+		r.GET("/terms", func(c *gin.Context) { c.FileFromFS("terms.html", http.FS(d.FS)) })
 	}
 
 	// GitHub
