@@ -137,7 +137,6 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 				context.Background(),
 				hc,
 				"test-api-key",
-				ProviderGitHub,
 				"https://idpproxy.com/auth_cb",
 				"ACCESS_TOKEN_X",
 			)
