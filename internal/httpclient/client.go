@@ -2,6 +2,6 @@ package httpclient
 
 import "net/http"
 
-type Doer interface {
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
