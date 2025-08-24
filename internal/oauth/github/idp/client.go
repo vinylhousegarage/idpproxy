@@ -23,30 +23,30 @@ func SignInWithIdpByAccessToken(
 	accessToken string,
 ) (*SignInWithIdpResp, error) {
 	if apiKey == "" {
-			return nil, fmt.Errorf("apiKey is empty")
+		return nil, fmt.Errorf("apiKey is empty")
 	}
 	if accessToken == "" {
-			return nil, fmt.Errorf("accessToken is empty")
+		return nil, fmt.Errorf("accessToken is empty")
 	}
 	if requestURI == "" {
-			return nil, fmt.Errorf("requestURI is empty (must be an authorized domain)")
+		return nil, fmt.Errorf("requestURI is empty (must be an authorized domain)")
 	}
 
 	if httpClient == nil {
-			httpClient = &http.Client{Timeout: 10 * time.Second}
+		httpClient = &http.Client{Timeout: 10 * time.Second}
 	}
 
 	endpoint := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=" +
-			url.QueryEscape(apiKey)
+		url.QueryEscape(apiKey)
 
 	pb := url.Values{}
 	pb.Set("access_token", accessToken)
 	pb.Set("providerId", providerGitHub)
 
 	payload := signInPayload{
-			RequestURI:        requestURI,
-			PostBody:          pb.Encode(),
-			ReturnSecureToken: true,
+		RequestURI:        requestURI,
+		PostBody:          pb.Encode(),
+		ReturnSecureToken: true,
 	}
 
 	b, err := json.Marshal(payload)

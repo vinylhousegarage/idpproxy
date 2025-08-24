@@ -15,9 +15,9 @@ import (
 )
 
 const (
-    testAPIKey   = "test-api-key"
-    testReqURI   = "https://idpproxy.com/auth_cb"
-    testAccToken = "ACCESS_TOKEN_X"
+	testAPIKey   = "test-api-key"
+	testReqURI   = "https://idpproxy.com/auth_cb"
+	testAccToken = "ACCESS_TOKEN_X"
 )
 
 type rewriteRoundTripper struct {
@@ -162,23 +162,23 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 	}
 
 	t.Run("Validation_apiKeyEmpty", func(t *testing.T) {
-			t.Parallel()
-			_, err := SignInWithIdpByAccessToken(context.Background(), nil, "", testReqURI, testAccToken)
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "apiKey is empty")
+		t.Parallel()
+		_, err := SignInWithIdpByAccessToken(context.Background(), nil, "", testReqURI, testAccToken)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "apiKey is empty")
 	})
 
 	t.Run("Validation_requestURIEmpty", func(t *testing.T) {
-			t.Parallel()
-			_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, "", testAccToken)
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "requestURI is empty")
+		t.Parallel()
+		_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, "", testAccToken)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "requestURI is empty")
 	})
 
 	t.Run("Validation_accessTokenEmpty", func(t *testing.T) {
-			t.Parallel()
-			_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, testReqURI, "")
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "accessToken is empty")
+		t.Parallel()
+		_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, testReqURI, "")
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "accessToken is empty")
 	})
 }
