@@ -13,46 +13,40 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/httpclient"
 )
 
-const (
-	ProviderGitHub = "github.com"
-	ProviderGoogle = "google.com"
-)
+const providerGitHub = "github.com"
 
 func SignInWithIdpByAccessToken(
 	ctx context.Context,
 	httpClient httpclient.HTTPClient,
 	apiKey string,
-	providerID string,
 	requestURI string,
 	accessToken string,
 ) (*SignInWithIdpResp, error) {
 	if apiKey == "" {
-		return nil, fmt.Errorf("apiKey is empty")
-	}
-	if providerID != ProviderGitHub && providerID != ProviderGoogle {
-		return nil, fmt.Errorf("unsupported providerID: %s", providerID)
+			return nil, fmt.Errorf("apiKey is empty")
 	}
 	if accessToken == "" {
-		return nil, fmt.Errorf("accessToken is empty")
+			return nil, fmt.Errorf("accessToken is empty")
 	}
 	if requestURI == "" {
-		return nil, fmt.Errorf("requestURI is empty (must be an authorized domain)")
+			return nil, fmt.Errorf("requestURI is empty (must be an authorized domain)")
 	}
 
 	if httpClient == nil {
-		httpClient = &http.Client{Timeout: 10 * time.Second}
+			httpClient = &http.Client{Timeout: 10 * time.Second}
 	}
 
-	endpoint := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=" + url.QueryEscape(apiKey)
+	endpoint := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=" +
+			url.QueryEscape(apiKey)
 
 	pb := url.Values{}
 	pb.Set("access_token", accessToken)
-	pb.Set("providerId", providerID)
+	pb.Set("providerId", providerGitHub)
 
 	payload := signInPayload{
-		RequestURI:        requestURI,
-		PostBody:          pb.Encode(),
-		ReturnSecureToken: true,
+			RequestURI:        requestURI,
+			PostBody:          pb.Encode(),
+			ReturnSecureToken: true,
 	}
 
 	b, err := json.Marshal(payload)
