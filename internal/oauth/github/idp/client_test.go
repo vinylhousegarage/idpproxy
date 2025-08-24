@@ -14,6 +14,12 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/httpclient"
 )
 
+const (
+    testAPIKey   = "test-api-key"
+    testReqURI   = "https://idpproxy.com/auth_cb"
+    testAccToken = "ACCESS_TOKEN_X"
+)
+
 type rewriteRoundTripper struct {
 	target *url.URL
 	next   http.RoundTripper
@@ -53,19 +59,20 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				require.Equal(t, http.MethodPost, r.Method)
 				require.Equal(t, "/v1/accounts:signInWithIdp", r.URL.Path)
-				require.Contains(t, r.URL.RawQuery, "key=test-api-key")
+				require.Contains(t, r.URL.RawQuery, "key="+testAPIKey)
 				require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 
-				var payload map[string]any
+				var payload signInPayload
 				defer r.Body.Close()
 				require.NoError(t, json.NewDecoder(r.Body).Decode(&payload))
 
-				require.Equal(t, "https://idpproxy.com/auth_cb", payload["requestUri"])
-				require.Equal(t, true, payload["returnSecureToken"])
-				postBody, ok := payload["postBody"].(string)
-				require.True(t, ok)
-				require.Contains(t, postBody, "access_token=ACCESS_TOKEN_X")
-				require.Contains(t, postBody, "providerId=github.com")
+				require.Equal(t, testReqURI, payload.RequestURI)
+				require.True(t, payload.ReturnSecureToken)
+
+				values, err := url.ParseQuery(payload.PostBody)
+				require.NoError(t, err)
+				require.Equal(t, testAccToken, values.Get("access_token"))
+				require.Equal(t, "github.com", values.Get("providerId"))
 
 				resp := map[string]any{
 					"providerId":   "github.com",
@@ -136,9 +143,9 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 			out, err := SignInWithIdpByAccessToken(
 				context.Background(),
 				hc,
-				"test-api-key",
-				"https://idpproxy.com/auth_cb",
-				"ACCESS_TOKEN_X",
+				testAPIKey,
+				testReqURI,
+				testAccToken,
 			)
 
 			if tt.wantErr {
@@ -153,4 +160,25 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Validation_apiKeyEmpty", func(t *testing.T) {
+			t.Parallel()
+			_, err := SignInWithIdpByAccessToken(context.Background(), nil, "", testReqURI, testAccToken)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "apiKey is empty")
+	})
+
+	t.Run("Validation_requestURIEmpty", func(t *testing.T) {
+			t.Parallel()
+			_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, "", testAccToken)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "requestURI is empty")
+	})
+
+	t.Run("Validation_accessTokenEmpty", func(t *testing.T) {
+			t.Parallel()
+			_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, testReqURI, "")
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "accessToken is empty")
+	})
 }
