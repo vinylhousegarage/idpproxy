@@ -15,13 +15,13 @@ import (
 
 const providerGitHub = "github.com"
 
-func SignInWithIdpByAccessToken(
+func SignInGitHubWithAccessToken(
 	ctx context.Context,
 	httpClient httpclient.HTTPClient,
 	apiKey string,
 	requestURI string,
 	accessToken string,
-) (*SignInWithIdpResp, error) {
+) (*signInGitHubWithAccessTokenResp, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("apiKey is empty")
 	}
@@ -80,7 +80,7 @@ func SignInWithIdpByAccessToken(
 		return nil, fmt.Errorf("signInWithIdp: unexpected status %d", resp.StatusCode)
 	}
 
-	var out SignInWithIdpResp
+	var out signInGitHubWithAccessTokenResp
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return nil, fmt.Errorf("decode: %w", err)
 	}

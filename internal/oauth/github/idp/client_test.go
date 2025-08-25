@@ -44,7 +44,7 @@ func newRewritingHTTPClient(t *testing.T, target *url.URL) httpclient.HTTPClient
 	}
 }
 
-func TestSignInWithIdpByAccessToken(t *testing.T) {
+func TestSignInGitHubWithAccessToken(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -52,7 +52,7 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 		handler    http.HandlerFunc
 		wantErr    bool
 		errSubstrs []string
-		wantResp   *SignInWithIdpResp
+		wantResp   *signInGitHubWithAccessTokenResp
 	}{
 		{
 			name: "Success",
@@ -85,7 +85,7 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(resp)
 			},
-			wantResp: &SignInWithIdpResp{
+			wantResp: &signInGitHubWithAccessTokenResp{
 				ProviderID:   "github.com",
 				LocalID:      "firebase_local_123",
 				IDToken:      "ID_TOKEN_ABC",
@@ -140,7 +140,7 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 			require.NoError(t, err)
 			hc := newRewritingHTTPClient(t, u)
 
-			out, err := SignInWithIdpByAccessToken(
+			out, err := SignInGitHubWithAccessToken(
 				context.Background(),
 				hc,
 				testAPIKey,
@@ -163,21 +163,21 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 
 	t.Run("Validation_apiKeyEmpty", func(t *testing.T) {
 		t.Parallel()
-		_, err := SignInWithIdpByAccessToken(context.Background(), nil, "", testReqURI, testAccToken)
+		_, err := SignInGitHubWithAccessToken(context.Background(), nil, "", testReqURI, testAccToken)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "apiKey is empty")
 	})
 
 	t.Run("Validation_requestURIEmpty", func(t *testing.T) {
 		t.Parallel()
-		_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, "", testAccToken)
+		_, err := SignInGitHubWithAccessToken(context.Background(), nil, testAPIKey, "", testAccToken)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "requestURI is empty")
 	})
 
 	t.Run("Validation_accessTokenEmpty", func(t *testing.T) {
 		t.Parallel()
-		_, err := SignInWithIdpByAccessToken(context.Background(), nil, testAPIKey, testReqURI, "")
+		_, err := SignInGitHubWithAccessToken(context.Background(), nil, testAPIKey, testReqURI, "")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "accessToken is empty")
 	})
