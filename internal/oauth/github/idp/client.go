@@ -15,7 +15,7 @@ import (
 
 const providerGitHub = "github.com"
 
-func SignInWithIdpByAccessToken(
+func SignInGitHubWithAccessToken(
 	ctx context.Context,
 	httpClient httpclient.HTTPClient,
 	apiKey string,
