@@ -1,6 +1,6 @@
 package idp
 
-type SignInWithIdpResp struct {
+type signInGitHubWithAccessTokenResp struct {
 	ProviderID   string `json:"providerId,omitempty"`
 	LocalID      string `json:"localId,omitempty"`
 	IDToken      string `json:"idToken,omitempty"`

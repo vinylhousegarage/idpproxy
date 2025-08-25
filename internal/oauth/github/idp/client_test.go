@@ -52,7 +52,7 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 		handler    http.HandlerFunc
 		wantErr    bool
 		errSubstrs []string
-		wantResp   *SignInWithIdpResp
+		wantResp   *
 	}{
 		{
 			name: "Success",
@@ -85,7 +85,7 @@ func TestSignInWithIdpByAccessToken(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(resp)
 			},
-			wantResp: &SignInWithIdpResp{
+			wantResp: &signInGitHubWithAccessTokenResp{
 				ProviderID:   "github.com",
 				LocalID:      "firebase_local_123",
 				IDToken:      "ID_TOKEN_ABC",
