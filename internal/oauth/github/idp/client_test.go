@@ -52,7 +52,7 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 		handler    http.HandlerFunc
 		wantErr    bool
 		errSubstrs []string
-		wantResp   *
+		wantResp   *signInGitHubWithAccessTokenResp
 	}{
 		{
 			name: "Success",
