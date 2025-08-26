@@ -61,8 +61,10 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				require.Equal(t, http.MethodPost, r.Method)
 				require.Equal(t, pathSignIn, r.URL.Path)
-				require.Contains(t, r.URL.RawQuery, "key="+testAPIKey)
 				require.Contains(t, r.Header.Get("Content-Type"), "application/json")
+
+				q := r.URL.Query()
+				require.Equal(t, testAPIKey, q.Get("key"))
 
 				var payload signInPayload
 				defer r.Body.Close()
