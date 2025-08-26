@@ -15,9 +15,11 @@ import (
 )
 
 const (
+	pathSignIn   = "/v1/accounts:signInWithIdp"
+	providerGit  = "github.com"
+	testAccToken = "ACCESS_TOKEN_X"
 	testAPIKey   = "test-api-key"
 	testReqURI   = "https://idpproxy.com/auth_cb"
-	testAccToken = "ACCESS_TOKEN_X"
 )
 
 type rewriteRoundTripper struct {
@@ -26,7 +28,7 @@ type rewriteRoundTripper struct {
 }
 
 func (r *rewriteRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	if req.URL.Host == "identitytoolkit.googleapis.com" {
+	if req.URL.Hostname() == "identitytoolkit.googleapis.com" {
 		req.URL.Scheme = r.target.Scheme
 		req.URL.Host = r.target.Host
 	}
@@ -58,9 +60,11 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 			name: "Success",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				require.Equal(t, http.MethodPost, r.Method)
-				require.Equal(t, "/v1/accounts:signInWithIdp", r.URL.Path)
-				require.Contains(t, r.URL.RawQuery, "key="+testAPIKey)
-				require.Equal(t, "application/json", r.Header.Get("Content-Type"))
+				require.Equal(t, pathSignIn, r.URL.Path)
+				require.Contains(t, r.Header.Get("Content-Type"), "application/json")
+
+				q := r.URL.Query()
+				require.Equal(t, testAPIKey, q.Get("key"))
 
 				var payload signInPayload
 				defer r.Body.Close()
@@ -72,7 +76,7 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 				values, err := url.ParseQuery(payload.PostBody)
 				require.NoError(t, err)
 				require.Equal(t, testAccToken, values.Get("access_token"))
-				require.Equal(t, "github.com", values.Get("providerId"))
+				require.Equal(t, providerGit, values.Get("providerId"))
 
 				resp := signInGitHubWithAccessTokenResp{
 					ProviderID:   "github.com",
@@ -83,7 +87,7 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 					IsNewUser:    false,
 				}
 				w.WriteHeader(http.StatusOK)
-				_ = json.NewEncoder(w).Encode(resp)
+				require.NoError(t, json.NewEncoder(w).Encode(resp))
 			},
 			wantResp: &signInGitHubWithAccessTokenResp{
 				ProviderID:   "github.com",
@@ -125,6 +129,14 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 			},
 			wantErr:    true,
 			errSubstrs: []string{"decode:"},
+		},
+		{
+			name: "Error_Timeout",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				time.Sleep(6 * time.Second)
+			},
+			wantErr:    true,
+			errSubstrs: []string{"Client.Timeout", "context deadline"},
 		},
 	}
 
