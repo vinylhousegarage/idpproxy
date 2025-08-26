@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	pathSignIn  = "/v1/accounts:signInWithIdp"
-	providerGit = "github.com"
+	pathSignIn   = "/v1/accounts:signInWithIdp"
+	providerGit  = "github.com"
 	testAccToken = "ACCESS_TOKEN_X"
 	testAPIKey   = "test-api-key"
 	testReqURI   = "https://idpproxy.com/auth_cb"
