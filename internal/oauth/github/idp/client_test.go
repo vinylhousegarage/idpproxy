@@ -74,13 +74,13 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 				require.Equal(t, testAccToken, values.Get("access_token"))
 				require.Equal(t, "github.com", values.Get("providerId"))
 
-				resp := map[string]any{
-					"providerId":   "github.com",
-					"localId":      "firebase_local_123",
-					"idToken":      "ID_TOKEN_ABC",
-					"refreshToken": "REFRESH_TOKEN_DEF",
-					"expiresIn":    "3600",
-					"isNewUser":    false,
+				resp := signInGitHubWithAccessTokenResp{
+					ProviderID:   "github.com",
+					LocalID:      "firebase_local_123",
+					IDToken:      "ID_TOKEN_ABC",
+					RefreshToken: "REFRESH_TOKEN_DEF",
+					ExpiresIn:    "3600",
+					IsNewUser:    false,
 				}
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(resp)
