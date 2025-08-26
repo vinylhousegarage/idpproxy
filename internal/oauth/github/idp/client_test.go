@@ -28,7 +28,7 @@ type rewriteRoundTripper struct {
 }
 
 func (r *rewriteRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	if req.URL.Host == "identitytoolkit.googleapis.com" {
+	if req.URL.Hostname() == "identitytoolkit.googleapis.com" {
 		req.URL.Scheme = r.target.Scheme
 		req.URL.Host = r.target.Host
 	}
