@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+type TokenEncryptor interface {
+	EncryptString(plain string) (string, error)
+	DecryptString(token string) (string, error)
+}
+
 type GitHubTokenRepo interface {
 	Upsert(ctx context.Context, rec *GitHubTokenRecord) error
 	GetByFirebaseUID(ctx context.Context, uid string) (*GitHubTokenRecord, error)
