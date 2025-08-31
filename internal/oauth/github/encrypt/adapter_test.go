@@ -14,9 +14,10 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKey()
-		key := keys[0]
-		adapter := NewFernetAdapter(key, 0)
+		var k fernet.Key
+		require.NoError(t, k.Generate())
+		adapter, err := NewFernetAdapter(&k, 0)
+		require.NoError(t, err)
 
 		plain := "hello world"
 		token, err := adapter.EncryptString(plain)
@@ -31,25 +32,21 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("KeyNil", func(t *testing.T) {
 		t.Parallel()
 
-		adapter := NewFernetAdapter(nil, 0)
-
-		_, err := adapter.EncryptString("test")
+		adapter, err := NewFernetAdapter(nil, 0)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "fernet key is nil")
-
-		_, err = adapter.DecryptString("dummy")
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "fernet key is nil")
+		require.Nil(t, adapter)
+		require.ErrorIs(t, err, ErrNilKey)
 	})
 
 	t.Run("InvalidToken", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKey()
-		key := keys[0]
-		adapter := NewFernetAdapter(key, 0)
+		var k fernet.Key
+		require.NoError(t, k.Generate())
+		adapter, err := NewFernetAdapter(&k, 0)
+		require.NoError(t, err)
 
-		_, err := adapter.DecryptString("not-a-valid-token")
+		_, err = adapter.DecryptString("not-a-valid-token")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid or expired token")
 	})
@@ -57,9 +54,10 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("TTL", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKey()
-		key := keys[0]
-		adapter := NewFernetAdapter(key, 1)
+		var k fernet.Key
+		require.NoError(t, k.Generate())
+		adapter, err := NewFernetAdapter(&k, 1)
+		require.NoError(t, err)
 
 		plain := "short lived"
 		token, err := adapter.EncryptString(plain)
