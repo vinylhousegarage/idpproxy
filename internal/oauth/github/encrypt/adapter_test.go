@@ -14,7 +14,7 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKeys()
+		keys := fernet.GenerateKey()
 		key := keys[0]
 		adapter := NewFernetAdapter(key, 0)
 
@@ -45,7 +45,7 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("InvalidToken", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKeys()
+		keys := fernet.GenerateKey()
 		key := keys[0]
 		adapter := NewFernetAdapter(key, 0)
 
@@ -57,7 +57,7 @@ func TestFernetAdapter(t *testing.T) {
 	t.Run("TTL", func(t *testing.T) {
 		t.Parallel()
 
-		keys := fernet.GenerateKeys()
+		keys := fernet.GenerateKey()
 		key := keys[0]
 		adapter := NewFernetAdapter(key, 1)
 
