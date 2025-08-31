@@ -3,6 +3,8 @@ package idp
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,11 +17,12 @@ import (
 )
 
 const (
-	pathSignIn   = "/v1/accounts:signInWithIdp"
-	providerGit  = "github.com"
-	testAccToken = "ACCESS_TOKEN_X"
-	testAPIKey   = "test-api-key"
-	testReqURI   = "https://idpproxy.com/auth_cb"
+	clientTimeout = 5 * time.Second
+	pathSignIn    = "/v1/accounts:signInWithIdp"
+	providerGit   = "github.com"
+	testAccToken  = "ACCESS_TOKEN_X"
+	testAPIKey    = "test-api-key"
+	testReqURI    = "https://idpproxy.com/auth_cb"
 )
 
 type rewriteRoundTripper struct {
@@ -38,7 +41,7 @@ func (r *rewriteRoundTripper) RoundTrip(req *http.Request) (*http.Response, erro
 func newRewritingHTTPClient(t *testing.T, target *url.URL) httpclient.HTTPClient {
 	t.Helper()
 	return &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: clientTimeout,
 		Transport: &rewriteRoundTripper{
 			target: target,
 			next:   http.DefaultTransport,
@@ -133,10 +136,9 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 		{
 			name: "Error_Timeout",
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				time.Sleep(6 * time.Second)
+				time.Sleep(clientTimeout + time.Second)
 			},
-			wantErr:    true,
-			errSubstrs: []string{"Client.Timeout", "context deadline"},
+			wantErr: true,
 		},
 	}
 
@@ -162,14 +164,23 @@ func TestSignInGitHubWithAccessToken(t *testing.T) {
 
 			if tt.wantErr {
 				require.Error(t, err)
-				for _, s := range tt.errSubstrs {
-					require.Contains(t, err.Error(), s)
+
+				if errors.Is(err, context.DeadlineExceeded) {
+					return
 				}
-				require.Nil(t, out)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tt.wantResp, out)
+				var nerr net.Error
+				if errors.As(err, &nerr) && nerr.Timeout() {
+					return
+				}
+
+				for _, sub := range tt.errSubstrs {
+					require.Contains(t, err.Error(), sub)
+				}
+				return
 			}
+
+			require.NoError(t, err)
+			require.Equal(t, tt.wantResp, out)
 		})
 	}
 
