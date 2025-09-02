@@ -6,6 +6,8 @@ import (
 
 	"github.com/fernet/fernet-go"
 	"github.com/stretchr/testify/require"
+
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 )
 
 func TestFernetAdapter(t *testing.T) {
@@ -46,9 +48,12 @@ func TestFernetAdapter(t *testing.T) {
 		adapter, err := NewFernetAdapter(&k, 0)
 		require.NoError(t, err)
 
-		_, err = adapter.DecryptString("not-a-valid-token")
+		_, err = adapter.DecryptString(store.Ciphertext{
+			KID:  "default",
+			Blob: "not-a-valid-token",
+		})
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid or expired token")
+		require.ErrorIs(t, err, ErrBadFormat)
 	})
 
 	t.Run("TTL", func(t *testing.T) {
@@ -68,8 +73,9 @@ func TestFernetAdapter(t *testing.T) {
 		require.Equal(t, plain, out)
 
 		time.Sleep(1100 * time.Millisecond)
+
 		_, err = adapter.DecryptString(token)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid or expired token")
+		require.ErrorIs(t, err, ErrDecryptFailed)
 	})
 }
