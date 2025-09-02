@@ -76,6 +76,6 @@ func TestFernetAdapter(t *testing.T) {
 
 		_, err = adapter.DecryptString(token)
 		require.Error(t, err)
-		require.ErrorIs(t, err, ErrDecryptFailed)
+		require.ErrorIs(t, err, ErrUnknownKID)
 	})
 }
