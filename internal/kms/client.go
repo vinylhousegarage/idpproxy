@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/kms/apiv1"
+	kms "cloud.google.com/go/kms/apiv1"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 )
