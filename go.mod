@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	cloud.google.com/go/firestore v1.18.0
+	cloud.google.com/go/kms v1.21.2
 	firebase.google.com/go/v4 v4.17.0
 	github.com/fernet/fernet-go v0.0.0-20240119011108-303da6aec611
 	github.com/gin-gonic/gin v1.10.1
