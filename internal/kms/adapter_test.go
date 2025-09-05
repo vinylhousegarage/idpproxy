@@ -21,25 +21,25 @@ type fakeKMS struct {
 }
 
 func (f *fakeKMS) Encrypt(ctx context.Context, req *kmspb.EncryptRequest, _ ...gax.CallOption) (*kmspb.EncryptResponse, error) {
-    f.lastEncryptReq = req
-    if f.encryptErr != nil {
-        return nil, f.encryptErr
-    }
-    c := append([]byte("CIPH|"), req.Plaintext...)
-    return &kmspb.EncryptResponse{Ciphertext: c}, nil
+	f.lastEncryptReq = req
+	if f.encryptErr != nil {
+		return nil, f.encryptErr
+	}
+	c := append([]byte("CIPH|"), req.Plaintext...)
+	return &kmspb.EncryptResponse{Ciphertext: c}, nil
 }
 
 func (f *fakeKMS) Decrypt(ctx context.Context, req *kmspb.DecryptRequest, _ ...gax.CallOption) (*kmspb.DecryptResponse, error) {
-    f.lastDecryptReq = req
-    if f.decryptErr != nil {
-        return nil, f.decryptErr
-    }
-    const p = "CIPH|"
-    if !strings.HasPrefix(string(req.Ciphertext), p) {
-        return nil, errors.New("ciphertext malformed")
-    }
-    plain := []byte(string(req.Ciphertext)[len(p):])
-    return &kmspb.DecryptResponse{Plaintext: plain}, nil
+	f.lastDecryptReq = req
+	if f.decryptErr != nil {
+		return nil, f.decryptErr
+	}
+	const p = "CIPH|"
+	if !strings.HasPrefix(string(req.Ciphertext), p) {
+		return nil, errors.New("ciphertext malformed")
+	}
+	plain := []byte(string(req.Ciphertext)[len(p):])
+	return &kmspb.DecryptResponse{Plaintext: plain}, nil
 }
 
 func TestAdapter(t *testing.T) {
