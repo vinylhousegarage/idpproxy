@@ -2,20 +2,17 @@ package kms
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
-	kms "cloud.google.com/go/kms/apiv1"
-	"go.uber.org/zap"
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	"google.golang.org/api/option"
 )
 
-func NewClient(ctx context.Context, logger *zap.Logger, opts ...option.ClientOption) (*kms.KeyManagementClient, error) {
-	client, err := kms.NewKeyManagementClient(ctx, opts...)
+func NewClient(ctx context.Context, opts ...option.ClientOption) (*cloudkms.KeyManagementClient, error) {
+	client, err := cloudkms.NewKeyManagementClient(ctx, opts...)
 	if err != nil {
-		if logger != nil {
-			logger.Error("failed to initialize KMS client", zap.Error(err))
-		}
-		return nil, fmt.Errorf("kms.NewClient: %w", err)
+		return nil, errors.Join(ErrInitFailed, err)
 	}
+
 	return client, nil
 }
