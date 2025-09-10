@@ -130,3 +130,23 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		require.EqualError(t, err, "GITHUB_DEV_REDIRECT_URI is not set")
 	})
 }
+
+func TestLoadServiceAccountConfig(t *testing.T) {
+	t.Run("when env var is not set", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "", cfg.ImpersonateSA)
+	})
+
+	t.Run("when env var is set", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "sa@example.iam.gserviceaccount.com")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
+	})
+
+	t.Run("when env var has spaces", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "  sa@example.iam.gserviceaccount.com  ")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
+	})
+}
