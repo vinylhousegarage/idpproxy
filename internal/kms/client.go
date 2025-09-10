@@ -4,30 +4,59 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
+	"strings"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
+	"golang.org/x/oauth2"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 )
 
-var reSA = regexp.MustCompile(`^[a-zA-Z0-9\-]+@[a-z0-9\-]+\.iam\.gserviceaccount\.com$`)
+const scopeCloudPlatform = "https://www.googleapis.com/auth/cloud-platform"
 
-func NewClient(ctx context.Context) (*cloudkms.KeyManagementClient, error) {
-	if sa := os.Getenv("IMPERSONATE_SERVICE_ACCOUNT"); sa != "" {
-		if !reSA.MatchString(sa) {
-			return nil, fmt.Errorf("%w: invalid service account email %q", ErrInitFailed, sa)
+var (
+	reSA           = regexp.MustCompile(`^[a-z][a-z0-9-]*@[a-z][a-z0-9-]*\.iam\.gserviceaccount\.com$`)
+	newTokenSource = func(ctx context.Context, cfg impersonate.CredentialsConfig) (oauth2.TokenSource, error) {
+		return impersonate.CredentialsTokenSource(ctx, cfg)
+	}
+)
+
+func NewClient(ctx context.Context, impersonateSA string) (*cloudkms.KeyManagementClient, error) {
+	impersonateSA = strings.ToLower(strings.TrimSpace(impersonateSA))
+	if impersonateSA != "" {
+		if !reSA.MatchString(impersonateSA) {
+			return nil, fmt.Errorf("%w: invalid service account email %q", ErrInitFailed, impersonateSA)
 		}
-		ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
-			TargetPrincipal: sa,
-			Scopes:          []string{"https://www.googleapis.com/auth/cloud-platform"},
+
+		ts, err := newTokenSource(ctx, impersonate.CredentialsConfig{
+			TargetPrincipal: impersonateSA,
+			Scopes:          []string{scopeCloudPlatform},
 		})
 		if err != nil {
-			return nil, errors.Join(ErrInitFailed, err)
+			return nil, errors.Join(
+				fmt.Errorf("%w: impersonate failed for %q", ErrInitFailed, impersonateSA),
+				err,
+			)
 		}
-		return cloudkms.NewKeyManagementClient(ctx, option.WithTokenSource(ts))
+
+		cli, err := cloudkms.NewKeyManagementClient(ctx, option.WithTokenSource(ts))
+		if err != nil {
+			return nil, errors.Join(
+				fmt.Errorf("%w: kms client init failed (impersonated %q)", ErrInitFailed, impersonateSA),
+				err,
+			)
+		}
+		return cli, nil
 	}
 
-	return cloudkms.NewKeyManagementClient(ctx)
+	cli, err := cloudkms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return nil, errors.Join(
+			fmt.Errorf("%w: kms client init failed (using ADC)", ErrInitFailed),
+			err,
+		)
+	}
+
+	return cli, nil
 }
