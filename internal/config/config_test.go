@@ -45,13 +45,22 @@ func TestLoadFirebaseConfig(t *testing.T) {
 		require.Equal(t, []byte(dummy), cfg.CredentialsJSON)
 	})
 
-	t.Run("returns error if env is not set", func(t *testing.T) {
+	t.Run("returns error when env is empty", func(t *testing.T) {
 		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "")
 
 		cfg, err := LoadFirebaseConfig()
-		require.Nil(t, cfg)
 		require.Error(t, err)
+		require.Nil(t, cfg)
 		require.Contains(t, err.Error(), "GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set")
+	})
+
+	t.Run("invalid base64", func(t *testing.T) {
+		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "not-base64!!!")
+
+		cfg, err := LoadFirebaseConfig()
+		require.Error(t, err)
+		require.Nil(t, cfg)
+		require.ErrorContains(t, err, "failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64")
 	})
 }
 
