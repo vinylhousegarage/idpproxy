@@ -21,6 +21,18 @@ func TestGetPort(t *testing.T) {
 	})
 }
 
+func TestGetOpenAPIURL(t *testing.T) {
+	t.Run("returns value when set", func(t *testing.T) {
+		t.Setenv("OPENAPI_URL", "https://api.example.com")
+		require.Equal(t, "https://api.example.com", GetOpenAPIURL())
+	})
+
+	t.Run("panics when not set", func(t *testing.T) {
+		t.Setenv("OPENAPI_URL", "")
+		require.Panics(t, func() { _ = GetOpenAPIURL() })
+	})
+}
+
 func TestLoadFirebaseConfig(t *testing.T) {
 	t.Run("loads from base64", func(t *testing.T) {
 		dummy := "test-credentials"
@@ -33,13 +45,22 @@ func TestLoadFirebaseConfig(t *testing.T) {
 		require.Equal(t, []byte(dummy), cfg.CredentialsJSON)
 	})
 
-	t.Run("returns error if env is not set", func(t *testing.T) {
+	t.Run("returns error when env is empty", func(t *testing.T) {
 		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "")
 
 		cfg, err := LoadFirebaseConfig()
-		require.Nil(t, cfg)
 		require.Error(t, err)
+		require.Nil(t, cfg)
 		require.Contains(t, err.Error(), "GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set")
+	})
+
+	t.Run("invalid base64", func(t *testing.T) {
+		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "not-base64!!!")
+
+		cfg, err := LoadFirebaseConfig()
+		require.Error(t, err)
+		require.Nil(t, cfg)
+		require.ErrorContains(t, err, "failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64")
 	})
 }
 
@@ -128,5 +149,25 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		require.Nil(t, cfg)
 		require.Error(t, err)
 		require.EqualError(t, err, "GITHUB_DEV_REDIRECT_URI is not set")
+	})
+}
+
+func TestLoadServiceAccountConfig(t *testing.T) {
+	t.Run("when env var is not set", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "", cfg.ImpersonateSA)
+	})
+
+	t.Run("when env var is set", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "sa@example.iam.gserviceaccount.com")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
+	})
+
+	t.Run("when env var has spaces", func(t *testing.T) {
+		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "  sa@example.iam.gserviceaccount.com  ")
+		cfg := LoadServiceAccountConfig()
+		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
 	})
 }
