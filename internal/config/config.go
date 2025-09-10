@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func GetPort() string {
@@ -100,5 +101,15 @@ func LoadGitHubAPIConfig() *GitHubAPIConfig {
 		APIVersion: GitHubAPIVersion,
 		BaseURL:    GitHubAPIBaseURL,
 		UserAgent:  UserAgent(),
+	}
+}
+
+type ServiceAccountConfig struct {
+	ImpersonateSA string
+}
+
+func LoadServiceAccountConfig() *ServiceAccountConfig {
+	return &ServiceAccountConfig{
+		ImpersonateSA: strings.TrimSpace(os.Getenv("IMPERSONATE_SERVICE_ACCOUNT")),
 	}
 }
