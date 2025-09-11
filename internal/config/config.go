@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/base64"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -49,44 +50,38 @@ type GitHubOAuthConfig struct {
 }
 
 func LoadGitHubOAuthConfig() (*GitHubOAuthConfig, error) {
-	clientID := os.Getenv("GITHUB_CLIENT_ID")
-	redirectURI := os.Getenv("GITHUB_REDIRECT_URI")
-	if clientID == "" && redirectURI == "" {
-		return nil, fmt.Errorf("GITHUB_CLIENT_ID and GITHUB_REDIRECT_URI are not set")
-	}
-	if clientID == "" {
-		return nil, fmt.Errorf("GITHUB_CLIENT_ID is not set")
-	}
-	if redirectURI == "" {
-		return nil, fmt.Errorf("GITHUB_REDIRECT_URI is not set")
-	}
-
-	return &GitHubOAuthConfig{
-		ClientID:    clientID,
-		RedirectURI: redirectURI,
-		Scope:       "read:user",
-		AllowSignup: "true",
-	}, nil
+	return loadGitHubOAuthConfigWithPrefix("GITHUB_")
 }
 
 func LoadGitHubDevOAuthConfig() (*GitHubOAuthConfig, error) {
-	clientID := os.Getenv("GITHUB_DEV_CLIENT_ID")
-	redirectURI := os.Getenv("GITHUB_DEV_REDIRECT_URI")
+	return loadGitHubOAuthConfigWithPrefix("GITHUB_DEV_")
+}
+
+func loadGitHubOAuthConfigWithPrefix(prefix string) (*GitHubOAuthConfig, error) {
+	clientID := strings.TrimSpace(os.Getenv(prefix + "CLIENT_ID"))
+	redirectURI := strings.TrimSpace(os.Getenv(prefix + "REDIRECT_URI"))
+
 	if clientID == "" && redirectURI == "" {
-		return nil, fmt.Errorf("GITHUB_DEV_CLIENT_ID and GITHUB_DEV_REDIRECT_URI are not set")
+		return nil, fmt.Errorf("%sCLIENT_ID and %sREDIRECT_URI are not set", prefix, prefix)
 	}
+
 	if clientID == "" {
-		return nil, fmt.Errorf("GITHUB_DEV_CLIENT_ID is not set")
+		return nil, fmt.Errorf("%sCLIENT_ID is not set", prefix)
 	}
+
 	if redirectURI == "" {
-		return nil, fmt.Errorf("GITHUB_DEV_REDIRECT_URI is not set")
+		return nil, fmt.Errorf("%sREDIRECT_URI is not set", prefix)
+	}
+
+	if _, err := url.ParseRequestURI(redirectURI); err != nil {
+		return nil, fmt.Errorf("%sREDIRECT_URI is invalid: %w", prefix, err)
 	}
 
 	return &GitHubOAuthConfig{
 		ClientID:    clientID,
 		RedirectURI: redirectURI,
-		Scope:       "read:user",
-		AllowSignup: "true",
+		Scope:       GitHubScope,
+		AllowSignup: GitHubAllowSignup,
 	}, nil
 }
 
