@@ -10,7 +10,7 @@ import (
 )
 
 func GenerateState() string {
-	b := make([]byte, config.StateLength)
+	b := make([]byte, config.OAuthStateBytes)
 	if _, err := rand.Read(b); err != nil {
 		panic("failed to generate secure random state: " + err.Error())
 	}
