@@ -16,8 +16,8 @@ const (
 	// for fetching Google OIDC metadata
 	GoogleOIDCMetadataURL = "https://accounts.google.com/.well-known/openid-configuration"
 
-	// for GenerateState
-	StateLength = 16
+	// for OAuth state (bytes of entropy)
+	OAuthStateBytes = 16
 
 	// for UserAgent
 	UserAgentProduct = "idpproxy"
