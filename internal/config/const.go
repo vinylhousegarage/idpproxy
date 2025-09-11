@@ -1,6 +1,9 @@
 package config
 
 const (
+	// for HTTP server
+	DefaultPort = "9000"
+
 	// for GitHub OAuth
 	GitHubAllowSignup = "true"
 	GitHubScope       = "read:user"

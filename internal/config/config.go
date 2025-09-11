@@ -11,7 +11,7 @@ import (
 func GetPort() string {
 	port := os.Getenv("PORT")
 	if port == "" {
-		return "9000"
+		return DefaultPort
 	}
 	return port
 }
