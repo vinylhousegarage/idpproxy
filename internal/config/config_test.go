@@ -17,7 +17,7 @@ func TestGetPort(t *testing.T) {
 	t.Run("without env var", func(t *testing.T) {
 		t.Setenv("PORT", "")
 
-		require.Equal(t, "9000", GetPort())
+		require.Equal(t, DefaultPort, GetPort())
 	})
 }
 
