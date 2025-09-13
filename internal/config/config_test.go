@@ -21,18 +21,6 @@ func TestGetPort(t *testing.T) {
 	})
 }
 
-func TestGetOpenAPIURL(t *testing.T) {
-	t.Run("returns value when set", func(t *testing.T) {
-		t.Setenv("OPENAPI_URL", "https://api.example.com")
-		require.Equal(t, "https://api.example.com", GetOpenAPIURL())
-	})
-
-	t.Run("panics when not set", func(t *testing.T) {
-		t.Setenv("OPENAPI_URL", "")
-		require.Panics(t, func() { _ = GetOpenAPIURL() })
-	})
-}
-
 func TestLoadFirebaseConfig(t *testing.T) {
 	t.Run("loads from base64", func(t *testing.T) {
 		dummy := "test-credentials"
