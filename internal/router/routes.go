@@ -34,5 +34,4 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 
 	// System
 	health.RegisterRoutes(r, d.System)
-	info.RegisterRoutes(r, d.System)
 }
