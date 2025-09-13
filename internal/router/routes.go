@@ -10,7 +10,6 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/loginfirebase"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/me"
 	"github.com/vinylhousegarage/idpproxy/internal/system/health"
-	"github.com/vinylhousegarage/idpproxy/internal/system/info"
 )
 
 func RegisterRoutes(r *gin.Engine, d RouterDeps) {
