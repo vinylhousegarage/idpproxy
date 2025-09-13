@@ -16,14 +16,6 @@ func GetPort() string {
 	return port
 }
 
-func GetOpenAPIURL() string {
-	url := os.Getenv("OPENAPI_URL")
-	if url == "" {
-		panic("OPENAPI_URL is not set")
-	}
-	return url
-}
-
 type FirebaseConfig struct {
 	CredentialsJSON []byte
 }
