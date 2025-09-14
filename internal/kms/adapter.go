@@ -11,24 +11,24 @@ import (
 
 type Adapter struct {
 	c      KMSClient
-	keyRes string
+	keyName string
 	aad    []byte
 }
 
-func NewAdapter(c KMSClient, keyRes string, aad []byte) (*Adapter, error) {
+func NewAdapter(c KMSClient, keyName string, aad []byte) (*Adapter, error) {
 	if c == nil {
 		return nil, errors.New("kms: nil client")
 	}
-	if keyRes == "" {
+	if keyName == "" {
 		return nil, errors.New("kms: empty key resource")
 	}
 
-	return &Adapter{c: c, keyRes: keyRes, aad: aad}, nil
+	return &Adapter{c: c, keyName: keyName, aad: aad}, nil
 }
 
 func (a *Adapter) EncryptString(ctx context.Context, plain string) (string, error) {
 	req := &kmspb.EncryptRequest{
-		Name:                        a.keyRes,
+		Name:                        a.keyName,
 		Plaintext:                   []byte(plain),
 		AdditionalAuthenticatedData: a.aad,
 	}
@@ -48,7 +48,7 @@ func (a *Adapter) DecryptString(ctx context.Context, cipherB64 string) (string, 
 	}
 
 	req := &kmspb.DecryptRequest{
-		Name:                        a.keyRes,
+		Name:                        a.keyName,
 		Ciphertext:                  ciphertext,
 		AdditionalAuthenticatedData: a.aad,
 	}
