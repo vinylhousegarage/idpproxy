@@ -10,9 +10,9 @@ import (
 )
 
 type Adapter struct {
-	c      KMSClient
+	c       KMSClient
 	keyName string
-	aad    []byte
+	aad     []byte
 }
 
 func NewAdapter(c KMSClient, keyName string, aad []byte) (*Adapter, error) {
