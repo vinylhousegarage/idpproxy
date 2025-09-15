@@ -10,7 +10,6 @@ type GitHubTokenRecord struct {
 	Scopes       []string  `firestore:"scopes"`
 	TokenType    string    `firestore:"token_type"`
 	AccessToken  string    `firestore:"access_token"`
-	RefreshToken string    `firestore:"refresh_token"`
 	ExpiresAt    time.Time `firestore:"expires_at"`
 	LastUsedAt   time.Time `firestore:"last_used_at"`
 	CreatedAt    time.Time `firestore:"created_at"`
