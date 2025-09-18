@@ -10,7 +10,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/auth/store"
 )
 
-var nowFunc = func() time.Time { return time.Now().UTC() }
+var timeNow = func() time.Time { return time.Now().UTC() }
 
 func validateParams(userID string, ttl, purgeAfter time.Duration) error {
 	switch {
@@ -42,7 +42,7 @@ func GenerateRefreshToken(ctx context.Context, userID string, ttl, purgeAfter ti
 		}
 	}()
 
-	now := nowFunc()
+	now := timeNow()
 	rec := &store.RefreshTokenRecord{
 		UserID:     userID,
 		CreatedAt:  now,
