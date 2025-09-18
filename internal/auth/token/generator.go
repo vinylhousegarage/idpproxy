@@ -5,39 +5,44 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/vinylhousegarage/idpproxy/internal/auth/store"
 )
 
-const (
-	refreshTokenPrefix = "rt1."
-	refreshTokenRawLen = 32
-)
+var nowFunc = func() time.Time { return time.Now().UTC() }
 
-func GenerateRefreshToken(
-	_ context.Context,
-	userID string,
-	ttl time.Duration,
-	purgeAfter time.Duration,
-) (*store.RefreshTokenRecord, string, error) {
-	if userID == "" {
-		return nil, "", errors.New("userID empty")
+func validateParams(userID string, ttl, purgeAfter time.Duration) error {
+	switch {
+	case userID == "":
+		return ErrEmptyUserID
+	case ttl <= 0:
+		return ErrInvalidTTL
+	case purgeAfter < ttl:
+		return ErrInvalidPurge
+	default:
+		return nil
 	}
-	if ttl <= 0 {
-		return nil, "", errors.New("ttl must be > 0")
-	}
-	if purgeAfter < ttl {
-		return nil, "", errors.New("purgeAfter must be >= ttl")
+}
+
+func GenerateRefreshToken(ctx context.Context, userID string, ttl, purgeAfter time.Duration) (*store.RefreshTokenRecord, string, error) {
+	_ = ctx
+
+	if err := validateParams(userID, ttl, purgeAfter); err != nil {
+		return nil, "", err
 	}
 
 	raw := make([]byte, refreshTokenRawLen)
 	if _, err := rand.Read(raw); err != nil {
-		return nil, "", fmt.Errorf("rand: %w", err)
+		return nil, "", errors.Join(ErrRandFailure, err)
 	}
+	defer func() {
+		for i := range raw {
+			raw[i] = 0
+		}
+	}()
 
-	now := time.Now().UTC()
+	now := nowFunc()
 	rec := &store.RefreshTokenRecord{
 		UserID:     userID,
 		CreatedAt:  now,

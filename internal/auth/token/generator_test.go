@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	tokenRawLen = 32
-	tokenB64Len = 43
+	refreshTokenB64Len = 43
+	testUserID1        = "user-1"
+	testUserID2        = "user-2"
 )
 
 func TestGenerateRefreshToken(t *testing.T) {
@@ -24,19 +25,19 @@ func TestGenerateRefreshToken(t *testing.T) {
 		ttl := 24 * time.Hour
 		purge := 48 * time.Hour
 
-		rec, token, err := GenerateRefreshToken(context.Background(), "user-1", ttl, purge)
+		rec, token, err := GenerateRefreshToken(context.Background(), testUserID1, ttl, purge)
 		require.NoError(t, err)
 
-		require.True(t, strings.HasPrefix(token, "rt1."))
-		rawB64 := strings.TrimPrefix(token, "rt1.")
+		require.True(t, strings.HasPrefix(token, refreshTokenPrefix))
+		rawB64 := strings.TrimPrefix(token, refreshTokenPrefix)
 
-		require.Len(t, rawB64, tokenB64Len)
+		require.Len(t, rawB64, refreshTokenB64Len)
 
 		raw, err := base64.RawURLEncoding.DecodeString(rawB64)
 		require.NoError(t, err)
-		require.Len(t, raw, tokenRawLen)
+		require.Len(t, raw, refreshTokenRawLen)
 
-		require.Equal(t, "user-1", rec.UserID)
+		require.Equal(t, testUserID1, rec.UserID)
 		require.WithinDuration(t, rec.CreatedAt.Add(ttl), rec.ExpiresAt, time.Second)
 		require.WithinDuration(t, rec.CreatedAt.Add(purge), rec.DeleteAt, time.Second)
 		require.WithinDuration(t, rec.CreatedAt, rec.LastUsedAt, time.Second)
@@ -48,10 +49,10 @@ func TestGenerateRefreshToken(t *testing.T) {
 		ttl := time.Hour
 		purge := 2 * time.Hour
 
-		_, tok1, err1 := GenerateRefreshToken(context.Background(), "u", ttl, purge)
+		_, tok1, err1 := GenerateRefreshToken(context.Background(), testUserID2, ttl, purge)
 		require.NoError(t, err1)
 
-		_, tok2, err2 := GenerateRefreshToken(context.Background(), "u", ttl, purge)
+		_, tok2, err2 := GenerateRefreshToken(context.Background(), testUserID2, ttl, purge)
 		require.NoError(t, err2)
 
 		require.NotEqual(t, tok1, tok2)
