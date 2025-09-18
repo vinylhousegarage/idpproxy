@@ -31,7 +31,7 @@ func TestGenerateRefreshToken(t *testing.T) {
 		require.True(t, strings.HasPrefix(token, refreshTokenPrefix))
 		rawB64 := strings.TrimPrefix(token, refreshTokenPrefix)
 
-		require.Len(t, rawB64, tokenB64Len)
+		require.Len(t, rawB64, refreshTokenB64Len)
 
 		raw, err := base64.RawURLEncoding.DecodeString(rawB64)
 		require.NoError(t, err)
