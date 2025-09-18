@@ -11,9 +11,9 @@ import (
 )
 
 const (
+	refreshTokenB64Len = 43
 	testUserID1        = "user-1"
 	testUserID2        = "user-2"
-	refreshTokenB64Len = 43
 )
 
 func TestGenerateRefreshToken(t *testing.T) {
