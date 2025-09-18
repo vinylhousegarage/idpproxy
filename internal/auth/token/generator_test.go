@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	tokenRawLen = 32
 	tokenB64Len = 43
 )
 
@@ -27,14 +26,14 @@ func TestGenerateRefreshToken(t *testing.T) {
 		rec, token, err := GenerateRefreshToken(context.Background(), "user-1", ttl, purge)
 		require.NoError(t, err)
 
-		require.True(t, strings.HasPrefix(token, "rt1."))
-		rawB64 := strings.TrimPrefix(token, "rt1.")
+		require.True(t, strings.HasPrefix(token, refreshTokenPrefix))
+		rawB64 := strings.TrimPrefix(token, refreshTokenPrefix)
 
 		require.Len(t, rawB64, tokenB64Len)
 
 		raw, err := base64.RawURLEncoding.DecodeString(rawB64)
 		require.NoError(t, err)
-		require.Len(t, raw, tokenRawLen)
+		require.Len(t, raw, refreshTokenRawLen)
 
 		require.Equal(t, "user-1", rec.UserID)
 		require.WithinDuration(t, rec.CreatedAt.Add(ttl), rec.ExpiresAt, time.Second)
