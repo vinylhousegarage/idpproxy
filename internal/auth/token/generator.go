@@ -3,8 +3,10 @@ package token
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/vinylhousegarage/idpproxy/internal/auth/store"
@@ -32,25 +34,43 @@ func GenerateRefreshToken(ctx context.Context, userID string, ttl, purgeAfter ti
 		return nil, "", err
 	}
 
-	raw := make([]byte, refreshTokenRawLen)
-	if _, err := rand.Read(raw); err != nil {
+	idRaw := make([]byte, refreshIDRawLen)
+	if _, err := rand.Read(idRaw); err != nil {
 		return nil, "", errors.Join(ErrRandFailure, err)
 	}
-	defer func() {
-		for i := range raw {
-			raw[i] = 0
-		}
-	}()
+	refreshID := base64.RawURLEncoding.EncodeToString(idRaw)
+
+	secretRaw := make([]byte, refreshTokenRawLen)
+	if _, err := rand.Read(secretRaw); err != nil {
+		return nil, "", errors.Join(ErrRandFailure, err)
+	}
+
+	sum := sha256.Sum256(secretRaw)
+	digestB64 := base64.RawURLEncoding.EncodeToString(sum[:])
+
+	secretB64 := base64.RawURLEncoding.EncodeToString(secretRaw)
+	token := fmt.Sprintf("%s%s.%s", refreshTokenPrefix, refreshID, secretB64)
 
 	now := timeNow()
 	rec := &store.RefreshTokenRecord{
-		UserID:     userID,
+		RefreshID: refreshID,
+		UserID:    userID,
+		DigestB64: digestB64,
+		KeyID:     "",
+		FamilyID:  refreshID,
+
 		CreatedAt:  now,
 		LastUsedAt: now,
 		ExpiresAt:  now.Add(ttl),
 		DeleteAt:   now.Add(purgeAfter),
 	}
 
-	token := refreshTokenPrefix + base64.RawURLEncoding.EncodeToString(raw)
+	for i := range secretRaw {
+		secretRaw[i] = 0
+	}
+	for i := range idRaw {
+		idRaw[i] = 0
+	}
+
 	return rec, token, nil
 }
