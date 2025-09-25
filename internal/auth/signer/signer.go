@@ -1,4 +1,4 @@
-package jwt
+package signer
 
 import (
 	"context"
