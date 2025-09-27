@@ -1,6 +1,17 @@
 package signer
 
-import "testing"
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+)
+
+const (
+	testKey    = "secret"
+	testKid123 = "kid-123"
+)
 
 func TestHMACSigner_InfoMethods(t *testing.T) {
 	t.Parallel()
@@ -15,14 +26,34 @@ func TestHMACSigner_InfoMethods(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			s := NewHMACSigner(tt.key, tt.kid)
-			if got := s.Alg(); got != "HS256" {
-				t.Fatalf("Alg() = %q", got)
-			}
-			if got := s.KeyID(); got != tt.kid {
-				t.Fatalf("KeyID() = %q", got)
-			}
+			require.Equal(t, AlgHS256, s.Alg())
+			require.Equal(t, tt.kid, s.KeyID())
 		})
 	}
+
+	t.Run("key-cloned-defensively", func(t *testing.T) {
+		t.Parallel()
+
+		orig := []byte(testKey)
+		s := NewHMACSigner(orig, testKid123)
+
+		fixed := time.Unix(1_700_000_000, 0)
+		s.now = func() time.Time { return fixed }
+
+		payload := []byte(`{"sub":"u1"}`)
+		tok1, _, err := s.Sign(context.Background(), payload)
+		require.NoError(t, err)
+
+		orig[0] = 'X'
+
+		tok2, _, err := s.Sign(context.Background(), payload)
+		require.NoError(t, err)
+		require.Equal(t, tok1, tok2, "signer must hold a cloned key buffer")
+	})
 }
