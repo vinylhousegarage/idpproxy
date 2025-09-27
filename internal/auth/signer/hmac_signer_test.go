@@ -119,7 +119,7 @@ func TestHMACSigner_Sign(t *testing.T) {
 	t.Run("claims-use-fixed-now", func(t *testing.T) {
 		t.Parallel()
 
-		fixed := time.Unix(1_700_000_000, 0)
+		fixed := time.Now().Add(time.Hour)
 		s := NewHMACSigner([]byte(testKey), testKidXYZ)
 		s.now = func() time.Time { return fixed }
 
