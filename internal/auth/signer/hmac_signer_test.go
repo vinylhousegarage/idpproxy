@@ -39,7 +39,7 @@ func TestHMACSigner_InfoMethods(t *testing.T) {
 		s := NewHMACSigner(orig, testKid123)
 
 		fixed := time.Unix(1_700_000_000, 0)
-		s.now = func() time.Time { return fixed }
+		s.now = fixedNow(fixed)
 
 		payload := []byte(`{"sub":"u1"}`)
 		tok1, _, err := s.Sign(context.Background(), payload)

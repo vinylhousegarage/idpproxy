@@ -68,7 +68,7 @@ func TestHMACSigner_Sign(t *testing.T) {
 
 		fixed := time.Now().Add(time.Hour)
 		s := NewHMACSigner([]byte(testKey), testKidXYZ)
-		s.now = func() time.Time { return fixed }
+		s.now = fixedNow(fixed)
 
 		tok, _, err := s.Sign(context.Background(), []byte(`{"sub":"u1"}`))
 		require.NoError(t, err)
