@@ -13,19 +13,26 @@ func makeHS256Token(t *testing.T, key []byte, kid, typ string, claims jwt.MapCla
 	t.Helper()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	if kid != "" {
 		token.Header["kid"] = kid
 	}
-	if typ != "" {
+	if typ == "" {
+		delete(token.Header, "typ")
+	} else {
 		token.Header["typ"] = typ
 	}
+
 	signed, err := token.SignedString(key)
 	require.NoError(t, err)
 	require.NotEmpty(t, signed)
+
 	return signed
 }
 
 func TestHMACSigner_Verify(t *testing.T) {
+	t.Parallel()
+
 	secret := []byte("secret")
 	kid := "kid"
 	base := time.Unix(1_700_000_000, 0)
@@ -144,10 +151,24 @@ func TestHMACSigner_Verify(t *testing.T) {
 			key:     nil,
 			wantErr: ErrEmptyKey,
 		},
+		{
+			name:      "expect kid set but header missing",
+			claims:    jwt.MapClaims{"exp": base.Add(5 * time.Minute).Unix()},
+			typ:       "JWT",
+			kidHeader: "",
+			opt:       &VerifyOptions{ExpectKID: "expected-kid"},
+			now:       base,
+			key:       secret,
+			wantErr:   ErrUnexpectedKID,
+		},
 	}
 
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			s := NewHMACSigner(tt.key, kid)
 			s.now = func() time.Time { return tt.now }
 
