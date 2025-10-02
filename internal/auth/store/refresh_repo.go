@@ -61,14 +61,14 @@ func prepareForCreate(rec *RefreshTokenRecord, now time.Time) error {
 
 func (r *Repo) Create(ctx context.Context, rec *RefreshTokenRecord) error {
 	if err := validateForCreate(rec); err != nil {
-			return fmt.Errorf("create: validate: %w", err)
+		return fmt.Errorf("create: validate: %w", err)
 	}
 	if err := prepareForCreate(rec, r.now()); err != nil {
-			return fmt.Errorf("create: prepare: %w", err)
+		return fmt.Errorf("create: prepare: %w", err)
 	}
 	_, err := r.docRT(rec.RefreshID).Create(ctx, rec)
 	if status.Code(err) == codes.AlreadyExists {
-			return ErrConflict
+		return ErrConflict
 	}
 
 	return err
