@@ -1,0 +1,39 @@
+package store
+
+import (
+	"time"
+
+	"cloud.google.com/go/firestore"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+const (
+	colRefreshTokens     = "refresh_tokens"
+	colAccessGenerations = "access_generations"
+)
+
+type Repo struct {
+	fs  *firestore.Client
+	now func() time.Time
+}
+
+func NewRepo(fs *firestore.Client) *Repo {
+	return &Repo{fs: fs, now: time.Now}
+}
+
+func (r *Repo) docRT(id string) *firestore.DocumentRef {
+	return r.fs.Collection(colRefreshTokens).Doc(id)
+}
+
+func (r *Repo) docAG(userID string) *firestore.DocumentRef {
+	return r.fs.Collection(colAccessGenerations).Doc(userID)
+}
+
+func mapNotFound(err error) error {
+	if status.Code(err) == codes.NotFound {
+		return ErrNotFound
+	}
+
+	return err
+}
