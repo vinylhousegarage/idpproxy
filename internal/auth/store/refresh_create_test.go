@@ -67,8 +67,11 @@ func TestRepo_Create(t *testing.T) {
 		require.NoError(t, repo.Create(ctx, rec))
 		t.Cleanup(func() { _, _ = repo.docRT(id).Delete(ctx) })
 
-		got, err := repo.GetByID(ctx, id)
+		snap, err := repo.docRT(id).Get(ctx)
 		require.NoError(t, err)
+
+		var got RefreshTokenRecord
+		require.NoError(t, snap.DataTo(&got))
 		require.Equal(t, rec.RefreshID, got.RefreshID)
 		require.Equal(t, rec.UserID, got.UserID)
 		require.Equal(t, rec.FamilyID, got.FamilyID)
