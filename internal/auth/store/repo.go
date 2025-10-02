@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -24,16 +22,4 @@ func NewRepo(fs *firestore.Client) *Repo {
 
 func (r *Repo) docRT(id string) *firestore.DocumentRef {
 	return r.fs.Collection(colRefreshTokens).Doc(id)
-}
-
-func (r *Repo) docAG(userID string) *firestore.DocumentRef {
-	return r.fs.Collection(colAccessGenerations).Doc(userID)
-}
-
-func mapNotFound(err error) error {
-	if status.Code(err) == codes.NotFound {
-		return ErrNotFound
-	}
-
-	return err
 }
