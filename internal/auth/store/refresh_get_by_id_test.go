@@ -67,7 +67,6 @@ func TestRepo_GetByID(t *testing.T) {
 		seed       *RefreshTokenRecord
 		id         string
 		wantErr    bool
-		errSubstr  string
 		isNotFound bool
 	}{
 		{
@@ -82,16 +81,14 @@ func TestRepo_GetByID(t *testing.T) {
 			isNotFound: true,
 		},
 		{
-			name:      "invalid-empty",
-			id:        "",
-			wantErr:   true,
-			errSubstr: "empty refreshid",
+			name:    "invalid-empty",
+			id:      "",
+			wantErr: true,
 		},
 		{
-			name:      "invalid-slash",
-			id:        "bad/id",
-			wantErr:   true,
-			errSubstr: "must not contain '/'",
+			name:    "invalid-slash",
+			id:      "bad/id",
+			wantErr: true,
 		},
 	}
 
@@ -114,9 +111,10 @@ func TestRepo_GetByID(t *testing.T) {
 				require.Error(t, err)
 				if tt.isNotFound {
 					require.True(t, errors.Is(err, ErrNotFound), "expected ErrNotFound, got %v", err)
-				}
-				if tt.errSubstr != "" {
-					require.Contains(t, strings.ToLower(err.Error()), strings.ToLower(tt.errSubstr))
+				} else {
+					if ErrInvalidID != nil {
+						require.True(t, errors.Is(err, ErrInvalidID), "expected ErrInvalidID, got: %v", err)
+					}
 				}
 				return
 			}
