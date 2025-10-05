@@ -24,8 +24,8 @@ services:
       - "9000:9000"
     volumes:
       - ./:/app
-      - ${USERPROFILE}\go\pkg\mod:/go/pkg/mod
-      - ${USERPROFILE}\AppData\Local\go-build:/root/.cache/go-build
+      - ${HOME}/go/pkg/mod:/go/pkg/mod
+      - ${HOME}/.cache/go-build:/root/.cache/go-build
     depends_on:
       fs-emu:
         condition: service_healthy
