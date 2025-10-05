@@ -9,5 +9,6 @@ func mapNotFound(err error) error {
 	if status.Code(err) == codes.NotFound {
 		return ErrNotFound
 	}
+
 	return err
 }
