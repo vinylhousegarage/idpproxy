@@ -36,14 +36,14 @@ jobs:
       - name: Start Firestore emulator (cloud-sdk)
         run: |
           docker run -d --name fs-emu -p 9010:8080 gcr.io/google.com/cloudsdktool/cloud-sdk:latest \
-            bash -lc "apt-get update && apt-get install -y openjdk-17-jre-headless && \
-                      gcloud components install cloud-firestore-emulator -q && \
-                      gcloud beta emulators firestore start --host-port=0.0.0.0:8080 --quiet"
+            bash -lc "apt-get update && \
+                      apt-get install -y openjdk-17-jre-headless google-cloud-cli-firestore-emulator && \
+                      gcloud beta emulators firestore start --host-port=0.0.0.0:8080 --quiet --project=${GOOGLE_CLOUD_PROJECT}"
 
       - name: Wait for Firestore emulator
         run: |
           for i in {1..180}; do
-            if nc -z 127.0.0.1 9010 && curl -fsS http://127.0.0.1:9010 >/dev/null 2>&1; then
+            if nc -z 127.0.0.1 9010 && curl -sI http://127.0.0.1:9010 >/dev/null; then
               sleep 2
               exit 0
             fi
@@ -79,3 +79,7 @@ jobs:
       - name: Dump emulator logs (on-failure)
         if: failure()
         run: docker logs fs-emu || true
+
+      - name: Cleanup emulator
+        if: always()
+        run: docker rm -f fs-emu || true
