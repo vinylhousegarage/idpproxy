@@ -10,7 +10,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: read
 
     env:
       FIRESTORE_EMULATOR_HOST: 127.0.0.1:9010
@@ -24,13 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -40,12 +32,16 @@ jobs:
       - name: Ensure netcat
         run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
 
-      - name: Start Firestore emulator (prebuilt)
-        run: docker run -d --name fs-emu -p 9010:8080 ghcr.io/manyminds/firestore-emulator:latest
+
+      - name: Start Firestore emulator (cloud-sdk)
+        run: |
+          docker run -d --name fs-emu -p 9010:9010 gcr.io/google.com/cloudsdktool/cloud-sdk:latest \
+            bash -lc "gcloud components install cloud-firestore-emulator -q && \
+                      gcloud beta emulators firestore start --host-port=0.0.0.0:9010 --quiet"
 
       - name: Wait for Firestore emulator
         run: |
-          for i in {1..120}; do
+          for i in {1..180}; do
             if nc -z 127.0.0.1 9010; then
               sleep 3
               exit 0
