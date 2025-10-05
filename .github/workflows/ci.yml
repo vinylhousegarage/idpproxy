@@ -13,12 +13,13 @@ jobs:
 
     env:
       FIRESTORE_EMULATOR_HOST: 127.0.0.1:9010
-      TEST_FIRESTORE_PROJECT: demo-idpproxy
       GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_CLOUD_PROJECT: demo-idpproxy
       GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
       OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
+      TEST_FIRESTORE_PROJECT: demo-idpproxy
 
     steps:
       - uses: actions/checkout@v4
@@ -32,24 +33,26 @@ jobs:
       - name: Ensure netcat
         run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
 
-
       - name: Start Firestore emulator (cloud-sdk)
         run: |
-          docker run -d --name fs-emu -p 9010:9010 gcr.io/google.com/cloudsdktool/cloud-sdk:latest \
-            bash -lc "gcloud components install cloud-firestore-emulator -q && \
-                      gcloud beta emulators firestore start --host-port=0.0.0.0:9010 --quiet"
+          docker run -d --name fs-emu -p 9010:8080 gcr.io/google.com/cloudsdktool/cloud-sdk:latest \
+            bash -lc "apt-get update && apt-get install -y openjdk-17-jre-headless && \
+                      gcloud components install cloud-firestore-emulator -q && \
+                      gcloud beta emulators firestore start --host-port=0.0.0.0:8080 --quiet"
 
       - name: Wait for Firestore emulator
         run: |
           for i in {1..180}; do
-            if nc -z 127.0.0.1 9010; then
-              sleep 3
+            if nc -z 127.0.0.1 9010 && curl -fsS http://127.0.0.1:9010 >/dev/null 2>&1; then
+              sleep 2
               exit 0
             fi
             sleep 1
           done
           echo "Emulator not responding on 127.0.0.1:9010" >&2
           docker logs fs-emu || true
+          docker ps -a || true
+          docker port fs-emu || true
           exit 1
 
       - name: Download modules
