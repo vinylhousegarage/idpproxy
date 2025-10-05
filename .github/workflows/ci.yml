@@ -19,7 +19,6 @@ jobs:
           --health-interval=5s --health-timeout=2s --health-retries=30
 
     env:
-      FERNET_KEY: ${{ secrets.FERNET_KEY }}
       GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
