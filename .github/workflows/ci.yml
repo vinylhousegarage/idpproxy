@@ -8,13 +8,18 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     env:
-      FERNET_KEY: ${{ secrets.FERNET_KEY }}
+      FIRESTORE_EMULATOR_HOST: 127.0.0.1:9010
       GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_CLOUD_PROJECT: demo-idpproxy
       GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
       OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
+      TEST_FIRESTORE_PROJECT: demo-idpproxy
 
     steps:
       - uses: actions/checkout@v4
@@ -23,16 +28,48 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24.5'
+          cache: true
 
-      - name: Install dependencies
-        run: go mod tidy
+      - name: Ensure netcat
+        run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
 
-      - name: Run goimports
+      - name: Start Firestore emulator (Java21 base)
+        run: |
+          docker run -d --name fs-emu -p 9010:8080 eclipse-temurin:21-jre \
+            bash -lc "set -euo pipefail
+                      apt-get update
+                      apt-get install -y curl gnupg
+                      echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk bookworm main' \
+                        | tee /etc/apt/sources.list.d/google-cloud-sdk.list
+                      curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+                        | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+                      apt-get update
+                      apt-get install -y google-cloud-cli-firestore-emulator
+                      gcloud beta emulators firestore start --host-port=0.0.0.0:8080 --quiet --project=${GOOGLE_CLOUD_PROJECT}"
+
+      - name: Wait for Firestore emulator
+        run: |
+          for i in {1..180}; do
+            if nc -z 127.0.0.1 9010 && curl -sI http://127.0.0.1:9010 >/dev/null; then
+              sleep 2
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Emulator not responding on 127.0.0.1:9010" >&2
+          docker logs fs-emu || true
+          docker ps -a || true
+          docker port fs-emu || true
+          exit 1
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Run goimports (lint for imports)
         run: |
           go install golang.org/x/tools/cmd/goimports@v0.35.0
           imports="$(goimports -l .)"
           if [ -n "$imports" ]; then
-            echo "Please run goimports:"
             echo "$imports"
             exit 1
           fi
@@ -44,4 +81,12 @@ jobs:
           args: --timeout 5m --out-format=colored-line-number
 
       - name: Run tests
-        run: go test ./... -v
+        run: go test ./... -v -count=1
+
+      - name: Dump emulator logs (on-failure)
+        if: failure()
+        run: docker logs fs-emu || true
+
+      - name: Cleanup emulator
+        if: always()
+        run: docker rm -f fs-emu || true

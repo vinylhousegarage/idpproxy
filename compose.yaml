@@ -1,0 +1,31 @@
+services:
+  fs-emu:
+    image: google/cloud-sdk:emulators
+    command: ["gcloud","beta","emulators","firestore","start","--host-port=0.0.0.0:9010"]
+    ports:
+      - "9010:9010"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'echo > /dev/tcp/127.0.0.1/9010'"]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+  app:
+    image: idpproxy:dev
+    build:
+      context: .
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      FIRESTORE_EMULATOR_HOST: fs-emu:9010
+      TEST_FIRESTORE_PROJECT: demo-idpproxy
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/app
+      - ${HOME}/go/pkg/mod:/go/pkg/mod
+      - ${HOME}/.cache/go-build:/root/.cache/go-build
+    depends_on:
+      fs-emu:
+        condition: service_healthy
