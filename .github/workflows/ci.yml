@@ -8,16 +8,6 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
-    services:
-      fs-emu:
-        image: google/cloud-sdk:emulators
-        ports:
-          - 9010:9010
-        command: ["gcloud","beta","emulators","firestore","start","--host-port=0.0.0.0:9010"]
-        options: >-
-          --health-cmd="bash -lc 'echo > /dev/tcp/127.0.0.1/9010'"
-          --health-interval=5s --health-timeout=2s --health-retries=30
-
     env:
       GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -33,6 +23,25 @@ jobs:
         with:
           go-version: '1.24.5'
           cache: true
+
+      - name: Ensure netcat
+        run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
+
+      - name: Start Firestore emulator
+        run: |
+          docker run -d --name fs-emu -p 9010:9010 gcr.io/google.com/cloudsdktool/cloud-sdk:latest \
+            bash -lc "gcloud components install cloud-firestore-emulator -q && \
+                      gcloud beta emulators firestore start --host-port=0.0.0.0:9010 --quiet"
+
+      - name: Wait for Firestore emulator
+        run: |
+          for i in {1..60}; do
+            nc -z 127.0.0.1 9010 && exit 0
+            sleep 1
+          done
+          echo "Emulator not responding on 127.0.0.1:9010" >&2
+          docker logs fs-emu || true
+          exit 1
 
       - name: Download modules
         run: go mod download
@@ -52,15 +61,6 @@ jobs:
         with:
           version: v1.64.8
           args: --timeout 5m --out-format=colored-line-number
-
-      - name: Wait for Firestore emulator
-        run: |
-          for i in {1..60}; do
-            nc -z 127.0.0.1 9010 && exit 0
-            sleep 1
-          done
-          echo "Emulator not responding on 127.0.0.1:9010" >&2
-          exit 1
 
       - name: Run tests
         env:
