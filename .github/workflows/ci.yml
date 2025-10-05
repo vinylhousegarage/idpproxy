@@ -65,6 +65,8 @@ jobs:
           args: --timeout 5m --out-format=colored-line-number
 
       - name: Run tests
-        run: go test ./... -v
+        run: go test ./... -count=1
 
-      - name: Dump e
+      - name: Dump emulator logs (on-failure)
+        if: failure()
+        run: docker logs fs-emu || true
