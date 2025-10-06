@@ -2,19 +2,7 @@ package store
 
 import (
 	"context"
-	"fmt"
-	"strings"
 )
-
-func validateRefreshID(id string) error {
-	if id == "" {
-		return fmt.Errorf("%w: empty", ErrInvalidID)
-	}
-	if strings.Contains(id, "/") {
-		return fmt.Errorf("%w: must not contain '/'", ErrInvalidID)
-	}
-	return nil
-}
 
 func (r *Repo) GetByID(ctx context.Context, refreshID string) (*RefreshTokenRecord, error) {
 	if err := validateRefreshID(refreshID); err != nil {

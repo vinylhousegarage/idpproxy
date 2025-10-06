@@ -20,8 +20,8 @@ func requireEmulator(t *testing.T) {
 
 func newTestRepo(t *testing.T) *Repo {
 	t.Helper()
-
 	ctx := context.Background()
+
 	projectID := os.Getenv("TEST_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Fatal("TEST_FIRESTORE_PROJECT is not set")
@@ -33,6 +33,13 @@ func newTestRepo(t *testing.T) *Repo {
 
 	fixed := time.Unix(1_725_000_000, 0)
 	return &Repo{fs: client, now: func() time.Time { return fixed }}
+}
+
+func newTestRepoWithNow(t *testing.T, fixed time.Time) *Repo {
+	t.Helper()
+	r := newTestRepo(t)
+	r.now = func() time.Time { return fixed }
+	return r
 }
 
 func makeRec(id, user, family string, now time.Time) *RefreshTokenRecord {
@@ -50,4 +57,22 @@ func makeRec(id, user, family string, now time.Time) *RefreshTokenRecord {
 		ExpiresAt:    now.Add(24 * time.Hour),
 		DeleteAt:     now.Add(48 * time.Hour),
 	}
+}
+
+func seedRefreshDoc(t *testing.T, r *Repo, rec *RefreshTokenRecord) {
+	t.Helper()
+	ctx := context.Background()
+	_, err := r.docRT(rec.RefreshID).Set(ctx, rec)
+	require.NoError(t, err)
+}
+
+func getRefreshDoc(t *testing.T, r *Repo, id string) *RefreshTokenRecord {
+	t.Helper()
+	ctx := context.Background()
+	snap, err := r.docRT(id).Get(ctx)
+	require.NoError(t, err)
+
+	var rec RefreshTokenRecord
+	require.NoError(t, snap.DataTo(&rec))
+	return &rec
 }
