@@ -137,7 +137,8 @@ func TestRepo_MarkUsed(t *testing.T) {
 			require.NoError(t, err)
 			if tt.wantLastUsed != nil {
 				got := getRefreshDoc(t, r, tt.refreshID)
-				require.Equal(t, *tt.wantLastUsed, got.LastUsedAt)
+				require.True(t, got.LastUsedAt.Equal(*tt.wantLastUsed),
+					"expected %v, got %v", tt.wantLastUsed, got.LastUsedAt)
 			}
 		})
 	}
