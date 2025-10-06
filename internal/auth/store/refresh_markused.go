@@ -12,9 +12,10 @@ func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 	}
 
 	doc := r.docRT(refreshID)
-	now := r.now()
 
 	return r.fs.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		now := r.now()
+
 		snap, err := tx.Get(doc)
 		if err != nil {
 			return mapNotFound(err)
@@ -36,7 +37,7 @@ func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 		}
 
 		return tx.Update(doc, []firestore.Update{
-			{Path: "last_used_at", Value: firestore.ServerTimestamp},
+			{Path: "last_used_at", Value: now},
 		})
 	})
 }
