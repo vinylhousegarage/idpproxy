@@ -2,19 +2,9 @@ package store
 
 import (
 	"context"
-	"strings"
 
 	"cloud.google.com/go/firestore"
 )
-
-func validateRefreshID(id string) error {
-	id = strings.TrimSpace(id)
-	if id == "" || strings.Contains(id, "/") {
-		return ErrInvalidID
-	}
-
-	return nil
-}
 
 func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 	if err := validateRefreshID(refreshID); err != nil {
@@ -46,7 +36,7 @@ func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 		}
 
 		return tx.Update(doc, []firestore.Update{
-			{Path: "last_used_at", Value: now},
+			{Path: "last_used_at", Value: firestore.ServerTimestamp},
 		})
 	})
 }

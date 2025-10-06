@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -14,11 +13,8 @@ func validateForCreate(rec *RefreshTokenRecord) error {
 	if rec == nil {
 		return fmt.Errorf("nil RefreshTokenRecord")
 	}
-	if rec.RefreshID == "" {
-		return fmt.Errorf("missing RefreshID")
-	}
-	if strings.Contains(rec.RefreshID, "/") {
-		return fmt.Errorf("invalid RefreshID: must not contain '/'")
+	if err := validateRefreshID(rec.RefreshID); err != nil {
+			return fmt.Errorf("invalid RefreshID: %w", err)
 	}
 	if rec.UserID == "" {
 		return fmt.Errorf("missing UserID")
