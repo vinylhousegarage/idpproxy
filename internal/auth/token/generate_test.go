@@ -29,8 +29,6 @@ func TestGenerateRefreshToken(t *testing.T) {
 	timeNow = func() time.Time { return fixedNow }
 	t.Cleanup(func() { timeNow = oldNow })
 
-	t.Parallel()
-
 	t.Run("basic properties (format, lengths, digest=HMAC, keyID, family=uuid, times, lastUsed=zero)", func(t *testing.T) {
 		t.Parallel()
 
