@@ -16,19 +16,6 @@ import (
 
 var timeNow = func() time.Time { return time.Now().UTC() }
 
-func validateParams(userID string, ttl, purgeAfter time.Duration) error {
-	switch {
-	case userID == "":
-		return ErrEmptyUserID
-	case ttl <= 0:
-		return ErrInvalidTTL
-	case purgeAfter < ttl:
-		return ErrInvalidPurge
-	default:
-		return nil
-	}
-}
-
 func currentPepperKeyID() (string, error) {
 	v := os.Getenv("IDPPROXY_REFRESH_PEPPER_KEY_ID")
 	if v == "" {
