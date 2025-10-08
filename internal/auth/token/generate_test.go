@@ -19,25 +19,17 @@ const (
 )
 
 func TestGenerateRefreshToken(t *testing.T) {
-	t.Parallel()
-
-	oldKeyID := currentPepperKeyID
-	oldKeyMat := getPepperKeyMaterial
-	oldNow := timeNow
-
 	const testKeyID = "test-hmac-k1"
 	const testPepper = "pepper-for-test"
+	t.Setenv("IDPPROXY_REFRESH_PEPPER_KEY_ID", testKeyID)
+	t.Setenv("IDPPROXY_REFRESH_PEPPER_KEY_MATERIAL", testPepper)
+
+	oldNow := timeNow
 	fixedNow := time.Unix(1_800_000_000, 0).UTC()
-
-	currentPepperKeyID = func() string { return testKeyID }
-	getPepperKeyMaterial = func(keyID string) []byte { return []byte(testPepper) }
 	timeNow = func() time.Time { return fixedNow }
+	t.Cleanup(func() { timeNow = oldNow })
 
-	t.Cleanup(func() {
-		currentPepperKeyID = oldKeyID
-		getPepperKeyMaterial = oldKeyMat
-		timeNow = oldNow
-	})
+	t.Parallel()
 
 	t.Run("basic properties (format, lengths, digest=HMAC, keyID, family=uuid, times, lastUsed=zero)", func(t *testing.T) {
 		t.Parallel()
@@ -66,6 +58,7 @@ func TestGenerateRefreshToken(t *testing.T) {
 
 		require.Equal(t, testUserID1, rec.UserID)
 		require.Equal(t, idB64, rec.RefreshID, "RefreshID should equal idB64 part")
+
 		require.NotEmpty(t, rec.KeyID)
 		require.Equal(t, testKeyID, rec.KeyID)
 

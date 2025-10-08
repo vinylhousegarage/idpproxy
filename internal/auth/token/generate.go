@@ -16,7 +16,7 @@ import (
 
 var timeNow = func() time.Time { return time.Now().UTC() }
 
-func currentPepperKeyID() (string, error) {
+var currentPepperKeyID = func() (string, error) {
 	v := os.Getenv("IDPPROXY_REFRESH_PEPPER_KEY_ID")
 	if v == "" {
 		return "", fmt.Errorf("IDPPROXY_REFRESH_PEPPER_KEY_ID is required but not set")
