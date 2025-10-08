@@ -34,13 +34,16 @@ var getPepperKeyMaterial = func(keyID string) ([]byte, error) {
 	return []byte(v), nil
 }
 
-func computeDigestB64(secretRaw []byte, keyID string) string {
-	key := getPepperKeyMaterial(keyID)
+func computeDigestB64(secretRaw []byte, keyID string) (string, error) {
+	key, err := getPepperKeyMaterial(keyID)
+	if err != nil {
+		return "", err
+	}
 	mac := hmac.New(sha256.New, key)
 	mac.Write(secretRaw)
 	sum := mac.Sum(nil)
 
-	return base64.RawURLEncoding.EncodeToString(sum)
+	return base64.RawURLEncoding.EncodeToString(sum), nil
 }
 
 func GenerateRefreshToken(ctx context.Context, userID string, ttl, purgeAfter time.Duration) (*store.RefreshTokenRecord, string, error) {
