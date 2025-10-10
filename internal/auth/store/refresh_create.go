@@ -16,8 +16,8 @@ func validateForCreate(rec *RefreshTokenRecord) error {
 	if err := validateRefreshID(rec.RefreshID); err != nil {
 		return fmt.Errorf("invalid RefreshID: %w", err)
 	}
-	if rec.UserID == "" {
-		return fmt.Errorf("missing UserID")
+	if err := validateUserID(rec.UserID); err != nil {
+		return fmt.Errorf("invalid UserID: %w", err)
 	}
 	if rec.DigestB64 == "" {
 		return fmt.Errorf("missing DigestB64")
