@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +21,8 @@ func TestRepo_Create(t *testing.T) {
 
 		fixed := repo.now()
 		id := fmt.Sprintf("rt-%d-success", fixed.UnixNano())
-		rec := makeRec(id, "user-1", "fam-1", fixed)
+		user := "github:" + uuid.NewString()
+		rec := makeRec(id, user, "fam-1", fixed)
 
 		require.NoError(t, repo.Create(ctx, rec))
 		t.Cleanup(func() { _, _ = repo.docRT(id).Delete(ctx) })
@@ -40,7 +42,8 @@ func TestRepo_Create(t *testing.T) {
 
 		fixed := repo.now()
 		id := fmt.Sprintf("rt-%d-conflict", fixed.UnixNano())
-		rec := makeRec(id, "user-2", "fam-2", fixed)
+		user := "github:" + uuid.NewString()
+		rec := makeRec(id, user, "fam-2", fixed)
 
 		require.NoError(t, repo.Create(ctx, rec))
 		t.Cleanup(func() { _, _ = repo.docRT(id).Delete(ctx) })
@@ -49,3 +52,4 @@ func TestRepo_Create(t *testing.T) {
 		require.ErrorIs(t, err, ErrConflict)
 	})
 }
+
