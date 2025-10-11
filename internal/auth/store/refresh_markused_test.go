@@ -109,10 +109,14 @@ func TestRepo_MarkUsed(t *testing.T) {
 			r := newRepo()
 
 			var id string
-			if tt.refreshID != "" {
-				id = tt.refreshID
-			} else {
-				id = mkID(t, "rt")
+			isInvalidIDCase := tt.wantErrIs == ErrInvalidID || strings.Contains(tt.name, "invalid-id")
+			switch {
+			case isInvalidIDCase:
+					id = tt.refreshID
+			case tt.refreshID != "":
+					id = tt.refreshID
+			default:
+					id = mkID(t, "rt")
 			}
 
 			if tt.seed != nil && tt.refreshID == "" {
