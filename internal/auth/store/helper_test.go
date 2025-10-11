@@ -9,6 +9,8 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
+  "google.golang.org/grpc/codes"
+  "google.golang.org/grpc/status"
 )
 
 func requireEmulator(t *testing.T) {
@@ -62,7 +64,16 @@ func makeRec(id, user, family string, now time.Time) *RefreshTokenRecord {
 func seedRefreshDoc(t *testing.T, r *Repo, rec *RefreshTokenRecord) {
 	t.Helper()
 	ctx := context.Background()
-	_, err := r.docRT(rec.RefreshID).Set(ctx, rec)
+
+	_, err := r.docRT(rec.RefreshID).Create(ctx, rec)
+	if err == nil {
+		return
+	}
+
+	if st, ok := status.FromError(err); ok && st.Code() == codes.AlreadyExists {
+		_, err = r.docRT(rec.RefreshID).Set(ctx, rec)
+	}
+
 	require.NoError(t, err)
 }
 
@@ -87,4 +98,3 @@ func makeActiveRec(id, user string, now time.Time) *RefreshTokenRecord {
 
 	return rec
 }
-
