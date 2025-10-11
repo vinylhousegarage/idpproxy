@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func validateReplaceArgs(oldID string, newRec *RefreshTokenRecord) error {
@@ -60,39 +62,37 @@ func txUpdateWithPrecond(tx *firestore.Transaction, ref *firestore.DocumentRef, 
 }
 
 func (r *Repo) Replace(ctx context.Context, oldID string, newRec *RefreshTokenRecord, t time.Time) error {
-	if err := validateReplaceArgs(oldID, newRec); err != nil {
-		return err
-	}
+    if err := validateReplaceArgs(oldID, newRec); err != nil { return err }
 
-	return r.fs.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		oldRef := r.docRT(oldID)
-		oldSnap, err := tx.Get(oldRef)
-		if err != nil {
-			return mapNotFound(err)
-		}
+    return r.fs.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+        oldRef := r.docRT(oldID)
+        oldSnap, err := tx.Get(oldRef)
+        if err != nil { return mapNotFound(err) }
 
-		var old RefreshTokenRecord
-		if err := oldSnap.DataTo(&old); err != nil {
-			return err
-		}
+        var old RefreshTokenRecord
+        if err := oldSnap.DataTo(&old); err != nil { return err }
 
-		if err := checkReplaceAllowed(&old, newRec, t); err != nil {
-			return err
-		}
-		prepareNewFromOld(newRec, &old, t)
+        if err := checkReplaceAllowed(&old, newRec, t); err != nil { return err }
+        prepareNewFromOld(newRec, &old, t)
 
-		newRef := r.docRT(newRec.RefreshID)
+        newRef := r.docRT(newRec.RefreshID)
 
-		if err := txUpdateWithPrecond(tx, oldRef, oldSnap, []firestore.Update{
-			{Path: "replaced_by", Value: newRec.RefreshID},
-			{Path: "revoked_at", Value: t},
-		}); err != nil {
-			return mapConflict(err)
-		}
+        if _, err := tx.Get(newRef); err == nil {
+            return ErrConflict
+        } else if status.Code(err) != codes.NotFound {
+            return err
+        }
 
-		if err := tx.Create(newRef, newRec); err != nil {
-			return mapConflict(err)
-		}
-		return nil
-	})
+        if err := txUpdateWithPrecond(tx, oldRef, oldSnap, []firestore.Update{
+            {Path: "replaced_by", Value: newRec.RefreshID},
+            {Path: "revoked_at",  Value: t},
+        }); err != nil {
+            return mapConflict(err)
+        }
+
+        if err := tx.Create(newRef, newRec); err != nil {
+            return mapConflict(err)
+        }
+        return nil
+    })
 }
