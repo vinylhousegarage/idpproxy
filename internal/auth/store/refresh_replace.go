@@ -93,7 +93,7 @@ func (r *Repo) Replace(ctx context.Context, oldID string, newRec *RefreshTokenRe
 
 		if err := txUpdateWithPrecond(tx, oldRef, oldSnap, []firestore.Update{
 			{Path: "replaced_by", Value: newRec.RefreshID},
-			{Path: "revoked_at",  Value: t},
+			{Path: "revoked_at", Value: t},
 		}); err != nil {
 			return mapConflict(err)
 		}
