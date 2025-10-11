@@ -2,11 +2,18 @@ package store
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 )
 
 func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
+	refreshID = strings.TrimSpace(refreshID)
+
+	if refreshID == "" {
+		return fmt.Errorf("%w: empty", ErrInvalidID)
+	}
 	if err := validateRefreshID(refreshID); err != nil {
 		return err
 	}
@@ -38,6 +45,6 @@ func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 
 		return tx.Update(doc, []firestore.Update{
 			{Path: "last_used_at", Value: now},
-		})
+		}, firestore.LastUpdateTime(snap.UpdateTime))
 	})
 }

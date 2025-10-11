@@ -12,3 +12,14 @@ func mapNotFound(err error) error {
 
 	return err
 }
+
+func mapConflict(err error) error {
+	switch status.Code(err) {
+	case codes.AlreadyExists,
+		codes.FailedPrecondition,
+		codes.Aborted:
+		return ErrConflict
+	default:
+		return err
+	}
+}
