@@ -9,7 +9,7 @@ import (
 
 func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 	if err := validateRefreshID(strings.TrimSpace(refreshID)); err != nil {
-			return err
+		return err
 	}
 
 	doc := r.docRT(refreshID)
@@ -39,6 +39,6 @@ func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
 
 		return tx.Update(doc, []firestore.Update{
 			{Path: "last_used_at", Value: now},
-		})
+		}, firestore.LastUpdateTime(snap.UpdateTime))
 	})
 }
