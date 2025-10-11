@@ -76,3 +76,15 @@ func getRefreshDoc(t *testing.T, r *Repo, id string) *RefreshTokenRecord {
 	require.NoError(t, snap.DataTo(&rec))
 	return &rec
 }
+
+func makeActiveRec(id, user string, now time.Time) *RefreshTokenRecord {
+	rec := makeRec(id, user, "fam-1", now)
+	rec.CreatedAt = now.Add(-time.Hour)
+	rec.ExpiresAt = now.Add(24 * time.Hour)
+	rec.DeleteAt  = now.Add(30 * 24 * time.Hour)
+	rec.RevokedAt  = time.Time{}
+	rec.ReplacedBy = ""
+
+	return rec
+}
+

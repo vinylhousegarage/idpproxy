@@ -9,28 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func seedRefreshDoc(t *testing.T, r *Repo, rec *RefreshTokenRecord) {
-	t.Helper()
-	ctx := context.Background()
-	_, err := r.docRT(rec.RefreshID).Set(ctx, rec)
-	require.NoError(t, err)
-}
-
-func makeActiveRec(id, user string, now time.Time) *RefreshTokenRecord {
-	return &RefreshTokenRecord{
-		RefreshID:  id,
-		UserID:     user,
-		DigestB64:  "ZGVtbw==",
-		KeyID:      "k1",
-		FamilyID:   "fam-1",
-		CreatedAt:  now.Add(-time.Hour),
-		ExpiresAt:  now.Add(24 * time.Hour),
-		DeleteAt:   now.Add(30 * 24 * time.Hour),
-		RevokedAt:  time.Time{},
-		ReplacedBy: "",
-	}
-}
-
 func TestRepo_Replace(t *testing.T) {
 	requireEmulator(t)
 
