@@ -13,42 +13,57 @@ func TestRepo_MarkUsed(t *testing.T) {
 	requireEmulator(t)
 	t.Parallel()
 
-	fixed := time.Unix(1_800_000_000, 0)
+	fixed := time.Unix(1_800_000_000, 0).UTC()
 	newRepo := func() *Repo { return newTestRepoWithNow(t, fixed) }
 
-	type seedFn func(*testing.T, *Repo)
-	mkSeed := func(rec RefreshTokenRecord) seedFn {
-		return func(t *testing.T, r *Repo) { seedRefreshDoc(t, r, &rec) }
+	mkID := func(t *testing.T, suffix string) string {
+		base := strings.ReplaceAll(t.Name(), "/", "_")
+		return base + "-" + time.Now().UTC().Format("20060102T150405.000000000Z") + "-" + suffix
+	}
+
+	cleanupIDs := func(t *testing.T, r *Repo, ids ...string) {
+		t.Helper()
+		t.Cleanup(func() {
+			for _, id := range ids {
+				if id == "" {
+					continue
+				}
+				_, _ = r.docRT(id).Delete(context.Background())
+			}
+		})
+	}
+
+	type seedFn func(*testing.T, *Repo, string)
+
+	seedActive := func(user string) seedFn {
+		return func(t *testing.T, r *Repo, id string) {
+			rec := makeActiveRec(id, user, fixed)
+			seedRefreshDoc(t, r, rec)
+		}
+	}
+	seedWith := func(mut func(*RefreshTokenRecord)) seedFn {
+		return func(t *testing.T, r *Repo, id string) {
+			rec := makeActiveRec(id, "github:123e4567-e89b-12d3-a456-426614174000", fixed)
+			mut(rec)
+			seedRefreshDoc(t, r, rec)
+		}
 	}
 
 	tests := []struct {
 		name          string
-		refreshID     string
 		seed          seedFn
+		refreshID     string
 		wantErrIs     error
 		wantErrSubstr string
 		wantLastUsed  *time.Time
 	}{
 		{
-			name:      "success",
-			refreshID: "rt-ok-1",
-			seed: mkSeed(RefreshTokenRecord{
-				RefreshID:  "rt-ok-1",
-				UserID:     "u1",
-				DigestB64:  "d",
-				KeyID:      "kid",
-				FamilyID:   "fam1",
-				CreatedAt:  fixed.Add(-time.Hour),
-				ExpiresAt:  fixed.Add(time.Hour),
-				DeleteAt:   time.Time{},
-				RevokedAt:  time.Time{},
-				LastUsedAt: time.Time{},
-			}),
+			name:         "success",
+			seed:         seedActive("github:123e4567-e89b-12d3-a456-426614174000"),
 			wantLastUsed: &fixed,
 		},
 		{
 			name:      "not-found",
-			refreshID: "rt-does-not-exist",
 			seed:      nil,
 			wantErrIs: ErrNotFound,
 		},
@@ -65,49 +80,23 @@ func TestRepo_MarkUsed(t *testing.T) {
 			wantErrIs: ErrInvalidID,
 		},
 		{
-			name:      "revoked",
-			refreshID: "rt-revoked-1",
-			seed: mkSeed(RefreshTokenRecord{
-				RefreshID:  "rt-revoked-1",
-				UserID:     "u1",
-				DigestB64:  "d",
-				KeyID:      "kid",
-				FamilyID:   "fam1",
-				CreatedAt:  fixed.Add(-2 * time.Hour),
-				ExpiresAt:  fixed.Add(time.Hour),
-				RevokedAt:  fixed.Add(-30 * time.Minute),
-				LastUsedAt: time.Time{},
+			name: "revoked",
+			seed: seedWith(func(r *RefreshTokenRecord) {
+				r.RevokedAt = fixed.Add(-30 * time.Minute)
 			}),
 			wantErrSubstr: "token revoked",
 		},
 		{
-			name:      "expired",
-			refreshID: "rt-expired-1",
-			seed: mkSeed(RefreshTokenRecord{
-				RefreshID:  "rt-expired-1",
-				UserID:     "u1",
-				DigestB64:  "d",
-				KeyID:      "kid",
-				FamilyID:   "fam1",
-				CreatedAt:  fixed.Add(-48 * time.Hour),
-				ExpiresAt:  fixed.Add(-1 * time.Minute),
-				LastUsedAt: time.Time{},
+			name: "expired",
+			seed: seedWith(func(r *RefreshTokenRecord) {
+				r.ExpiresAt = fixed.Add(-1 * time.Minute)
 			}),
 			wantErrSubstr: "token expired",
 		},
 		{
-			name:      "deleted",
-			refreshID: "rt-deleted-1",
-			seed: mkSeed(RefreshTokenRecord{
-				RefreshID:  "rt-deleted-1",
-				UserID:     "u1",
-				DigestB64:  "d",
-				KeyID:      "kid",
-				FamilyID:   "fam1",
-				CreatedAt:  fixed.Add(-48 * time.Hour),
-				ExpiresAt:  fixed.Add(time.Hour),
-				DeleteAt:   fixed.Add(-1 * time.Minute),
-				LastUsedAt: time.Time{},
+			name: "deleted",
+			seed: seedWith(func(r *RefreshTokenRecord) {
+				r.DeleteAt = fixed.Add(-1 * time.Minute)
 			}),
 			wantErrSubstr: "token deleted",
 		},
@@ -117,13 +106,22 @@ func TestRepo_MarkUsed(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			r := newRepo()
-			if tt.seed != nil {
-				tt.seed(t, r)
+
+			var id string
+			if tt.refreshID != "" {
+				id = tt.refreshID
+			} else {
+				id = mkID(t, "rt")
 			}
 
-			err := r.MarkUsed(context.Background(), tt.refreshID)
+			if tt.seed != nil && tt.refreshID == "" {
+				cleanupIDs(t, r, id)
+				tt.seed(t, r, id)
+			}
+
+			err := r.MarkUsed(context.Background(), id)
+
 			if tt.wantErrIs != nil {
 				require.ErrorIs(t, err, tt.wantErrIs)
 				return
@@ -136,9 +134,9 @@ func TestRepo_MarkUsed(t *testing.T) {
 
 			require.NoError(t, err)
 			if tt.wantLastUsed != nil {
-				got := getRefreshDoc(t, r, tt.refreshID)
+				got := getRefreshDoc(t, r, id)
 				require.True(t, got.LastUsedAt.Equal(*tt.wantLastUsed),
-					"expected %v, got %v", tt.wantLastUsed, got.LastUsedAt)
+					"expected %v, got %v", *tt.wantLastUsed, got.LastUsedAt)
 			}
 		})
 	}
