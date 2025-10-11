@@ -2,13 +2,19 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"cloud.google.com/go/firestore"
 )
 
 func (r *Repo) MarkUsed(ctx context.Context, refreshID string) error {
-	if err := validateRefreshID(strings.TrimSpace(refreshID)); err != nil {
+	refreshID = strings.TrimSpace(refreshID)
+
+	if refreshID == "" {
+		return fmt.Errorf("%w: empty", ErrInvalidID)
+	}
+	if err := validateRefreshID(refreshID); err != nil {
 		return err
 	}
 
