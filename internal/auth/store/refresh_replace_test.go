@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -21,15 +23,36 @@ func TestRepo_Replace(t *testing.T) {
 	const userOK = "github:123e4567-e89b-12d3-a456-426614174000"
 	const userNG = "github:00000000-0000-0000-0000-000000000000"
 
+	mkID := func(t *testing.T, suffix string) string {
+		base := strings.ReplaceAll(t.Name(), "/", "_")
+		return fmt.Sprintf("%s-%d-%s", base, time.Now().UnixNano(), suffix)
+	}
+
+	cleanupIDs := func(t *testing.T, repo *Repo, ids ...string) {
+		t.Helper()
+		t.Cleanup(func() {
+			for _, id := range ids {
+				if id == "" {
+					continue
+				}
+				_, _ = repo.docRT(id).Delete(context.Background())
+			}
+		})
+	}
+
 	t.Run("success: old active → old closed & new created", func(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
-		old := makeActiveRec("rt-old-1", userOK, now)
+		oldID := mkID(t, "old")
+		newID := mkID(t, "new")
+		cleanupIDs(t, repo, oldID, newID)
+
+		old := makeActiveRec(oldID, userOK, now)
 		seedRefreshDoc(t, repo, old)
 
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-1",
+			RefreshID: newID,
 			UserID:    userOK,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -40,17 +63,15 @@ func TestRepo_Replace(t *testing.T) {
 		err := repo.Replace(ctx, old.RefreshID, newRec, now)
 		require.NoError(t, err)
 
-		oldSnap, err := repo.docRT(old.RefreshID).Get(ctx)
+		oldSnap, err := repo.docRT(oldID).Get(ctx)
 		require.NoError(t, err)
-
 		var gotOld RefreshTokenRecord
 		require.NoError(t, oldSnap.DataTo(&gotOld))
-		require.Equal(t, "rt-new-1", gotOld.ReplacedBy)
+		require.Equal(t, newID, gotOld.ReplacedBy)
 		require.Equal(t, now, gotOld.RevokedAt)
 
-		newSnap, err := repo.docRT(newRec.RefreshID).Get(ctx)
+		newSnap, err := repo.docRT(newID).Get(ctx)
 		require.NoError(t, err)
-
 		var gotNew RefreshTokenRecord
 		require.NoError(t, newSnap.DataTo(&gotNew))
 		require.Equal(t, old.FamilyID, gotNew.FamilyID)
@@ -63,8 +84,11 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
+		newID := mkID(t, "new404")
+		cleanupIDs(t, repo, newID)
+
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-404",
+			RefreshID: newID,
 			UserID:    userOK,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -72,7 +96,7 @@ func TestRepo_Replace(t *testing.T) {
 			DeleteAt:  now.Add(30 * 24 * time.Hour),
 		}
 
-		err := repo.Replace(ctx, "rt-missing", newRec, now)
+		err := repo.Replace(ctx, mkID(t, "missing-old"), newRec, now)
 		require.Error(t, err)
 		require.True(t, errors.Is(err, ErrNotFound), "got %v", err)
 	})
@@ -81,7 +105,7 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
-		err := repo.Replace(ctx, "rt-any", nil, now)
+		err := repo.Replace(ctx, mkID(t, "any"), nil, now)
 		require.Error(t, err)
 		require.True(t, errors.Is(err, ErrInvalid))
 	})
@@ -90,8 +114,11 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
+		newID := mkID(t, "new-bad-old")
+		cleanupIDs(t, repo, newID)
+
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-bad-old",
+			RefreshID: newID,
 			UserID:    userOK,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -108,11 +135,15 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
-		old := makeActiveRec("rt-old-u", userOK, now)
+		oldID := mkID(t, "old-u")
+		newID := mkID(t, "new-u")
+		cleanupIDs(t, repo, oldID, newID)
+
+		old := makeActiveRec(oldID, userOK, now)
 		seedRefreshDoc(t, repo, old)
 
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-u",
+			RefreshID: newID,
 			UserID:    userNG,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -120,7 +151,7 @@ func TestRepo_Replace(t *testing.T) {
 			DeleteAt:  now.Add(30 * 24 * time.Hour),
 		}
 
-		err := repo.Replace(ctx, old.RefreshID, newRec, now)
+		err := repo.Replace(ctx, oldID, newRec, now)
 		require.Error(t, err)
 		require.True(t, errors.Is(err, ErrConflict))
 	})
@@ -129,12 +160,16 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
-		old := makeActiveRec("rt-old-r", userOK, now)
+		oldID := mkID(t, "old-r")
+		newID := mkID(t, "new-r")
+		cleanupIDs(t, repo, oldID, newID)
+
+		old := makeActiveRec(oldID, userOK, now)
 		old.RevokedAt = now.Add(-time.Minute)
 		seedRefreshDoc(t, repo, old)
 
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-r",
+			RefreshID: newID,
 			UserID:    userOK,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -142,7 +177,7 @@ func TestRepo_Replace(t *testing.T) {
 			DeleteAt:  now.Add(30 * 24 * time.Hour),
 		}
 
-		err := repo.Replace(ctx, old.RefreshID, newRec, now)
+		err := repo.Replace(ctx, oldID, newRec, now)
 		require.Error(t, err)
 		require.True(t, errors.Is(err, ErrConflict))
 	})
@@ -151,14 +186,18 @@ func TestRepo_Replace(t *testing.T) {
 		t.Parallel()
 		repo := newRepo()
 
-		old := makeActiveRec("rt-old-dup", userOK, now)
+		oldID := mkID(t, "old-dup")
+		newID := mkID(t, "new-dup")
+		cleanupIDs(t, repo, oldID, newID)
+
+		old := makeActiveRec(oldID, userOK, now)
 		seedRefreshDoc(t, repo, old)
 
-		existingNew := makeActiveRec("rt-new-dup", userOK, now)
+		existingNew := makeActiveRec(newID, userOK, now)
 		seedRefreshDoc(t, repo, existingNew)
 
 		newRec := &RefreshTokenRecord{
-			RefreshID: "rt-new-dup",
+			RefreshID: newID,
 			UserID:    userOK,
 			DigestB64: "ZGVtbw==",
 			KeyID:     "k1",
@@ -166,8 +205,8 @@ func TestRepo_Replace(t *testing.T) {
 			DeleteAt:  now.Add(30 * 24 * time.Hour),
 		}
 
-		err := repo.Replace(ctx, old.RefreshID, newRec, now)
+		err := repo.Replace(ctx, oldID, newRec, now)
 		require.Error(t, err)
-		require.True(t, errors.Is(err, ErrConflict))
+		require.True(t, errors.Is(err, ErrConflict), "got %v", err)
 	})
 }
