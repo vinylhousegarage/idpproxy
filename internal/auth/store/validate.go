@@ -47,3 +47,21 @@ func validateUserID(userID string) error {
 
 	return nil
 }
+
+func validateFamilyID(id string) error {
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return fmt.Errorf("empty familyID")
+	}
+	if len(id) > 512 {
+		return fmt.Errorf("familyID too long")
+	}
+	if containsSlash(id) {
+		return fmt.Errorf("familyID must not contain '/'")
+	}
+	return nil
+}
+
+func containsSlash(s string) bool {
+	return strings.Contains(s, "/")
+}
