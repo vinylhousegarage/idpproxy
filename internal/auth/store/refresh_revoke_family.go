@@ -9,8 +9,6 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-const maxBatchWrites = 500
-
 func (r *Repo) RevokeFamily(ctx context.Context, familyID, reason string, t time.Time) (int, error) {
 	if err := validateFamilyID(familyID); err != nil {
 		return 0, fmt.Errorf("invalid familyID: %w", err)
@@ -19,18 +17,11 @@ func (r *Repo) RevokeFamily(ctx context.Context, familyID, reason string, t time
 		t = r.now()
 	}
 
-	q := r.fs.Collection(colRefreshTokens).Where("family_id", "==", familyID)
-	iter := q.Documents(ctx)
+	iter := r.fs.Collection(colRefreshTokens).Where("family_id", "==", familyID).Documents(ctx)
 	defer iter.Stop()
 
-	commit := func(b *firestore.WriteBatch) error {
-		_, err := b.Commit(ctx)
-		return err
-	}
-
-	batch := r.fs.Batch()
-	pending := 0
-	affected := 0
+	bw := r.fs.BulkWriter(ctx)
+	var jobs []*firestore.BulkWriterJob
 
 	for {
 		doc, err := iter.Next()
@@ -38,41 +29,42 @@ func (r *Repo) RevokeFamily(ctx context.Context, familyID, reason string, t time
 			break
 		}
 		if err != nil {
-			return affected, err
+			bw.End()
+			return 0, err
 		}
 
 		var rec RefreshTokenRecord
 		if err := doc.DataTo(&rec); err != nil {
-			return affected, fmt.Errorf("decode: %w", err)
+			bw.End()
+			return 0, fmt.Errorf("decode: %w", err)
 		}
-
 		if !rec.RevokedAt.IsZero() {
 			continue
-		}
-
-		updates := []firestore.Update{
+	}
+		j, err := bw.Update(doc.Ref, []firestore.Update{
 			{Path: "revoked_at", Value: t},
 			{Path: "revoke_reason", Value: reason},
+		})
+		if err != nil {
+			bw.End()
+			return 0, err
 		}
+		jobs = append(jobs, j)
+	}
 
-		batch.Update(doc.Ref, updates)
-		pending++
-		affected++
+	bw.End()
 
-		if pending >= maxBatchWrites-1 {
-			if err := commit(batch); err != nil {
-				return affected, err
+	affected := 0
+	var firstErr error
+	for _, job := range jobs {
+		if _, err := job.Results(); err != nil {
+			if firstErr == nil {
+				firstErr = err
 			}
-			batch = r.fs.Batch()
-			pending = 0
+			continue
 		}
+		affected++
 	}
 
-	if pending > 0 {
-		if err := commit(batch); err != nil {
-			return affected, err
-		}
-	}
-
-	return affected, nil
+	return affected, firstErr
 }
