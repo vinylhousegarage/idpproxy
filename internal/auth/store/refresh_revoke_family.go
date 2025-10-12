@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 const maxBatchWrites = 500
@@ -33,7 +34,7 @@ func (r *Repo) RevokeFamily(ctx context.Context, familyID, reason string, t time
 
 	for {
 		doc, err := iter.Next()
-		if err == firestore.IteratorDone {
+		if err == iterator.Done {
 			break
 		}
 		if err != nil {
