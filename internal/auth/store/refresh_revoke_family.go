@@ -40,7 +40,7 @@ func (r *Repo) RevokeFamily(ctx context.Context, familyID, reason string, t time
 		}
 		if !rec.RevokedAt.IsZero() {
 			continue
-	}
+		}
 		j, err := bw.Update(doc.Ref, []firestore.Update{
 			{Path: "revoked_at", Value: t},
 			{Path: "revoke_reason", Value: reason},
