@@ -11,6 +11,7 @@ var (
 	ErrExpired        = errors.New("refresh token expired")
 	ErrInvalid        = errors.New("invalid record")
 	ErrInvalidID      = errors.New("invalid refreshID")
+	ErrInvalidUntil   = errors.New("invalid until")
 	ErrInvalidUserID  = errors.New("invalid UserID")
 	ErrNotFound       = errors.New("not found")
 	ErrRevoked        = errors.New("refresh token revoked")
