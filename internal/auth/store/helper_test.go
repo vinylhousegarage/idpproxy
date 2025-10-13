@@ -1,23 +1,23 @@
 package store
 
 import (
-    "context"
-    "os"
-    "testing"
-    "time"
+	"context"
+	"os"
+	"testing"
+	"time"
 
-    "cloud.google.com/go/firestore"
-    "github.com/stretchr/testify/require"
-		"google.golang.org/api/iterator"
-    "google.golang.org/api/option"
-    "google.golang.org/grpc/codes"
-    "google.golang.org/grpc/status"
+	"cloud.google.com/go/firestore"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func requireEmulator(t *testing.T) {
 	t.Helper()
 	if os.Getenv("FIRESTORE_EMULATOR_HOST") == "" {
-			t.Skip("FIRESTORE_EMULATOR_HOST is not set; skipping Firestore emulator tests")
+		t.Skip("FIRESTORE_EMULATOR_HOST is not set; skipping Firestore emulator tests")
 	}
 }
 
@@ -115,7 +115,9 @@ func purgeRefreshTokens(t *testing.T, r *Repo) {
 	var jobs []*firestore.BulkWriterJob
 	for {
 		doc, err := iter.Next()
-		if err == iterator.Done { break }
+		if err == iterator.Done {
+			break
+		}
 		require.NoError(t, err)
 		job, err := bw.Delete(doc.Ref)
 		require.NoError(t, err)
