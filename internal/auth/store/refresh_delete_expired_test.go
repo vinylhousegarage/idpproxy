@@ -13,11 +13,8 @@ import (
 
 func TestRepo_DeleteExpired(t *testing.T) {
 	requireEmulator(t)
-	t.Parallel()
 
 	t.Run("until is zero -> ErrInvalidUntil", func(t *testing.T) {
-		t.Parallel()
-
 		r := newTestRepo(t)
 		_, err := r.DeleteExpired(context.Background(), time.Time{})
 		if !errors.Is(err, ErrInvalidUntil) {
@@ -26,10 +23,10 @@ func TestRepo_DeleteExpired(t *testing.T) {
 	})
 
 	t.Run("delete only expired and revoked (keep active)", func(t *testing.T) {
-		t.Parallel()
-
 		fixed := time.Unix(1_800_000_000, 0).UTC()
 		r := newTestRepoWithNow(t, fixed)
+
+		purgeRefreshTokens(t, r)
 
 		until := fixed
 
@@ -84,10 +81,11 @@ func TestRepo_DeleteExpired(t *testing.T) {
 	})
 
 	t.Run("batch deletion over 500 docs (e.g., 503)", func(t *testing.T) {
-		t.Parallel()
-
 		fixed := time.Unix(1_800_100_000, 0).UTC()
 		r := newTestRepoWithNow(t, fixed)
+
+		purgeRefreshTokens(t, r)
+
 		until := fixed
 
 		n := 503
