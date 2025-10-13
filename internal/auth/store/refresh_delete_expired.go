@@ -9,30 +9,14 @@ import (
 )
 
 func (r *Repo) deleteByQuery(ctx context.Context, q firestore.Query) (int, error) {
-	const batchSize = 500
-
 	iter := q.Documents(ctx)
 	defer iter.Stop()
 
+	bw := r.fs.BulkWriter(ctx)
+	defer bw.End()
+
 	deleted := 0
-	batch := r.fs.Batch()
-	pending := 0
-
-	commit := func() error {
-		if pending == 0 {
-			return nil
-		}
-		_, err := batch.Commit(ctx)
-		if err != nil {
-			return err
-		}
-		deleted += pending
-
-		batch = r.fs.Batch()
-		pending = 0
-
-		return nil
-	}
+	var jobs []*firestore.BulkWriterJob
 
 	for {
 		doc, err := iter.Next()
@@ -43,17 +27,20 @@ func (r *Repo) deleteByQuery(ctx context.Context, q firestore.Query) (int, error
 			return deleted, err
 		}
 
-		batch.Delete(doc.Ref)
-		pending++
-		if pending >= batchSize {
-			if err := commit(); err != nil {
-				return deleted, err
-			}
+		job, err := bw.Delete(doc.Ref)
+		if err != nil {
+			return deleted, err
 		}
+		jobs = append(jobs, job)
 	}
 
-	if err := commit(); err != nil {
-		return deleted, err
+	bw.End()
+
+	for _, j := range jobs {
+		if _, err := j.Results(); err != nil {
+			continue
+		}
+		deleted++
 	}
 
 	return deleted, nil
@@ -67,9 +54,7 @@ func (r *Repo) DeleteExpired(ctx context.Context, until time.Time) (int, error) 
 	col := r.fs.Collection(colRefreshTokens)
 	total := 0
 
-	if n, err := r.deleteByQuery(ctx,
-		col.Where("expires_at", "<=", until),
-	); err != nil {
+	if n, err := r.deleteByQuery(ctx, col.Where("expires_at", "<=", until)); err != nil {
 		return total, err
 	} else {
 		total += n
