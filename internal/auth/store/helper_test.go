@@ -1,39 +1,40 @@
 package store
 
 import (
-	"context"
-	"os"
-	"testing"
-	"time"
+    "context"
+    "os"
+    "testing"
+    "time"
 
-	"cloud.google.com/go/firestore"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+    "cloud.google.com/go/firestore"
+    "github.com/stretchr/testify/require"
+		"google.golang.org/api/iterator"
+    "google.golang.org/api/option"
+    "google.golang.org/grpc/codes"
+    "google.golang.org/grpc/status"
 )
 
 func requireEmulator(t *testing.T) {
 	t.Helper()
 	if os.Getenv("FIRESTORE_EMULATOR_HOST") == "" {
-		t.Skip("FIRESTORE_EMULATOR_HOST is not set; skipping Firestore emulator tests")
+			t.Skip("FIRESTORE_EMULATOR_HOST is not set; skipping Firestore emulator tests")
 	}
 }
 
 func newTestRepo(t *testing.T) *Repo {
-	t.Helper()
+	requireEmulator(t)
+
 	ctx := context.Background()
 
 	projectID := os.Getenv("TEST_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Fatal("TEST_FIRESTORE_PROJECT is not set")
-	}
+	require.NotEmpty(t, projectID, "TEST_FIRESTORE_PROJECT is not set")
 
 	client, err := firestore.NewClient(ctx, projectID, option.WithoutAuthentication())
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = client.Close() })
 
-	fixed := time.Unix(1_725_000_000, 0)
+	fixed := time.Unix(1_725_000_000, 0).UTC()
+
 	return &Repo{fs: client, now: func() time.Time { return fixed }}
 }
 
@@ -41,6 +42,7 @@ func newTestRepoWithNow(t *testing.T, fixed time.Time) *Repo {
 	t.Helper()
 	r := newTestRepo(t)
 	r.now = func() time.Time { return fixed }
+
 	return r
 }
 
@@ -85,6 +87,7 @@ func getRefreshDoc(t *testing.T, r *Repo, id string) *RefreshTokenRecord {
 
 	var rec RefreshTokenRecord
 	require.NoError(t, snap.DataTo(&rec))
+
 	return &rec
 }
 
@@ -97,4 +100,30 @@ func makeActiveRec(id, user string, now time.Time) *RefreshTokenRecord {
 	rec.ReplacedBy = ""
 
 	return rec
+}
+
+func purgeRefreshTokens(t *testing.T, r *Repo) {
+	t.Helper()
+	ctx := context.Background()
+
+	iter := r.fs.Collection(colRefreshTokens).Documents(ctx)
+	defer iter.Stop()
+
+	bw := r.fs.BulkWriter(ctx)
+	defer bw.End()
+
+	var jobs []*firestore.BulkWriterJob
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done { break }
+		require.NoError(t, err)
+		job, err := bw.Delete(doc.Ref)
+		require.NoError(t, err)
+		jobs = append(jobs, job)
+	}
+	bw.End()
+	for _, j := range jobs {
+		_, err := j.Results()
+		require.NoError(t, err)
+	}
 }
