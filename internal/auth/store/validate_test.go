@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -42,30 +43,36 @@ func TestValidateUserID(t *testing.T) {
 
 	okUUID := uuid.New().String()
 
-	tests := []struct {
-		name   string
-		userID string
-		wantOK bool
+	cases := []struct {
+		name string
+		in   string
+		ok   bool
 	}{
-		{"github-ok", "github:" + okUUID, true},
-		{"google-ok", "google:" + okUUID, true},
-		{"missing", "", false},
-		{"no-colon", "github" + okUUID, false},
-		{"unknown-provider", "x:" + okUUID, false},
-		{"bad-uuid", "github:not-a-uuid", false},
+		{"ok-github", "github:" + okUUID, true},
+		{"ok-google", "google:" + okUUID, true},
+		{"ok-trim-and-case", "  GitHub :  " + okUUID + "  ", true},
+
+		{"ng-empty", "   ", false},
+		{"ng-no-colon", "github" + okUUID, false},
+		{"ng-unknown-provider", "x:" + okUUID, false},
+		{"ng-bad-uuid", "github:not-a-uuid", false},
+		{"ng-missing-uuid", "github:", false},
+		{"ng-missing-provider", ":" + okUUID, false},
 	}
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-
-			err := validateUserID(tt.userID)
-			if tt.wantOK && err != nil {
-				t.Fatalf("want OK, got err: %v", err)
-			}
-			if !tt.wantOK && err == nil {
-				t.Fatalf("want error, got nil")
+			err := validateUserID(tc.in)
+			if tc.ok {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				require.ErrorIs(t, err, ErrInvalidUserID)
+				if strings.Contains(tc.name, "no-colon") {
+					require.Contains(t, err.Error(), "want '<provider>:<uuid>'")
+				}
 			}
 		})
 	}

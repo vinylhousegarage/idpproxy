@@ -30,18 +30,17 @@ func validateUserID(userID string) error {
 		return fmt.Errorf("%w: empty", ErrInvalidUserID)
 	}
 
-	parts := strings.SplitN(userID, ":", 2)
-	if len(parts) != 2 {
+	provider, raw, ok := strings.Cut(userID, ":")
+	if !ok {
 		return fmt.Errorf("%w: want '<provider>:<uuid>'", ErrInvalidUserID)
 	}
-	provider := parts[0]
-	raw := parts[1]
+	provider = strings.ToLower(strings.TrimSpace(provider))
 
 	if _, ok := allowedProviders[provider]; !ok {
 		return fmt.Errorf("%w: unknown provider %q", ErrInvalidUserID, provider)
 	}
 
-	if _, err := uuid.Parse(raw); err != nil {
+	if _, err := uuid.Parse(strings.TrimSpace(raw)); err != nil {
 		return fmt.Errorf("%w: %v", ErrInvalidUserID, err)
 	}
 
@@ -59,6 +58,7 @@ func validateFamilyID(id string) error {
 	if containsSlash(id) {
 		return fmt.Errorf("familyID must not contain '/'")
 	}
+
 	return nil
 }
 
