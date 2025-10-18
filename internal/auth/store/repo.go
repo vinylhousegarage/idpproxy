@@ -23,3 +23,7 @@ func NewRepo(fs *firestore.Client) *Repo {
 func (r *Repo) docRT(id string) *firestore.DocumentRef {
 	return r.fs.Collection(colRefreshTokens).Doc(id)
 }
+
+func (r *Repo) docAG(userID string) *firestore.DocumentRef {
+	return r.fs.Collection(colAccessGenerations).Doc(userID)
+}
