@@ -2,11 +2,17 @@ package store
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
+
+func safeUserID(t *testing.T, prefix string) string {
+	base := strings.ReplaceAll(t.Name(), "/", "_")
+	return prefix + base
+}
 
 func getAccessGenDoc(t *testing.T, r *Repo, user string) *AccessGenerationRecord {
 	t.Helper()
@@ -46,12 +52,11 @@ func TestRepo_Set(t *testing.T) {
 		fixed := time.Unix(1_900_000_000, 0).UTC()
 		r := newTestRepoWithNow(t, fixed)
 
-		user := "u-set-create-" + t.Name()
+		user := safeUserID(t, "u-set-create-")
 		ctx := context.Background()
 		t.Cleanup(func() { _, _ = r.docAG(user).Delete(ctx) })
 
 		rec := &AccessGenerationRecord{UserID: user}
-
 		require.NoError(t, r.Set(ctx, rec))
 
 		got := getAccessGenDoc(t, r, user)
@@ -65,12 +70,11 @@ func TestRepo_Set(t *testing.T) {
 		old := time.Unix(1_850_000_000, 0).UTC()
 		r1 := newTestRepoWithNow(t, old)
 
-		user := "u-set-update-" + t.Name()
+		user := safeUserID(t, "u-set-update-")
 		ctx := context.Background()
 		t.Cleanup(func() { _, _ = r1.docAG(user).Delete(ctx) })
 
 		require.NoError(t, r1.Set(ctx, &AccessGenerationRecord{UserID: user}))
-
 		got1 := getAccessGenDoc(t, r1, user)
 		require.True(t, got1.UpdatedAt.Equal(old))
 
@@ -78,7 +82,6 @@ func TestRepo_Set(t *testing.T) {
 		r2 := newTestRepoWithNow(t, newer)
 
 		require.NoError(t, r2.Set(ctx, &AccessGenerationRecord{UserID: user}))
-
 		got2 := getAccessGenDoc(t, r2, user)
 		require.True(t, got2.UpdatedAt.After(got1.UpdatedAt), "UpdatedAt should advance on update")
 		require.True(t, got2.UpdatedAt.Equal(newer), "UpdatedAt should be the new repo.now()")
