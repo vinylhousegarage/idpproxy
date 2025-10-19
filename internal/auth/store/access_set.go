@@ -2,8 +2,6 @@ package store
 
 import (
 	"context"
-
-	"cloud.google.com/go/firestore"
 )
 
 func (r *Repo) Set(ctx context.Context, rec *AccessGenerationRecord) error {
