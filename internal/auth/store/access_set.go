@@ -15,7 +15,7 @@ func (r *Repo) Set(ctx context.Context, rec *AccessGenerationRecord) error {
 	}
 
 	rec.UpdatedAt = r.now().UTC()
-	_, err := r.docAG(rec.UserID).Set(ctx, rec, firestore.MergeAll)
+	_, err := r.docAG(rec.UserID).Set(ctx, rec)
 
 	return err
 }
