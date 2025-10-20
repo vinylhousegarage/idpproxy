@@ -14,18 +14,6 @@ func safeUserID(t *testing.T, prefix string) string {
 	return prefix + base
 }
 
-func getAccessGenDoc(t *testing.T, r *Repo, user string) *AccessGenerationRecord {
-	t.Helper()
-	ctx := context.Background()
-
-	snap, err := r.docAG(user).Get(ctx)
-	require.NoError(t, err)
-
-	var got AccessGenerationRecord
-	require.NoError(t, snap.DataTo(&got))
-	return &got
-}
-
 func TestRepo_Set(t *testing.T) {
 	requireEmulator(t)
 	t.Parallel()
