@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"sort"
 	"sync"
 	"testing"
 	"time"
@@ -70,7 +69,8 @@ func TestRepo_Bump(t *testing.T) {
 	t.Run("concurrent bumps -> atomic increments result in final gen == N", func(t *testing.T) {
 		t.Parallel()
 		r := newTestRepo(t)
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		user := "user-bump-concurrent"
 		t.Cleanup(func() { deleteAccessGenDoc(t, r, user) })
 		_, _ = r.docAG(user).Delete(ctx)
@@ -80,15 +80,13 @@ func TestRepo_Bump(t *testing.T) {
 		wg.Add(N)
 
 		tFixed := time.Unix(1_900_000_000, 0).UTC()
-		results := make([]int, N)
 		errs := make([]error, N)
 
 		for i := 0; i < N; i++ {
 			i := i
 			go func() {
 				defer wg.Done()
-				gen, err := r.BumpWithRetry(ctx, user, tFixed)
-				results[i] = gen
+				_, err := r.BumpWithRetry(ctx, user, tFixed)
 				errs[i] = err
 			}()
 		}
