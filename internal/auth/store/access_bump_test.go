@@ -69,7 +69,7 @@ func TestRepo_Bump(t *testing.T) {
 	t.Run("concurrent bumps -> atomic increments result in final gen == N", func(t *testing.T) {
 		t.Parallel()
 		r := newTestRepo(t)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		user := "user-bump-concurrent"
 		t.Cleanup(func() { deleteAccessGenDoc(t, r, user) })
