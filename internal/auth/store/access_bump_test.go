@@ -12,28 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func getAccessGenDoc(t *testing.T, r *Repo, user string) *AccessGenerationRecord {
-	t.Helper()
-	ctx := context.Background()
-
-	snap, err := r.docAG(user).Get(ctx)
-	require.NoError(t, err)
-
-	var got AccessGenerationRecord
-	require.NoError(t, snap.DataTo(&got))
-	return &got
-}
-
-func deleteAccessGenDoc(t *testing.T, r *Repo, user string) {
-	t.Helper()
-	ctx := context.Background()
-	_, err := r.docAG(user).Delete(ctx)
-	if st, ok := status.FromError(err); ok && st.Code() == codes.NotFound {
-		return
-	}
-	require.NoError(t, err)
-}
-
 func TestRepo_Bump(t *testing.T) {
 	requireEmulator(t)
 	t.Parallel()
