@@ -1,4 +1,4 @@
-package token
+package refresh
 
 import (
 	"testing"
