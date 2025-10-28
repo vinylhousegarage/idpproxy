@@ -22,8 +22,6 @@ func (f *fakeSigner) SignJWT(_ context.Context, payload map[string]any) (string,
 	return "jwt.mock", "kid-1", nil
 }
 
-func fixed(t time.Time) time.Time { return t.UTC() }
-
 func TestIssue_MinimalSuccess(t *testing.T) {
 	t.Parallel()
 
