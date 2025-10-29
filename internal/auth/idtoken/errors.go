@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrInvalidAudience = errors.New("invalid issuer")
+	ErrInvalidAudience = errors.New("invalid audience")
 	ErrInvalidExp      = errors.New("invalid expiration")
 	ErrInvalidIat      = errors.New("invalid issued-at")
 	ErrInvalidIssuer   = errors.New("invalid issuer")
