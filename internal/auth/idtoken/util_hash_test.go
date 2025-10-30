@@ -15,19 +15,34 @@ func TestComputeAtHash(t *testing.T) {
 		accessToken string
 		want        string
 		wantErr     bool
+		errContains string
 	}{
 		{
 			name:        "RS256 with known value",
 			alg:         "RS256",
 			accessToken: "abc123",
-			want:        "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ", // 確認用に実測値を記録
+			want:        "bKE9UspwyIPg8LsQHkJaiQ",
 			wantErr:     false,
 		},
 		{
-			name:        "RS384 should differ from RS256",
+			name:        "RS384 with known value",
 			alg:         "RS384",
 			accessToken: "abc123",
-			want:        "（異なる値）",
+			want:        "ox15iRkZytJPMmRHnXaIT1gb7jLoZ3g3",
+			wantErr:     false,
+		},
+		{
+			name:        "RS512 with known value",
+			alg:         "RS512",
+			accessToken: "abc123",
+			want:        "xwtd2ev7b1HQnUEytxcMnSB1CnhS8AaA9lZY8DEOgQA",
+			wantErr:     false,
+		},
+		{
+			name:        "lowercase alg is accepted",
+			alg:         "rs256",
+			accessToken: "abc123",
+			want:        "bKE9UspwyIPg8LsQHkJaiQ",
 			wantErr:     false,
 		},
 		{
@@ -35,25 +50,33 @@ func TestComputeAtHash(t *testing.T) {
 			alg:         "RS999",
 			accessToken: "abc",
 			wantErr:     true,
+			errContains: "unsupported alg",
 		},
 		{
 			name:        "empty access token",
 			alg:         "RS256",
 			accessToken: "",
 			wantErr:     true,
+			errContains: "empty access token",
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := computeAtHash(tt.alg, tt.accessToken)
-			if tt.wantErr {
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := computeAtHash(tc.alg, tc.accessToken)
+			if tc.wantErr {
 				require.Error(t, err)
+				if tc.errContains != "" {
+					require.ErrorContains(t, err, tc.errContains)
+				}
 				return
 			}
+
 			require.NoError(t, err)
-			require.NotEmpty(t, got)
-			t.Logf("alg=%s, at_hash=%s", tt.alg, got)
+			require.Equal(t, tc.want, got, "alg=%s token=%q", tc.alg, tc.accessToken)
 		})
 	}
 }
