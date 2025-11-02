@@ -1,5 +1,7 @@
 package idtoken
 
+import "errors"
+
 type IDTokenClaims struct {
 	Iss      string   `json:"iss"`
 	Sub      string   `json:"sub"`
@@ -25,7 +27,11 @@ func (c *IDTokenClaims) Validate() error {
 		return ErrInvalidIat
 	case c.Exp <= c.Iat:
 		return ErrInvalidExp
-	default:
-		return nil
 	}
+
+	if c.AuthTime != 0 && c.AuthTime > c.Iat {
+		return errors.New("invalid auth_time: must be <= iat")
+	}
+
+	return nil
 }
