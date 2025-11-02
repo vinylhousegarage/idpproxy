@@ -40,6 +40,20 @@ func (uc *IssueIDTokenUsecase) Issue(ctx context.Context, in *IDTokenInput) (tok
 		claims.AuthTime = in.AuthTime.UTC().Unix()
 	}
 
+	if in.AccessToken != "" && in.SignAlg != "" {
+		if h, err := computeAtHash(in.SignAlg, in.AccessToken); err == nil {
+			claims.AtHash = h
+		} else {
+			return "", "", err
+		}
+	}
+	if in.Nonce != "" {
+		claims.Nonce = in.Nonce
+	}
+	if in.Azp != "" {
+		claims.Azp = in.Azp
+	}
+
 	if err := claims.Validate(); err != nil {
 		return "", "", err
 	}
