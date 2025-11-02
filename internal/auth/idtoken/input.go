@@ -9,4 +9,10 @@ type IDTokenInput struct {
 	TTL      time.Duration
 	AuthTime *time.Time
 	AMR      []string
+
+	AccessToken string
+	SignAlg     string
+
+	Nonce string
+	Azp   string
 }

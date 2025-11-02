@@ -39,6 +39,29 @@ func (uc *IssueIDTokenUsecase) Issue(ctx context.Context, in *IDTokenInput) (tok
 	if in.AuthTime != nil {
 		claims.AuthTime = in.AuthTime.UTC().Unix()
 	}
+	if in.Nonce != "" {
+		claims.Nonce = in.Nonce
+	}
+	if in.Azp != "" {
+		claims.Azp = in.Azp
+	}
+
+	if in.AccessToken != "" {
+		alg := in.SignAlg
+		if alg == "" {
+			if ap, ok := uc.Signer.(interface{ Algorithm() string }); ok {
+				alg = ap.Algorithm()
+			}
+		}
+		if alg == "" {
+			return "", "", errors.New("idtoken: missing alg for at_hash")
+		}
+		h, err := computeAtHash(alg, in.AccessToken)
+		if err != nil {
+			return "", "", err
+		}
+		claims.AtHash = h
+	}
 
 	if err := claims.Validate(); err != nil {
 		return "", "", err
