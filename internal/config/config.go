@@ -35,10 +35,11 @@ func LoadFirebaseConfig() (*FirebaseConfig, error) {
 }
 
 type GitHubOAuthConfig struct {
-	ClientID    string
-	RedirectURI string
-	Scope       string
-	AllowSignup string
+	ClientID     string
+	ClientSecret string
+	RedirectURI  string
+	Scope        string
+	AllowSignup  string
 }
 
 func LoadGitHubOAuthConfig() (*GitHubOAuthConfig, error) {
@@ -51,14 +52,19 @@ func LoadGitHubDevOAuthConfig() (*GitHubOAuthConfig, error) {
 
 func loadGitHubOAuthConfigWithPrefix(prefix string) (*GitHubOAuthConfig, error) {
 	clientID := strings.TrimSpace(os.Getenv(prefix + "CLIENT_ID"))
+	clientSecret := strings.TrimSpace(os.Getenv(prefix + "CLIENT_SECRET"))
 	redirectURI := strings.TrimSpace(os.Getenv(prefix + "REDIRECT_URI"))
 
-	if clientID == "" && redirectURI == "" {
-		return nil, fmt.Errorf("%sCLIENT_ID and %sREDIRECT_URI are not set", prefix, prefix)
-	}
+  if clientID == "" && clientSecret == "" && redirectURI == "" {
+		return nil, fmt.Errorf("%sCLIENT_ID, %sCLIENT_SECRET and %sREDIRECT_URI are not set", prefix, prefix, prefix)
+  }
 
 	if clientID == "" {
 		return nil, fmt.Errorf("%sCLIENT_ID is not set", prefix)
+	}
+
+	if clientSecret == "" {
+		return nil, fmt.Errorf("%sCLIENT_SECRET is not set", prefix)
 	}
 
 	if redirectURI == "" {
@@ -71,6 +77,7 @@ func loadGitHubOAuthConfigWithPrefix(prefix string) (*GitHubOAuthConfig, error) 
 
 	return &GitHubOAuthConfig{
 		ClientID:    clientID,
+		ClientSecret: clientSecret,
 		RedirectURI: redirectURI,
 		Scope:       GitHubScope,
 		AllowSignup: GitHubAllowSignup,

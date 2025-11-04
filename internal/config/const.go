@@ -16,6 +16,9 @@ const (
 	// for BuildGitHubLoginURL
 	GitHubAuthorizeURL = "https://github.com/login/oauth/authorize"
 
+	// for BuildAccessTokenRequest
+	GitHubTokenURL = "https://github.com/login/oauth/access_token"
+
 	// for fetching Google OIDC metadata
 	GoogleOIDCMetadataURL = "https://accounts.google.com/.well-known/openid-configuration"
 
