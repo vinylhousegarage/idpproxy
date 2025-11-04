@@ -10,13 +10,11 @@ import (
 func TestGetPort(t *testing.T) {
 	t.Run("with env var", func(t *testing.T) {
 		t.Setenv("PORT", "12345")
-
 		require.Equal(t, "12345", GetPort())
 	})
 
 	t.Run("without env var", func(t *testing.T) {
 		t.Setenv("PORT", "")
-
 		require.Equal(t, DefaultPort, GetPort())
 	})
 }
@@ -55,11 +53,13 @@ func TestLoadFirebaseConfig(t *testing.T) {
 func TestLoadGitHubOAuthConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
+		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
 
 		cfg, err := LoadGitHubOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-client-id", cfg.ClientID)
+		require.Equal(t, "test-github-client-secret", cfg.ClientSecret)
 		require.Equal(t, "https://idpproxy.com/github/callback", cfg.RedirectURI)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
@@ -67,16 +67,18 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 
 	t.Run("missing both variables", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
+		t.Setenv("GITHUB_CLIENT_SECRET", "")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.EqualError(t, err, "GITHUB_CLIENT_ID and GITHUB_REDIRECT_URI are not set")
+		require.EqualError(t, err, "GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET and GITHUB_REDIRECT_URI are not set")
 	})
 
 	t.Run("missing client ID", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
+		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
 
 		cfg, err := LoadGitHubOAuthConfig()
@@ -87,6 +89,7 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 
 	t.Run("missing redirect URI", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
+		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 		t.Setenv("GITHUB_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubOAuthConfig()
@@ -99,11 +102,13 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 func TestLoadGitHubDevConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
+		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
 
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-dev-client-id", cfg.ClientID)
+		require.Equal(t, "test-github-dev-client-secret", cfg.ClientSecret)
 		require.Equal(t, "http://localhost:9000/github/callback", cfg.RedirectURI)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
@@ -111,16 +116,18 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 
 	t.Run("missing both variables", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
+		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID and GITHUB_DEV_REDIRECT_URI are not set")
+		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID, GITHUB_DEV_CLIENT_SECRET and GITHUB_DEV_REDIRECT_URI are not set")
 	})
 
 	t.Run("missing client ID", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
+		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
 
 		cfg, err := LoadGitHubDevOAuthConfig()
@@ -131,6 +138,7 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 
 	t.Run("missing redirect URI", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
+		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubDevOAuthConfig()
