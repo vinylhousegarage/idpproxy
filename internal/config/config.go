@@ -55,9 +55,9 @@ func loadGitHubOAuthConfigWithPrefix(prefix string) (*GitHubOAuthConfig, error) 
 	clientSecret := strings.TrimSpace(os.Getenv(prefix + "CLIENT_SECRET"))
 	redirectURI := strings.TrimSpace(os.Getenv(prefix + "REDIRECT_URI"))
 
-  if clientID == "" && clientSecret == "" && redirectURI == "" {
+	if clientID == "" && clientSecret == "" && redirectURI == "" {
 		return nil, fmt.Errorf("%sCLIENT_ID, %sCLIENT_SECRET and %sREDIRECT_URI are not set", prefix, prefix, prefix)
-  }
+	}
 
 	if clientID == "" {
 		return nil, fmt.Errorf("%sCLIENT_ID is not set", prefix)
@@ -76,11 +76,11 @@ func loadGitHubOAuthConfigWithPrefix(prefix string) (*GitHubOAuthConfig, error) 
 	}
 
 	return &GitHubOAuthConfig{
-		ClientID:    clientID,
+		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		RedirectURI: redirectURI,
-		Scope:       GitHubScope,
-		AllowSignup: GitHubAllowSignup,
+		RedirectURI:  redirectURI,
+		Scope:        GitHubScope,
+		AllowSignup:  GitHubAllowSignup,
 	}, nil
 }
 
