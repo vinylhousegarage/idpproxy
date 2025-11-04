@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"testing"
 	"time"
 
@@ -23,6 +22,14 @@ func TestBuildAccessTokenRequest(t *testing.T) {
 		RedirectURI:  "https://idpproxy.com/github/callback",
 	}
 
+	readBody := func(t *testing.T, r io.ReadCloser) []byte {
+		t.Helper()
+		b, err := io.ReadAll(r)
+		require.NoError(t, err)
+		require.NoError(t, r.Close())
+		return b
+	}
+
 	t.Run("builds POST request with correct URL and headers", func(t *testing.T) {
 		t.Parallel()
 
@@ -37,6 +44,9 @@ func TestBuildAccessTokenRequest(t *testing.T) {
 
 		require.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
 		require.Equal(t, "application/json", req.Header.Get("Accept"))
+
+		body := readBody(t, req.Body)
+		require.Greater(t, len(body), 0)
 	})
 
 	t.Run("encodes form body correctly", func(t *testing.T) {
@@ -49,11 +59,9 @@ func TestBuildAccessTokenRequest(t *testing.T) {
 		req, err := BuildAccessTokenRequest(ctx, cfg, code, state)
 		require.NoError(t, err)
 
-		bodyBytes, err := io.ReadAll(req.Body)
-		require.NoError(t, err)
-		require.NoError(t, req.Body.Close())
+		body := readBody(t, req.Body)
 
-		values, err := url.ParseQuery(string(bodyBytes))
+		values, err := url.ParseQuery(string(body))
 		require.NoError(t, err)
 
 		require.Equal(t, cfg.ClientID, values.Get("client_id"))
@@ -74,16 +82,14 @@ func TestBuildAccessTokenRequest(t *testing.T) {
 		req, err := BuildAccessTokenRequest(context.Background(), &cfg2, "code-1", "state-2")
 		require.NoError(t, err)
 
-		bodyBytes, err := io.ReadAll(req.Body)
-		require.NoError(t, err)
-		require.NoError(t, req.Body.Close())
+		body := readBody(t, req.Body)
 
-		values, err := url.ParseQuery(string(bodyBytes))
+		values, err := url.ParseQuery(string(body))
 		require.NoError(t, err)
 		require.Equal(t, cfg2.RedirectURI, values.Get("redirect_uri"))
 
-		raw := string(bodyBytes)
-		require.True(t, strings.Contains(raw, "redirect_uri="))
+		raw := string(body)
+		require.Contains(t, raw, "redirect_uri=")
 		require.NotContains(t, raw, "welcome page")
 	})
 
