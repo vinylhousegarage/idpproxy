@@ -122,7 +122,6 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	accessToken = ""
 	h.OAuth.Logger.Info("github login success",
 		zap.String("login", ghUser.Login),
 		zap.Int64("gh_id", ghUser.ID),
