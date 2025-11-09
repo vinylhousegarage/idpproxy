@@ -2,11 +2,13 @@ package callback
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"net/http"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
+	"github.com/vinylhousegarage/idpproxy/internal/idtoken"
 )
 
 type fakeHTTPClient struct {
@@ -29,12 +31,19 @@ func (f *fakeHTTPClient) Do(req *http.Request) (*http.Response, error) {
 		}
 		return okJSON(f.userJSON), nil
 	default:
-		return &http.Response{StatusCode: 404, Body: io.NopCloser(bytes.NewBufferString(`not found`))}, nil
+		return &http.Response{
+			StatusCode: 404,
+			Body:       io.NopCloser(bytes.NewBufferString(`not found`)),
+		}, nil
 	}
 }
 
 func okJSON(s string) *http.Response {
-	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(s)), Header: make(http.Header)}
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(bytes.NewBufferString(s)),
+		Header:     make(http.Header),
+	}
 }
 
 type fakeUserService struct {
@@ -42,10 +51,11 @@ type fakeUserService struct {
 	err      error
 }
 
-func (s *fakeUserService) UpsertFromGitHub(_ interface{}, _ int64, _ string, _ string) (string, error) {
+func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string, _ string) (string, error) {
 	if s.err != nil {
 		return "", s.err
 	}
+
 	return s.returnID, nil
 }
 
@@ -57,9 +67,10 @@ type fakeIssuer struct {
 
 type issuerAdapter struct{ f *fakeIssuer }
 
-func (a *issuerAdapter) Issue(_ interface{}, _ any) (string, string, error) {
+func (a *issuerAdapter) Issue(_ context.Context, _ *idtoken.IDTokenInput) (string, string, error) {
 	if a.f.err != nil {
 		return "", "", a.f.err
 	}
+
 	return a.f.jwt, a.f.kid, nil
 }
