@@ -3,7 +3,7 @@ package callback
 import (
 	"context"
 
-	"github.com/vinylhousegarage/idpproxy/internal/idtoken"
+	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 )
 
 type UserService interface {

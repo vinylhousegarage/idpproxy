@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
-	"github.com/vinylhousegarage/idpproxy/internal/idtoken"
+	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 )
 
 type fakeHTTPClient struct {

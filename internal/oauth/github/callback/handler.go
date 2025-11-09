@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/idtoken"
+	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 	githubuser "github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 	"go.uber.org/zap"
 )
