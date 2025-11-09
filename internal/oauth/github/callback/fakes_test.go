@@ -39,14 +39,14 @@ func (f *fakeHTTPClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func okJSON(s string) *http.Response {
-    h := make(http.Header)
-    h.Set("Content-Type", "application/json")
+	h := make(http.Header)
+	h.Set("Content-Type", "application/json")
 
-    return &http.Response{
-        StatusCode: 200,
-        Body:       io.NopCloser(bytes.NewBufferString(s)),
-        Header:     h,
-    }
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(bytes.NewBufferString(s)),
+		Header:     h,
+	}
 }
 
 type fakeUserService struct {
