@@ -23,11 +23,11 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tokenJSON := loadTestDataJSON(t, "testdata/token_success.json")
-	userJSON  := loadTestDataJSON(t, "testdata/user_success.json")
+	userJSON := loadTestDataJSON(t, "testdata/user_success.json")
 
 	httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
-	us    := &fakeUserService{returnID: "user-internal-123"}
-	iss   := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
+	us := &fakeUserService{returnID: "user-internal-123"}
+	iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
 
 	h := newHandlerForTest(t, httpc, us, iss)
 
