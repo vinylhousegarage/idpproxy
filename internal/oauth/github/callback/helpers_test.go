@@ -52,11 +52,6 @@ func setStateCookie(r *http.Request, state string) {
 	})
 }
 
-func mustJSON(v any) string {
-	b, _ := json.Marshal(v)
-	return string(b)
-}
-
 func loadTestDataJSON(t *testing.T, path string) string {
 	t.Helper()
 	b, err := os.ReadFile(path)
