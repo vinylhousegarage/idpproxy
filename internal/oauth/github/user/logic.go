@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,13 +10,6 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/response"
-)
-
-var (
-	ErrEmptyBearerToken                 = errors.New("empty bearer token")
-	ErrInvalidAuthorizationHeaderFormat = errors.New("invalid Authorization header format")
-	ErrMissingAuthorizationHeader       = errors.New("missing Authorization header")
-	ErrNilContext                       = errors.New("nil context")
 )
 
 var githubUserURL = config.GitHubUserURL
