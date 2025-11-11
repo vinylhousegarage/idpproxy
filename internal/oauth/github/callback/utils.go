@@ -2,21 +2,12 @@ package callback
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"net/url"
 	"strings"
-)
-
-var (
-	ErrEmptyBody          = errors.New("empty response body")
-	ErrMissingAccessToken = errors.New("missing access_token in response")
-	ErrGitHubOAuthError   = errors.New("github oauth error")
-	ErrNon2xxStatus       = errors.New("non-2xx response")
-	ErrParseFormBody      = errors.New("parse form body")
 )
 
 const (
