@@ -36,10 +36,8 @@ func (uc *Usecase) Start(ctx context.Context, userID string) (*Session, error) {
 		SessionID: sessionID,
 		UserID:    userID,
 		Status:    "active",
-		CreatedAt: &now,
-		UpdatedAt: &now,
-		LastUsed:  &now,
-		ExpiresAt: &expiresAt,
+		CreatedAt: now,
+		ExpiresAt: expiresAt,
 	}
 
 	if err := uc.Repo.Create(ctx, s); err != nil {
