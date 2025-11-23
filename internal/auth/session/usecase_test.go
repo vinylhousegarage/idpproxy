@@ -45,9 +45,10 @@ func TestUsecase_Start(t *testing.T) {
 				require.Equal(t, "active", saved.Status)
 
 				require.Equal(t, now, saved.CreatedAt)
-				require.Equal(t, now, saved.UpdatedAt)
-				require.Equal(t, now, saved.LastUsed)
 				require.Equal(t, now.Add(ttl), saved.ExpiresAt)
+
+				require.Nil(t, saved.UpdatedAt)
+				require.Nil(t, saved.LastUsed)
 
 				require.Equal(t, saved.SessionID, got.SessionID)
 				require.Equal(t, saved.UserID, got.UserID)
