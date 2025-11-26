@@ -6,4 +6,5 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, s *Session) error
+	FindByID(ctx context.Context, sessionID string) (*Session, error)
 }
