@@ -2,7 +2,6 @@ package session
 
 import (
 	"context"
-	"errors"
 	"time"
 )
 
@@ -15,10 +14,10 @@ type Usecase struct {
 
 func (uc *Usecase) Start(ctx context.Context, userID string) (*Session, error) {
 	if uc == nil || uc.Repo == nil || uc.Now == nil || uc.IDGenerator == nil || uc.TTL <= 0 {
-		return nil, errors.New("session: invalid usecase configuration")
+		return nil, ErrInvalidUsecaseConfig
 	}
 	if userID == "" {
-		return nil, errors.New("session: empty userID")
+		return nil, ErrEmptyUserID
 	}
 
 	now := uc.Now().UTC()
@@ -49,10 +48,10 @@ func (uc *Usecase) Start(ctx context.Context, userID string) (*Session, error) {
 
 func (uc *Usecase) Get(ctx context.Context, sessionID string) (*Session, error) {
 	if uc == nil || uc.Repo == nil {
-		return nil, errors.New("session: invalid usecase configuration")
+		return nil, ErrInvalidUsecaseConfig
 	}
 	if sessionID == "" {
-		return nil, errors.New("session: empty sessionID")
+		return nil, ErrEmptySessionID
 	}
 
 	return uc.Repo.FindByID(ctx, sessionID)
