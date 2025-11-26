@@ -46,3 +46,14 @@ func (uc *Usecase) Start(ctx context.Context, userID string) (*Session, error) {
 
 	return s, nil
 }
+
+func (uc *Usecase) Get(ctx context.Context, sessionID string) (*Session, error) {
+	if uc == nil || uc.Repo == nil {
+		return nil, errors.New("session: invalid usecase configuration")
+	}
+	if sessionID == "" {
+		return nil, errors.New("session: empty sessionID")
+	}
+
+	return uc.Repo.FindByID(ctx, sessionID)
+}
