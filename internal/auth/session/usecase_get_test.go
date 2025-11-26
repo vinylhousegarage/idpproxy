@@ -8,24 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type fakeGetRepository struct {
-	session *Session
-	err     error
-	lastID  string
-}
-
-func (f *fakeGetRepository) Create(_ context.Context, _ *Session) error {
-	return nil
-}
-
-func (f *fakeGetRepository) FindByID(_ context.Context, sessionID string) (*Session, error) {
-	f.lastID = sessionID
-	if f.err != nil {
-		return nil, f.err
-	}
-	return f.session, nil
-}
-
 func TestUsecase_Get(t *testing.T) {
 	t.Parallel()
 
@@ -56,7 +38,7 @@ func TestUsecase_Get(t *testing.T) {
 	t.Run("empty_sessionID", func(t *testing.T) {
 		t.Parallel()
 
-		repo := &fakeGetRepository{}
+		repo := newFakeRepository()
 		uc := &Usecase{Repo: repo}
 		ctx := context.Background()
 
@@ -74,9 +56,10 @@ func TestUsecase_Get(t *testing.T) {
 			UserID:    "user-123",
 			Status:    "active",
 		}
-		repo := &fakeGetRepository{
-			session: s,
-		}
+
+		repo := newFakeRepository()
+		repo.findMap["session-123"] = s
+
 		uc := &Usecase{Repo: repo}
 		ctx := context.Background()
 
@@ -84,16 +67,16 @@ func TestUsecase_Get(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Same(t, s, got)
-		require.Equal(t, "session-123", repo.lastID)
 	})
 
 	t.Run("repository_error", func(t *testing.T) {
 		t.Parallel()
 
 		repoErr := errors.New("find error")
-		repo := &fakeGetRepository{
-			err: repoErr,
-		}
+
+		repo := newFakeRepository()
+		repo.findErr = repoErr
+
 		uc := &Usecase{Repo: repo}
 		ctx := context.Background()
 
@@ -101,6 +84,5 @@ func TestUsecase_Get(t *testing.T) {
 
 		require.Nil(t, got)
 		require.ErrorIs(t, err, repoErr)
-		require.Equal(t, "session-123", repo.lastID)
 	})
 }

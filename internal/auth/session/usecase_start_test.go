@@ -9,19 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type fakeRepository struct {
-	created []*Session
-	err     error
-}
-
-func (f *fakeRepository) Create(_ context.Context, s *Session) error {
-	if f.err != nil {
-		return f.err
-	}
-	f.created = append(f.created, s)
-	return nil
-}
-
 func TestUsecase_Start(t *testing.T) {
 	t.Parallel()
 
@@ -81,7 +68,8 @@ func TestUsecase_Start(t *testing.T) {
 			now := time.Date(2025, 11, 22, 10, 0, 0, 0, time.UTC)
 			ttl := 30 * time.Minute
 
-			repo := &fakeRepository{err: tt.repoErr}
+			repo := newFakeRepository()
+			repo.createErr = tt.repoErr
 
 			uc := &Usecase{
 				Repo: repo,
