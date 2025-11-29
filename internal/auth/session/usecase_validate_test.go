@@ -1,4 +1,3 @@
-// usecase_validate_test.go
 package session
 
 import (
