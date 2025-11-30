@@ -9,6 +9,12 @@ var (
 	ErrInvalidUsecaseConfig = errors.New("session: invalid usecase configuration")
 )
 
+// Domain validation
+var (
+	ErrExpiredSession  = errors.New("session: expired")
+	ErrInactiveSession = errors.New("session: inactive")
+)
+
 // Repository layer
 var (
 	ErrNotFound = errors.New("session: not found")
