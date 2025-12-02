@@ -112,7 +112,7 @@ func (uc *Usecase) Invalidate(ctx context.Context, sessionID string) (*Session, 
 	}
 
 	s.Status = "inactive"
-	s.UpdatedAt = now
+	s.UpdatedAt = &now
 
 	if err := uc.Repo.Update(ctx, s); err != nil {
 		return nil, err
