@@ -84,3 +84,39 @@ func (uc *Usecase) Validate(ctx context.Context, sessionID string) (*Session, er
 
 	return s, nil
 }
+
+func (uc *Usecase) Invalidate(ctx context.Context, sessionID string) (*Session, error) {
+	if uc == nil || uc.Repo == nil || uc.Now == nil {
+		return nil, ErrInvalidUsecaseConfig
+	}
+	if sessionID == "" {
+		return nil, ErrEmptySessionID
+	}
+
+	s, err := uc.Repo.FindByID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	now := uc.Now().UTC()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	if !s.ExpiresAt.After(now) {
+		return nil, ErrExpiredSession
+	}
+
+	if s.Status != "active" {
+		return nil, ErrInactiveSession
+	}
+
+	s.Status = "inactive"
+	s.UpdatedAt = &now
+
+	if err := uc.Repo.Update(ctx, s); err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
