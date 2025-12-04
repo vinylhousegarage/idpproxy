@@ -209,7 +209,9 @@ func TestUsecase_Touch(t *testing.T) {
 		require.Equal(t, "user-123", got.UserID)
 		require.Equal(t, "active", got.Status)
 
-		require.Equal(t, now, got.LastUsed)
+		require.NotNil(t, got.LastUsed)
+		require.Equal(t, now, *got.LastUsed)
+
 		require.NotNil(t, got.UpdatedAt)
 		require.Equal(t, now, *got.UpdatedAt)
 
