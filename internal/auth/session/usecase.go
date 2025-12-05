@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+func safeNowUTC(nowFn func() time.Time) time.Time {
+	now := nowFn().UTC()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	return now
+}
+
 type Usecase struct {
 	Repo        Repository
 	Now         func() time.Time
@@ -20,10 +29,7 @@ func (uc *Usecase) Start(ctx context.Context, userID string) (*Session, error) {
 		return nil, ErrEmptyUserID
 	}
 
-	now := uc.Now().UTC()
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
+	now := safeNowUTC(uc.Now)
 	expiresAt := now.Add(uc.TTL)
 
 	sessionID, err := uc.IDGenerator()
@@ -70,10 +76,7 @@ func (uc *Usecase) Validate(ctx context.Context, sessionID string) (*Session, er
 		return nil, err
 	}
 
-	now := uc.Now().UTC()
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
+	now := safeNowUTC(uc.Now)
 
 	if !s.ExpiresAt.After(now) {
 		return nil, ErrExpiredSession
@@ -98,10 +101,7 @@ func (uc *Usecase) Invalidate(ctx context.Context, sessionID string) (*Session, 
 		return nil, err
 	}
 
-	now := uc.Now().UTC()
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
+	now := safeNowUTC(uc.Now)
 
 	if !s.ExpiresAt.After(now) {
 		return nil, ErrExpiredSession
@@ -134,10 +134,7 @@ func (uc *Usecase) Touch(ctx context.Context, sessionID string) (*Session, error
 		return nil, err
 	}
 
-	now := uc.Now().UTC()
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
+	now := safeNowUTC(uc.Now)
 
 	if !s.ExpiresAt.After(now) {
 		return nil, ErrExpiredSession
