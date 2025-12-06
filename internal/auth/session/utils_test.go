@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"time"
 )
 
 type fakeRepository struct {
@@ -62,4 +63,12 @@ func (f *fakeRepository) Update(_ context.Context, s *Session) error {
 	f.findMap[s.SessionID] = s
 
 	return nil
+}
+
+func (f *fakeRepository) PurgeExpired(_ context.Context, before time.Time) (int, error) {
+	if f.purgeErr != nil {
+		return 0, f.purgeErr
+	}
+	f.purgeBefore = before
+	return f.purgeResult, nil
 }
