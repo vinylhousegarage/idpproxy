@@ -15,6 +15,10 @@ type fakeRepository struct {
 	updateErr error
 
 	lastFindID string
+
+	purgeErr    error
+	purgeBefore time.Time
+	purgeResult int
 }
 
 func newFakeRepository() *fakeRepository {
@@ -70,5 +74,6 @@ func (f *fakeRepository) PurgeExpired(_ context.Context, before time.Time) (int,
 		return 0, f.purgeErr
 	}
 	f.purgeBefore = before
+
 	return f.purgeResult, nil
 }
