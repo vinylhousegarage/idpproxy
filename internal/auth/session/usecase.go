@@ -152,3 +152,18 @@ func (uc *Usecase) Touch(ctx context.Context, sessionID string) (*Session, error
 
 	return s, nil
 }
+
+func (uc *Usecase) PurgeExpired(ctx context.Context) (int, error) {
+	if uc == nil || uc.Repo == nil || uc.Now == nil {
+		return 0, ErrInvalidUsecaseConfig
+	}
+
+	now := safeNowUTC(uc.Now)
+
+	deleted, err := uc.Repo.PurgeExpired(ctx, now)
+	if err != nil {
+		return 0, err
+	}
+
+	return deleted, nil
+}
