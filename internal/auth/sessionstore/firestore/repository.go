@@ -2,7 +2,6 @@ package firesessionstore
 
 import (
 	"cloud.google.com/go/firestore"
-	"github.com/vinylhousegarage/idpproxy/internal/auth/session"
 )
 
 type Repository struct {
