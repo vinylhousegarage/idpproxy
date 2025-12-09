@@ -16,5 +16,3 @@ func NewRepository(client *firestore.Client, collectionName string) *Repository 
 		collection: client.Collection(collectionName),
 	}
 }
-
-var _ session.Repository = (*Repository)(nil)
