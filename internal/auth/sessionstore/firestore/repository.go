@@ -44,3 +44,8 @@ func (r *Repository) FindByID(ctx context.Context, sessionID string) (*session.S
 
 	return &s, nil
 }
+
+func (r *Repository) Update(ctx context.Context, s *session.Session) error {
+	_, err := r.collection.Doc(s.SessionID).Set(ctx, s)
+	return err
+}
