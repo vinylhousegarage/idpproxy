@@ -2,9 +2,11 @@ package firesessionstore
 
 import (
 	"context"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/vinylhousegarage/idpproxy/internal/auth/session"
+	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -48,4 +50,31 @@ func (r *Repository) FindByID(ctx context.Context, sessionID string) (*session.S
 func (r *Repository) Update(ctx context.Context, s *session.Session) error {
 	_, err := r.collection.Doc(s.SessionID).Set(ctx, s)
 	return err
+}
+
+func (r *Repository) PurgeExpired(ctx context.Context, before time.Time) (int, error) {
+	iter := r.collection.
+		Where("expires_at", "<", before).
+		Documents(ctx)
+	defer iter.Stop()
+
+	deleted := 0
+
+	for {
+		doc, err := iter.Next()
+		if err != nil {
+			if err == iterator.Done {
+				break
+			}
+			return deleted, err
+		}
+
+		_, err = doc.Ref.Delete(ctx)
+		if err != nil {
+			return deleted, err
+		}
+		deleted++
+	}
+
+	return deleted, nil
 }
