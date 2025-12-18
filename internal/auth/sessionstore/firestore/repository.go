@@ -23,7 +23,7 @@ func NewRepository(client *firestore.Client, collectionName string) *Repository 
 	}
 }
 
-// var _ session.Repository = (*Repository)(nil)
+var _ session.Repository = (*Repository)(nil)
 
 func (r *Repository) Create(ctx context.Context, s *session.Session) error {
 	_, err := r.collection.Doc(s.SessionID).Set(ctx, s)
