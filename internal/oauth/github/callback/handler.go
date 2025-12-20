@@ -4,22 +4,29 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 	githubuser "github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 	"go.uber.org/zap"
 )
 
+func callbackSuccessLocation(code, qState string) string {
+	return "/oauth/github/callback/success?code=" + url.QueryEscape(code) +
+		"&state=" + url.QueryEscape(qState)
+}
+
 func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	if !h.ready() {
 		h.notReady(c.Writer)
+
 		return
 	}
 
 	code := c.Query("code")
 	qState := c.Query("state")
+
 	if code == "" {
 		h.OAuth.Logger.Warn("missing code")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "missing code"})
@@ -45,6 +52,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 		return
 	}
+
 	http.SetCookie(c.Writer, deleteStateCookie())
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -68,12 +76,11 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	accessToken, err := ExtractAccessTokenFromResponse(resp)
 	if err != nil {
-		status := http.StatusBadGateway
-		if errors.Is(err, ErrNon2xxStatus) || errors.Is(err, ErrGitHubOAuthError) {
-			status = http.StatusBadGateway
-		}
+		_ = errors.Is(err, ErrNon2xxStatus)
+		_ = errors.Is(err, ErrGitHubOAuthError)
+
 		h.OAuth.Logger.Warn("token response parse failed", zap.Error(err))
-		c.JSON(status, gin.H{"error": "token exchange failed"})
+		c.JSON(http.StatusBadGateway, gin.H{"error": "token exchange failed"})
 
 		return
 	}
@@ -85,6 +92,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 		return
 	}
+
 	userResp, err := h.API.HTTPClient.Do(userReq)
 	if err != nil {
 		h.OAuth.Logger.Error("call /user failed", zap.Error(err))
@@ -92,6 +100,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 		return
 	}
+
 	ghUser, err := githubuser.DecodeGitHubUserResponse(userResp)
 	if err != nil {
 		h.OAuth.Logger.Warn("decode /user failed", zap.Error(err))
@@ -100,7 +109,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	internalUserID, err := h.UserService.UpsertFromGitHub(ctx, ghUser.ID, ghUser.Login, ghUser.Email)
+	_, err = h.UserService.UpsertFromGitHub(ctx, ghUser.ID, ghUser.Login, ghUser.Email)
 	if err != nil {
 		h.OAuth.Logger.Error("upsert user failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upsert user"})
@@ -108,33 +117,5 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	jwt, kid, err := h.IDTokenIssuer.Issue(ctx, &idtoken.IDTokenInput{
-		UserID:   internalUserID,
-		ClientID: h.ClientID,
-		Now:      time.Now().UTC(),
-		TTL:      15 * time.Minute,
-		AMR:      []string{"github"},
-	})
-	if err != nil {
-		h.OAuth.Logger.Error("issue id token failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to issue id token"})
-
-		return
-	}
-
-	h.OAuth.Logger.Info("github login success",
-		zap.String("login", ghUser.Login),
-		zap.Int64("gh_id", ghUser.ID),
-		zap.String("kid", kid),
-	)
-	c.JSON(http.StatusOK, gin.H{
-		"ok":       true,
-		"provider": "github",
-		"id_token": jwt,
-		"kid":      kid,
-		"user": gin.H{
-			"login": ghUser.Login,
-			"id":    ghUser.ID,
-		},
-	})
+	c.Redirect(http.StatusFound, callbackSuccessLocation(code, qState))
 }
