@@ -1,7 +1,7 @@
 # idpproxy
 
 idpproxy は、OAuth / OIDC による外部 IdP（GitHub など）の認証を中継・正規化するための  
-**認証中継 API（IdP Proxy API）** です。
+認証中継 API です。
 
 フロントエンド（Web / SPA / モバイル）と IdP の間に位置し、
 
@@ -11,5 +11,10 @@ idpproxy は、OAuth / OIDC による外部 IdP（GitHub など）の認証を�
 
 を容易にすることを目的としています。
 
-現在は **途中公開（Work In Progress）** の状態であり、  
-構成を中心に公開しています。
+現在は途中公開の状態であり、構成を中心に公開しています。
+<br>
+<br>
+### License
+
+This project is licensed under the MIT License.  
+See the [LICENSE](./LICENSE) file for details.
