@@ -27,3 +27,11 @@ func (s *Service) Issue(
 
 	return s.store.Save(ctx, code)
 }
+
+func (s *Service) Consume(
+	ctx context.Context,
+	code string,
+	clientID string,
+) (string, error) {
+	return s.store.Consume(ctx, code, clientID)
+}
