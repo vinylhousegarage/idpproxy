@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/vinylhousegarage/idpproxy/internal/authcode"
 )
 
 type fakeConsumeStore struct {
@@ -14,15 +16,22 @@ type fakeConsumeStore struct {
 	retError error
 }
 
-func (f *fakeConsumeStore) Save(ctx context.Context, _ interface{}) error {
-	return nil
-}
-
 func (f *fakeConsumeStore) Save(
 	ctx context.Context,
 	code authcode.AuthCode,
 ) error {
 	panic("not used")
+}
+
+func (f *fakeConsumeStore) Consume(
+	ctx context.Context,
+	code string,
+	clientID string,
+) (string, error) {
+	f.called = true
+	f.gotCode = code
+	f.gotCID = clientID
+	return f.retUID, f.retError
 }
 
 func TestService_Consume(t *testing.T) {
