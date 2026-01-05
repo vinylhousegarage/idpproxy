@@ -8,18 +8,25 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/authcode"
 )
 
-type fakeStore struct {
+type fakeIssueStore struct {
 	saved authcode.AuthCode
 	err   error
 }
 
-func (f *fakeStore) Save(ctx context.Context, code authcode.AuthCode) error {
+func (f *fakeIssueStore) Save(
+	ctx context.Context,
+	code authcode.AuthCode,
+) error {
 	f.saved = code
 	return f.err
 }
 
-func (f *fakeStore) Consume(ctx context.Context, code string, clientID string) (string, error) {
-	return "", nil
+func (f *fakeIssueStore) Consume(
+	ctx context.Context,
+	code string,
+	clientID string,
+) (string, error) {
+	panic("not used")
 }
 
 func TestService_Issue(t *testing.T) {
@@ -28,7 +35,7 @@ func TestService_Issue(t *testing.T) {
 	t.Run("successfully issues auth code and saves it", func(t *testing.T) {
 		t.Parallel()
 
-		fs := &fakeStore{}
+		fs := &fakeIssueStore{}
 		svc := &Service{
 			store: fs,
 		}
@@ -60,7 +67,7 @@ func TestService_Issue(t *testing.T) {
 
 		expectedErr := context.DeadlineExceeded
 
-		fs := &fakeStore{
+		fs := &fakeIssueStore{
 			err: expectedErr,
 		}
 		svc := &Service{
