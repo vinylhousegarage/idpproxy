@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type fakeStore struct {
+type fakeConsumeStore struct {
 	called   bool
 	gotCode  string
 	gotCID   string
@@ -14,19 +14,15 @@ type fakeStore struct {
 	retError error
 }
 
-func (f *fakeStore) Save(ctx context.Context, _ interface{}) error {
+func (f *fakeConsumeStore) Save(ctx context.Context, _ interface{}) error {
 	return nil
 }
 
-func (f *fakeStore) Consume(
+func (f *fakeConsumeStore) Save(
 	ctx context.Context,
-	code string,
-	clientID string,
-) (string, error) {
-	f.called = true
-	f.gotCode = code
-	f.gotCID = clientID
-	return f.retUID, f.retError
+	code authcode.AuthCode,
+) error {
+	panic("not used")
 }
 
 func TestService_Consume(t *testing.T) {
@@ -37,7 +33,7 @@ func TestService_Consume(t *testing.T) {
 	t.Run("success_returns_user_id", func(t *testing.T) {
 		t.Parallel()
 
-		store := &fakeStore{
+		store := &fakeConsumeStore{
 			retUID:   "user-123",
 			retError: nil,
 		}
@@ -66,7 +62,7 @@ func TestService_Consume(t *testing.T) {
 		t.Parallel()
 
 		wantErr := errors.New("invalid code")
-		store := &fakeStore{
+		store := &fakeConsumeStore{
 			retError: wantErr,
 		}
 		svc := &Service{store: store}
