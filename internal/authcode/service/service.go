@@ -10,7 +10,6 @@ import (
 
 type Service struct {
 	store store.Store
-	now   func() time.Time
 }
 
 func (s *Service) Issue(
@@ -19,16 +18,11 @@ func (s *Service) Issue(
 	clientID string,
 ) error {
 
-	now := s.now
-	if now == nil {
-		now = time.Now
-	}
-
 	code := authcode.AuthCode{
 		Code:      "dummy",
 		UserID:    userID,
 		ClientID:  clientID,
-		ExpiresAt: now().Add(5 * time.Minute),
+		ExpiresAt: time.Now().Add(5 * time.Minute),
 	}
 
 	return s.store.Save(ctx, code)
@@ -39,24 +33,5 @@ func (s *Service) Consume(
 	code string,
 	clientID string,
 ) (string, error) {
-
-	now := s.now
-	if now == nil {
-		now = time.Now
-	}
-
-	ac, err := s.store.Get(ctx, code, clientID)
-	if err != nil {
-		return "", err
-	}
-
-	if ac.ClientID != clientID {
-		return "", ErrClientMismatch
-	}
-
-	if ac.ExpiresAt.Before(now()) {
-		return "", ErrExpired
-	}
-
 	return s.store.Consume(ctx, code, clientID)
 }
