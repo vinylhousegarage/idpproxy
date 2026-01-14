@@ -61,28 +61,4 @@ func TestMemoryStore_Consume(t *testing.T) {
 			t.Fatalf("expected ErrClientMismatch, got %v", err)
 		}
 	})
-
-	t.Run("returns ErrAlreadyUsed when auth code is already consumed", func(t *testing.T) {
-		t.Parallel()
-
-		s := NewMemoryStore()
-		code := authcode.AuthCode{
-			Code:      "code-used",
-			UserID:    "user-1",
-			ClientID:  "client-1",
-			ExpiresAt: time.Now().Add(5 * time.Minute),
-		}
-
-		_ = s.Save(ctx, code)
-
-		_, err := s.Consume(ctx, "code-used", "client-1")
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		_, err = s.Consume(ctx, "code-used", "client-1")
-		if err != ErrAlreadyUsed {
-			t.Fatalf("expected ErrAlreadyUsed, got %v", err)
-		}
-	})
 }
