@@ -13,7 +13,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestRootServesLoginHTML(t *testing.T) {
+func TestRootServesRootHTML(t *testing.T) {
 	t.Parallel()
 
 	logger, err := zap.NewDevelopment()
@@ -34,5 +34,5 @@ func TestRootServesLoginHTML(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, resp.Code)
 	require.Contains(t, resp.Body.String(), "<!DOCTYPE html>")
-	require.Contains(t, resp.Body.String(), "ログイン")
+	require.Contains(t, resp.Body.String(), "idpproxy")
 }
