@@ -18,7 +18,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 	}
 
 	if d.FS != nil {
-		r.GET("/", func(c *gin.Context) { c.FileFromFS("login.html", http.FS(d.FS)) })
+		r.GET("/", func(c *gin.Context) { c.FileFromFS("root.html", http.FS(d.FS)) })
 		r.GET("/privacy", func(c *gin.Context) { c.FileFromFS("privacy.html", http.FS(d.FS)) })
 		r.GET("/terms", func(c *gin.Context) { c.FileFromFS("terms.html", http.FS(d.FS)) })
 	}
