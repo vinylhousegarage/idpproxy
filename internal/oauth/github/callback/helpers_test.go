@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"go.uber.org/zap/zaptest"
@@ -58,4 +59,22 @@ func loadTestDataJSON(t *testing.T, path string) string {
 		t.Fatalf("read %s: %v", path, err)
 	}
 	return string(b)
+}
+
+func assertStateCookieDeleted(t *testing.T, rr *httptest.ResponseRecorder) {
+	t.Helper()
+
+	setCookies := rr.Header().Values("Set-Cookie")
+	if len(setCookies) == 0 {
+		t.Fatalf("expected Set-Cookie header, got none")
+	}
+
+	joined := strings.Join(setCookies, "\n")
+	if !strings.Contains(joined, stateCookieName) {
+		t.Fatalf("expected state cookie deletion, got: %s", joined)
+	}
+	if !(strings.Contains(joined, "Max-Age=0") ||
+		strings.Contains(strings.ToLower(joined), "expires=")) {
+		t.Fatalf("expected deletion attributes, got: %s", joined)
+	}
 }
