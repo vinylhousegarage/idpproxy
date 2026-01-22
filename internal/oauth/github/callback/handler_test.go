@@ -9,15 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func containsAll(s string, subs ...string) bool {
-	for _, sub := range subs {
-		if !strings.Contains(s, sub) {
-			return false
-		}
-	}
-	return true
-}
-
 func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	t.Parallel()
 	gin.SetMode(gin.TestMode)
@@ -25,13 +16,12 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	tokenJSON := loadTestDataJSON(t, "testdata/token_success.json")
 	userJSON := loadTestDataJSON(t, "testdata/user_success.json")
 
-	t.Run("success_redirects_with_code_and_state_and_deletes_cookie", func(t *testing.T) {
+	t.Run("successfully_exchanges_code_and_redirects_and_deletes_state_cookie", func(t *testing.T) {
 		t.Parallel()
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-
 		h := newHandlerForTest(t, httpc, us, iss)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
@@ -43,57 +33,39 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		h.Serve(ctx)
 
 		if rr.Code != http.StatusFound {
-			t.Fatalf("unexpected status: got=%d body=%s", rr.Code, rr.Body.String())
+			t.Fatalf("expected 302, got=%d body=%s", rr.Code, rr.Body.String())
 		}
 
 		loc := rr.Header().Get("Location")
 		if loc == "" {
 			t.Fatalf("missing Location header")
 		}
-		if !strings.Contains(loc, "code=") {
-			t.Fatalf("missing code in Location: %s", loc)
-		}
-		if !strings.Contains(loc, "state=") {
-			t.Fatalf("missing state in Location: %s", loc)
-		}
 
 		u, err := url.Parse(loc)
 		if err != nil {
 			t.Fatalf("invalid Location: %v (%s)", err, loc)
 		}
-		q := u.Query()
-		if q.Get("code") == "" {
-			t.Fatalf("missing code query param: %s", loc)
+
+		if u.Query().Get("code") == "" {
+			t.Fatalf("missing code param in redirect: %s", loc)
 		}
-		if q.Get("state") == "" {
-			t.Fatalf("missing state query param: %s", loc)
+		if u.Query().Get("state") == "" {
+			t.Fatalf("missing state param in redirect: %s", loc)
 		}
 
-		setCookies := rr.Header().Values("Set-Cookie")
-		if len(setCookies) == 0 {
-			t.Fatalf("expected Set-Cookie header to delete state cookie, got none")
-		}
-
-		joined := strings.Join(setCookies, "\n")
-		if !containsAll(joined, stateCookieName) {
-			t.Fatalf("expected state cookie deletion, Set-Cookie=%s", joined)
-		}
-		if !(strings.Contains(joined, "Max-Age=0") || strings.Contains(strings.ToLower(joined), "expires=")) {
-			t.Fatalf("expected cookie deletion attributes (Max-Age=0 or Expires=...), Set-Cookie=%s", joined)
-		}
+		assertStateCookieDeleted(t, rr)
 	})
 
-	t.Run("state_mismatch_returns_400_invalid_state_and_deletes_cookie", func(t *testing.T) {
+	t.Run("returns_400_when_state_is_invalid_and_deletes_cookie", func(t *testing.T) {
 		t.Parallel()
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-
 		h := newHandlerForTest(t, httpc, us, iss)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
-		setStateCookie(req, "st-different")
+		setStateCookie(req, "st-wrong")
 
 		ctx, _ := gin.CreateTestContext(rr)
 		ctx.Request = req
@@ -101,23 +73,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		h.Serve(ctx)
 
 		if rr.Code != http.StatusBadRequest {
-			t.Fatalf("unexpected status: got=%d body=%s", rr.Code, rr.Body.String())
+			t.Fatalf("expected 400, got=%d body=%s", rr.Code, rr.Body.String())
 		}
-		if got := rr.Body.String(); !strings.Contains(got, `"error":"invalid state"`) {
-			t.Fatalf("unexpected body: %s", got)
+		if !strings.Contains(rr.Body.String(), `"error":"invalid state"`) {
+			t.Fatalf("unexpected body: %s", rr.Body.String())
 		}
 
-		setCookies := rr.Header().Values("Set-Cookie")
-		if len(setCookies) == 0 {
-			t.Fatalf("expected Set-Cookie header to delete state cookie, got none")
-		}
-		joined := strings.Join(setCookies, "\n")
-		if !containsAll(joined, stateCookieName) {
-			t.Fatalf("expected state cookie deletion, Set-Cookie=%s", joined)
-		}
+		assertStateCookieDeleted(t, rr)
 	})
 
-	t.Run("token_exchange_http_error_returns_502", func(t *testing.T) {
+	t.Run("returns_502_when_token_exchange_fails", func(t *testing.T) {
 		t.Parallel()
 
 		httpc := &fakeHTTPClient{
@@ -127,7 +92,6 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-
 		h := newHandlerForTest(t, httpc, us, iss)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
@@ -139,10 +103,10 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		h.Serve(ctx)
 
 		if rr.Code != http.StatusBadGateway {
-			t.Fatalf("unexpected status: got=%d body=%s", rr.Code, rr.Body.String())
+			t.Fatalf("expected 502, got=%d body=%s", rr.Code, rr.Body.String())
 		}
-		if got := rr.Body.String(); !strings.Contains(got, `"error":"token request failed"`) {
-			t.Fatalf("unexpected body: %s", got)
+		if !strings.Contains(rr.Body.String(), `"error":"token request failed"`) {
+			t.Fatalf("unexpected body: %s", rr.Body.String())
 		}
 	})
 }
