@@ -1,4 +1,4 @@
-package callback
+package token
 
 import (
 	"encoding/json"
