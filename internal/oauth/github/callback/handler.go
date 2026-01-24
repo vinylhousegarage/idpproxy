@@ -2,12 +2,12 @@ package callback
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	githubtoken "github.com/vinylhousegarage/idpproxy/internal/oauth/github/token"
 	githubuser "github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 	"go.uber.org/zap"
 )
@@ -58,7 +58,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	req, err := BuildAccessTokenRequest(ctx, h.OAuth.Config, code, qState)
+	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, code, qState)
 	if err != nil {
 		h.OAuth.Logger.Error("build token request failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "build request failed"})
@@ -74,10 +74,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := ExtractAccessTokenFromResponse(resp)
+	accessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
-		_ = errors.Is(err, ErrNon2xxStatus)
-		_ = errors.Is(err, ErrGitHubOAuthError)
 
 		h.OAuth.Logger.Warn("token response parse failed", zap.Error(err))
 		c.JSON(http.StatusBadGateway, gin.H{"error": "token exchange failed"})
