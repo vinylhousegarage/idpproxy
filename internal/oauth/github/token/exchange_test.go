@@ -24,11 +24,14 @@ func (f *fakeHTTPDoer) Do(req *http.Request) (*http.Response, error) {
 
 func newResp(status int, contentType, body string) *http.Response {
 	rr := httptest.NewRecorder()
-	rr.WriteHeader(status)
+
 	if contentType != "" {
 		rr.Header().Set("Content-Type", contentType)
 	}
+
+	rr.WriteHeader(status)
 	rr.Body.WriteString(body)
+
 	return rr.Result()
 }
 
