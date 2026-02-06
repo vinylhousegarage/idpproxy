@@ -3,7 +3,61 @@ package token
 import (
 	"context"
 	"testing"
+	"time"
 )
+
+type fixedClock struct {
+	t time.Time
+}
+
+func (f fixedClock) Now() time.Time {
+	return f.t
+}
+
+type mockStore struct {
+	code *AuthCode
+	err  error
+}
+
+func (m *mockStore) Consume(ctx context.Context, code, clientID string) (*AuthCode, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.code, nil
+}
+
+func newTestService() *Service {
+	return &Service{
+		Store: &mockStore{err: ErrInvalidGrant},
+		Clock: fixedClock{t: time.Now()},
+	}
+}
+
+func newTestServiceWithExpiredCode() *Service {
+	return &Service{
+		Store: &mockStore{
+			code: &AuthCode{
+				UserID:    "user1",
+				ClientID:  "client-1",
+				ExpiresAt: time.Now().Add(-time.Hour),
+			},
+		},
+		Clock: fixedClock{t: time.Now()},
+	}
+}
+
+func newTestServiceWithValidCode() *Service {
+	return &Service{
+		Store: &mockStore{
+			code: &AuthCode{
+				UserID:    "user1",
+				ClientID:  "client-1",
+				ExpiresAt: time.Now().Add(time.Hour),
+			},
+		},
+		Clock: fixedClock{t: time.Now()},
+	}
+}
 
 func TestService_Exchange(t *testing.T) {
 	t.Parallel()
@@ -30,9 +84,10 @@ func TestService_Exchange(t *testing.T) {
 		svc := newTestService()
 
 		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType: "authorization_code",
-			Code:      "no-such-code",
-			ClientID:  "client-1",
+			GrantType:    "authorization_code",
+			Code:         "no-such-code",
+			ClientID:     "client-1",
+			ClientSecret: "secret",
 		})
 
 		if err != ErrInvalidGrant {
@@ -40,19 +95,20 @@ func TestService_Exchange(t *testing.T) {
 		}
 	})
 
-	t.Run("expired auth code returns ErrExpiredCode", func(t *testing.T) {
+	t.Run("expired auth code returns ErrInvalidGrant", func(t *testing.T) {
 		t.Parallel()
 
 		svc := newTestServiceWithExpiredCode()
 
 		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType: "authorization_code",
-			Code:      "expired-code",
-			ClientID:  "client-1",
+			GrantType:    "authorization_code",
+			Code:         "expired-code",
+			ClientID:     "client-1",
+			ClientSecret: "secret",
 		})
 
-		if err != ErrExpiredCode {
-			t.Fatalf("expected ErrExpiredCode, got %v", err)
+		if err != ErrInvalidGrant {
+			t.Fatalf("expected ErrInvalidGrant, got %v", err)
 		}
 	})
 
