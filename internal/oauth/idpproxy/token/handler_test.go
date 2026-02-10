@@ -2,22 +2,14 @@ package token
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
 )
-
-type stubService struct {
-	resp *TokenResponse
-	err  error
-}
-
-func (s *stubService) Exchange(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
-	return s.resp, s.err
-}
 
 func TestTokenHandler(t *testing.T) {
 	t.Parallel()
@@ -43,7 +35,7 @@ func TestTokenHandler(t *testing.T) {
 			Clock: fixedClock{t: time.Now()},
 		}
 
-		handler := TokenHandler(svc)
+		handler := NewHandler(svc, zap.NewNop())
 
 		body, _ := json.Marshal(validReq)
 		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
@@ -69,8 +61,7 @@ func TestTokenHandler(t *testing.T) {
 		t.Parallel()
 
 		svc := newTestService()
-
-		handler := TokenHandler(svc)
+		handler := NewHandler(svc, zap.NewNop())
 
 		body, _ := json.Marshal(validReq)
 		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
@@ -83,7 +74,9 @@ func TestTokenHandler(t *testing.T) {
 		}
 
 		var oauthErr map[string]string
-		json.NewDecoder(rec.Body).Decode(&oauthErr)
+		if err := json.NewDecoder(rec.Body).Decode(&oauthErr); err != nil {
+			t.Fatalf("decode error: %v", err)
+		}
 
 		if oauthErr["error"] != "invalid_grant" {
 			t.Fatalf("unexpected error: %v", oauthErr)
@@ -94,7 +87,7 @@ func TestTokenHandler(t *testing.T) {
 		t.Parallel()
 
 		svc := newTestService()
-		handler := TokenHandler(svc)
+		handler := NewHandler(svc, zap.NewNop())
 
 		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewBufferString("{bad json"))
 		rec := httptest.NewRecorder()
