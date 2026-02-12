@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 )
@@ -84,10 +85,9 @@ func TestService_Exchange(t *testing.T) {
 		svc := newTestService()
 
 		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType:    "authorization_code",
-			Code:         "no-such-code",
-			ClientID:     "client-1",
-			ClientSecret: "secret",
+			GrantType: "authorization_code",
+			Code:      "no-such-code",
+			ClientID:  "client-1",
 		})
 
 		if err != ErrInvalidGrant {
@@ -101,10 +101,9 @@ func TestService_Exchange(t *testing.T) {
 		svc := newTestServiceWithExpiredCode()
 
 		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType:    "authorization_code",
-			Code:         "expired-code",
-			ClientID:     "client-1",
-			ClientSecret: "secret",
+			GrantType: "authorization_code",
+			Code:      "expired-code",
+			ClientID:  "client-1",
 		})
 
 		if err != ErrInvalidGrant {
@@ -112,33 +111,15 @@ func TestService_Exchange(t *testing.T) {
 		}
 	})
 
-	t.Run("invalid client returns ErrInvalidClient", func(t *testing.T) {
-		t.Parallel()
-
-		svc := newTestServiceWithValidCode()
-
-		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType:    "authorization_code",
-			Code:         "valid-code",
-			ClientID:     "client-1",
-			ClientSecret: "wrong-secret",
-		})
-
-		if err != ErrInvalidClient {
-			t.Fatalf("expected ErrInvalidClient, got %v", err)
-		}
-	})
-
-	t.Run("valid request returns token response", func(t *testing.T) {
+	t.Run("valid request returns id_token", func(t *testing.T) {
 		t.Parallel()
 
 		svc := newTestServiceWithValidCode()
 
 		resp, err := svc.Exchange(ctx, TokenRequest{
-			GrantType:    "authorization_code",
-			Code:         "valid-code",
-			ClientID:     "client-1",
-			ClientSecret: "secret",
+			GrantType: "authorization_code",
+			Code:      "valid-code",
+			ClientID:  "client-1",
 		})
 
 		if err != nil {
@@ -149,16 +130,12 @@ func TestService_Exchange(t *testing.T) {
 			t.Fatal("response should not be nil")
 		}
 
-		if resp.AccessToken == "" {
-			t.Fatal("access_token should not be empty")
+		if resp.IDToken == "" {
+			t.Fatal("id_token should not be empty")
 		}
 
-		if resp.TokenType != "Bearer" {
-			t.Fatalf("unexpected token_type: %s", resp.TokenType)
-		}
-
-		if resp.ExpiresIn <= 0 {
-			t.Fatalf("invalid expires_in: %d", resp.ExpiresIn)
+		if !strings.Contains(resp.IDToken, "user1") {
+			t.Fatalf("id_token should contain user info")
 		}
 	})
 }
