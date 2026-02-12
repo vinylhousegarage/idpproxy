@@ -15,13 +15,12 @@ func TestTokenHandler(t *testing.T) {
 	t.Parallel()
 
 	validReq := TokenRequest{
-		GrantType:    "authorization_code",
-		Code:         "valid",
-		ClientID:     "client-1",
-		ClientSecret: "secret",
+		GrantType: "authorization_code",
+		Code:      "valid",
+		ClientID:  "client-1",
 	}
 
-	t.Run("success returns 200 and token response", func(t *testing.T) {
+	t.Run("success returns 200 and id_token response", func(t *testing.T) {
 		t.Parallel()
 
 		svc := &Service{
@@ -52,8 +51,8 @@ func TestTokenHandler(t *testing.T) {
 			t.Fatalf("decode error: %v", err)
 		}
 
-		if resp.AccessToken == "" {
-			t.Fatal("access_token should not be empty")
+		if resp.IDToken == "" {
+			t.Fatal("id_token should not be empty")
 		}
 	})
 
