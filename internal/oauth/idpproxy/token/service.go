@@ -24,20 +24,6 @@ type Service struct {
 	Clock Clock
 }
 
-func validateClientSecret(clientID, secret string) bool {
-	return secret == "secret"
-}
-
-func generateAccessToken(userID string) string {
-	return "access-" + userID
-}
-
-func generateRefreshToken() string {
-	return "refresh-token"
-}
-
-const accessTokenTTL = 3600
-
 func (s *Service) Exchange(
 	ctx context.Context,
 	req TokenRequest,
@@ -51,10 +37,6 @@ func (s *Service) Exchange(
 		return nil, ErrUnsupportedGrantType
 	}
 
-	if !validateClientSecret(req.ClientID, req.ClientSecret) {
-		return nil, ErrInvalidClient
-	}
-
 	ac, err := s.Store.Consume(ctx, req.Code, req.ClientID)
 	if err != nil {
 		return nil, ErrInvalidGrant
@@ -64,13 +46,9 @@ func (s *Service) Exchange(
 		return nil, ErrInvalidGrant
 	}
 
-	accessToken := generateAccessToken(ac.UserID)
-	refreshToken := generateRefreshToken()
+	idToken := "idtoken-for-" + ac.UserID
 
 	return &TokenResponse{
-		AccessToken:  accessToken,
-		TokenType:    "Bearer",
-		ExpiresIn:    accessTokenTTL,
-		RefreshToken: refreshToken,
+		IDToken: idToken,
 	}, nil
 }
