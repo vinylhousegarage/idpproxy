@@ -40,9 +40,17 @@ func TestService_Issue(t *testing.T) {
 			store: fs,
 		}
 
-		err := svc.Issue(context.Background(), "user-1", "client-1")
+		code, err := svc.Issue(context.Background(), "user-1", "client-1")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if code == "" {
+			t.Fatalf("returned code should not be empty")
+		}
+
+		if fs.saved.Code != code {
+			t.Errorf("saved code mismatch: got=%s want=%s", fs.saved.Code, code)
 		}
 
 		if fs.saved.UserID != "user-1" {
@@ -51,10 +59,6 @@ func TestService_Issue(t *testing.T) {
 
 		if fs.saved.ClientID != "client-1" {
 			t.Errorf("ClientID mismatch: got=%s", fs.saved.ClientID)
-		}
-
-		if fs.saved.Code == "" {
-			t.Errorf("Code should not be empty")
 		}
 
 		if time.Until(fs.saved.ExpiresAt) <= 0 {
@@ -74,9 +78,14 @@ func TestService_Issue(t *testing.T) {
 			store: fs,
 		}
 
-		err := svc.Issue(context.Background(), "user-1", "client-1")
+		code, err := svc.Issue(context.Background(), "user-1", "client-1")
+
 		if err != expectedErr {
 			t.Fatalf("expected error %v, got %v", expectedErr, err)
+		}
+
+		if code != "" {
+			t.Fatalf("code should be empty on error")
 		}
 	})
 }
