@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"time"
 
 	"github.com/vinylhousegarage/idpproxy/internal/authcode"
@@ -16,16 +18,25 @@ func (s *Service) Issue(
 	ctx context.Context,
 	userID string,
 	clientID string,
-) error {
+) (string, error) {
 
-	code := authcode.AuthCode{
-		Code:      "dummy",
-		UserID:    userID,
-		ClientID:  clientID,
-		ExpiresAt: time.Now().Add(5 * time.Minute),
+	codeStr, err := generateCode()
+	if err != nil {
+		return "", err
 	}
 
-	return s.store.Save(ctx, code)
+	ac := authcode.AuthCode{
+		Code:      codeStr,
+		UserID:    userID,
+		ClientID:  clientID,
+		ExpiresAt: time.Now().Add(60 * time.Second),
+	}
+
+	if err := s.store.Save(ctx, ac); err != nil {
+		return "", err
+	}
+
+	return codeStr, nil
 }
 
 func (s *Service) Consume(
@@ -34,4 +45,12 @@ func (s *Service) Consume(
 	clientID string,
 ) (string, error) {
 	return s.store.Consume(ctx, code, clientID)
+}
+
+func generateCode() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }
