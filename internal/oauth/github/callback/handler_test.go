@@ -22,7 +22,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-		h := newHandlerForTest(t, httpc, us, iss)
+		acs := &fakeAuthCodeService{code: "authcode-123"}
+
+		h := newHandlerForTest(t, httpc, us, iss, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-abc")
@@ -62,7 +64,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-		h := newHandlerForTest(t, httpc, us, iss)
+		acs := &fakeAuthCodeService{code: "authcode-123"}
+
+		h := newHandlerForTest(t, httpc, us, iss, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-wrong")
@@ -92,7 +96,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		iss := &fakeIssuer{jwt: "jwt.mock", kid: "kid-1"}
-		h := newHandlerForTest(t, httpc, us, iss)
+		acs := &fakeAuthCodeService{code: "authcode-123"}
+
+		h := newHandlerForTest(t, httpc, us, iss, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-abc")
