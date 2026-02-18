@@ -77,19 +77,3 @@ func (a *issuerAdapter) Issue(_ context.Context, _ *idtoken.IDTokenInput) (strin
 
 	return a.f.jwt, a.f.kid, nil
 }
-
-type fakeAuthCodeService struct {
-	code string
-	err  error
-}
-
-func (f *fakeAuthCodeService) Issue(
-	_ context.Context,
-	_ string,
-	_ string,
-) (string, error) {
-	if f.err != nil {
-		return "", f.err
-	}
-	return f.code, nil
-}
