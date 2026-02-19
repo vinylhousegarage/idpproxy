@@ -15,7 +15,12 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
-func newHandlerForTest(t *testing.T, httpc *fakeHTTPClient, us *fakeUserService, iss *fakeIssuer) *GitHubCallbackHandler {
+func newHandlerForTest(
+	t *testing.T,
+	httpc *fakeHTTPClient,
+	us *fakeUserService,
+	acs *fakeAuthCodeService,
+) *GitHubCallbackHandler {
 	t.Helper()
 
 	logger := zaptest.NewLogger(t)
@@ -28,7 +33,7 @@ func newHandlerForTest(t *testing.T, httpc *fakeHTTPClient, us *fakeUserService,
 		httpc,
 		logger,
 	)
-	return NewGitHubCallbackHandler(oauth, api, us, &issuerAdapter{iss}, "test-client")
+	return NewGitHubCallbackHandler(oauth, api, us, acs, "test-client")
 }
 
 func newCallbackRequest(t *testing.T, path, code, state string) (*httptest.ResponseRecorder, *http.Request) {

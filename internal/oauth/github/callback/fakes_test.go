@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 )
 
@@ -62,18 +61,19 @@ func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string,
 	return s.returnID, nil
 }
 
-type fakeIssuer struct {
-	jwt string
-	kid string
-	err error
+type fakeAuthCodeService struct {
+	code string
+	err  error
 }
 
-type issuerAdapter struct{ f *fakeIssuer }
-
-func (a *issuerAdapter) Issue(_ context.Context, _ *idtoken.IDTokenInput) (string, string, error) {
-	if a.f.err != nil {
-		return "", "", a.f.err
+func (f *fakeAuthCodeService) Issue(
+	_ context.Context,
+	_ string,
+	_ string,
+) (string, error) {
+	if f.err != nil {
+		return "", f.err
 	}
 
-	return a.f.jwt, a.f.kid, nil
+	return f.code, nil
 }
