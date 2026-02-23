@@ -107,13 +107,31 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	_, err = h.UserService.UpsertFromGitHub(ctx, ghUser.ID, ghUser.Login, ghUser.Email)
+	internalUserID, err := h.UserService.UpsertFromGitHub(
+		ctx,
+		ghUser.ID,
+		ghUser.Login,
+		ghUser.Email,
+	)
 	if err != nil {
 		h.OAuth.Logger.Error("upsert user failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upsert user"})
-
 		return
 	}
 
-	c.Redirect(http.StatusFound, callbackSuccessLocation(code, qState))
+	authCode, err := h.AuthCodeService.Issue(
+		ctx,
+		internalUserID,
+		h.ClientID,
+	)
+	if err != nil {
+		h.OAuth.Logger.Error("issue auth code failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to issue auth code"})
+		return
+	}
+
+	c.Redirect(
+		http.StatusFound,
+		callbackSuccessLocation(authCode, qState),
+	)
 }
