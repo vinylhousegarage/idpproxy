@@ -22,6 +22,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		acs := &fakeAuthCodeService{code: "authcode-123"}
+
 		h := newHandlerForTest(t, httpc, us, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
@@ -46,11 +47,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("invalid Location: %v (%s)", err, loc)
 		}
 
-		if u.Query().Get("code") == "" {
-			t.Fatalf("missing code param in redirect: %s", loc)
+		if got := u.Query().Get("code"); got != "authcode-123" {
+			t.Fatalf("expected authcode-123, got=%s (loc=%s)", got, loc)
 		}
-		if u.Query().Get("state") == "" {
-			t.Fatalf("missing state param in redirect: %s", loc)
+
+		if got := u.Query().Get("state"); got != "st-abc" {
+			t.Fatalf("expected state=st-abc, got=%s (loc=%s)", got, loc)
+		}
+
+		if !acs.called {
+			t.Fatalf("AuthCodeService.Issue was not called")
 		}
 
 		assertStateCookieDeleted(t, rr)
@@ -62,6 +68,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		acs := &fakeAuthCodeService{code: "authcode-123"}
+
 		h := newHandlerForTest(t, httpc, us, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
@@ -75,8 +82,13 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		if rr.Code != http.StatusBadRequest {
 			t.Fatalf("expected 400, got=%d body=%s", rr.Code, rr.Body.String())
 		}
+
 		if !strings.Contains(rr.Body.String(), `"error":"invalid state"`) {
 			t.Fatalf("unexpected body: %s", rr.Body.String())
+		}
+
+		if acs.called {
+			t.Fatalf("AuthCodeService.Issue must not be called on invalid state")
 		}
 
 		assertStateCookieDeleted(t, rr)
@@ -92,6 +104,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 		us := &fakeUserService{returnID: "user-internal-123"}
 		acs := &fakeAuthCodeService{code: "authcode-123"}
+
 		h := newHandlerForTest(t, httpc, us, acs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
@@ -105,8 +118,13 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		if rr.Code != http.StatusBadGateway {
 			t.Fatalf("expected 502, got=%d body=%s", rr.Code, rr.Body.String())
 		}
+
 		if !strings.Contains(rr.Body.String(), `"error":"token request failed"`) {
 			t.Fatalf("unexpected body: %s", rr.Body.String())
+		}
+
+		if acs.called {
+			t.Fatalf("AuthCodeService.Issue must not be called when token exchange fails")
 		}
 	})
 }

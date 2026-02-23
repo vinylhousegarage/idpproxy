@@ -62,8 +62,9 @@ func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string,
 }
 
 type fakeAuthCodeService struct {
-	code string
-	err  error
+	code   string
+	err    error
+	called bool
 }
 
 func (f *fakeAuthCodeService) Issue(
@@ -71,6 +72,8 @@ func (f *fakeAuthCodeService) Issue(
 	_ string,
 	_ string,
 ) (string, error) {
+	f.called = true
+
 	if f.err != nil {
 		return "", f.err
 	}
