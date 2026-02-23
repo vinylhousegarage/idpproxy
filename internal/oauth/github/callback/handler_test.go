@@ -1,7 +1,6 @@
 package callback
 
 import (
-	"context"
 	"net/http"
 	"net/url"
 	"strings"
@@ -9,28 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-type fakeAuthCodeService struct {
-	code   string
-	called bool
-}
-
-func (f *fakeAuthCodeService) Issue(
-	ctx context.Context,
-	userID string,
-	clientID string,
-) (string, error) {
-	f.called = true
-	return f.code, nil
-}
-
-func (f *fakeAuthCodeService) Consume(
-	ctx context.Context,
-	code string,
-	clientID string,
-) (string, error) {
-	return "", nil
-}
 
 func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	t.Parallel()
