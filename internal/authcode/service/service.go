@@ -20,13 +20,13 @@ func (s *Service) Issue(
 	clientID string,
 ) (string, error) {
 
-	codeStr, err := generateCode()
+	authCode, err := generateAuthCode()
 	if err != nil {
 		return "", err
 	}
 
 	ac := authcode.AuthCode{
-		Code:      codeStr,
+		Code:      authCode,
 		UserID:    userID,
 		ClientID:  clientID,
 		ExpiresAt: time.Now().Add(60 * time.Second),
@@ -36,18 +36,18 @@ func (s *Service) Issue(
 		return "", err
 	}
 
-	return codeStr, nil
+	return authCode, nil
 }
 
 func (s *Service) Consume(
 	ctx context.Context,
-	code string,
+	authCode string,
 	clientID string,
 ) (string, error) {
-	return s.store.Consume(ctx, code, clientID)
+	return s.store.Consume(ctx, authCode, clientID)
 }
 
-func generateCode() (string, error) {
+func generateAuthCode() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
