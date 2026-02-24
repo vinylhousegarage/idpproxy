@@ -2,15 +2,15 @@ package service
 
 import "testing"
 
-func TestGenerateCode(t *testing.T) {
+func TestGenerateAuthCode(t *testing.T) {
 	t.Parallel()
 
-	c1, err := generateCode()
+	c1, err := generateAuthCode()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	c2, err := generateCode()
+	c2, err := generateAuthCode()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
