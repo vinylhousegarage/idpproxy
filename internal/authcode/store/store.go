@@ -7,6 +7,6 @@ import (
 )
 
 type Store interface {
-	Save(ctx context.Context, code authcode.AuthCode) error
-	Consume(ctx context.Context, code string, clientID string) (string, error)
+	Save(ctx context.Context, authCode authcode.AuthCode) error
+	Consume(ctx context.Context, authCodeValue, clientID string) (string, error)
 }
