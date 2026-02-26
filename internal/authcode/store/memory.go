@@ -9,42 +9,42 @@ import (
 )
 
 type MemoryStore struct {
-	mu    sync.Mutex
-	codes map[string]authcode.AuthCode
+	mu        sync.Mutex
+	authCodes map[string]authcode.AuthCode
 }
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		codes: make(map[string]authcode.AuthCode),
+		authCodes: make(map[string]authcode.AuthCode),
 	}
 }
 
-func (s *MemoryStore) Save(ctx context.Context, code authcode.AuthCode) error {
+func (s *MemoryStore) Save(ctx context.Context, authCode authcode.AuthCode) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.codes[code.Code] = code
+	s.authCodes[authCode.Code] = authCode
 	return nil
 }
 
-func (s *MemoryStore) Consume(ctx context.Context, code, clientID string) (string, error) {
+func (s *MemoryStore) Consume(ctx context.Context, authCodeValue, clientID string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	ac, ok := s.codes[code]
+	authCode, ok := s.authCodes[authCodeValue]
 	if !ok {
 		return "", ErrNotFound
 	}
 
-	delete(s.codes, code)
+	delete(s.authCodes, authCodeValue)
 
-	if ac.ClientID != clientID {
+	if authCode.ClientID != clientID {
 		return "", ErrClientMismatch
 	}
 
-	if time.Now().After(ac.ExpiresAt) {
+	if time.Now().After(authCode.ExpiresAt) {
 		return "", ErrExpired
 	}
 
-	return ac.UserID, nil
+	return authCode.UserID, nil
 }
