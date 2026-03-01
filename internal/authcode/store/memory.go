@@ -9,42 +9,42 @@ import (
 )
 
 type MemoryStore struct {
-	mu        sync.Mutex
-	authCodes map[string]authcode.AuthCode
+	mu         sync.Mutex
+	proxyCodes map[string]authcode.ProxyCode
 }
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		authCodes: make(map[string]authcode.AuthCode),
+		proxyCodes: make(map[string]authcode.ProxyCode),
 	}
 }
 
-func (s *MemoryStore) Save(ctx context.Context, authCode authcode.AuthCode) error {
+func (s *MemoryStore) Save(ctx context.Context, proxyCode authcode.ProxyCode) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.authCodes[authCode.Code] = authCode
+	s.proxyCodes[proxyCode.Code] = proxyCode
 	return nil
 }
 
-func (s *MemoryStore) Consume(ctx context.Context, authCodeValue, clientID string) (string, error) {
+func (s *MemoryStore) Consume(ctx context.Context, proxyCodeValue, clientID string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	authCode, ok := s.authCodes[authCodeValue]
+	pc, ok := s.proxyCodes[proxyCodeValue]
 	if !ok {
 		return "", ErrNotFound
 	}
 
-	delete(s.authCodes, authCodeValue)
+	delete(s.proxyCodes, proxyCodeValue)
 
-	if authCode.ClientID != clientID {
+	if pc.ClientID != clientID {
 		return "", ErrClientMismatch
 	}
 
-	if time.Now().After(authCode.ExpiresAt) {
+	if time.Now().After(pc.ExpiresAt) {
 		return "", ErrExpired
 	}
 
-	return authCode.UserID, nil
+	return pc.UserID, nil
 }

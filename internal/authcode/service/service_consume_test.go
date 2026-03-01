@@ -18,18 +18,18 @@ type fakeConsumeStore struct {
 
 func (f *fakeConsumeStore) Save(
 	ctx context.Context,
-	code authcode.AuthCode,
+	proxyCode authcode.ProxyCode,
 ) error {
 	panic("not used")
 }
 
 func (f *fakeConsumeStore) Consume(
 	ctx context.Context,
-	code string,
+	proxyCode string,
 	clientID string,
 ) (string, error) {
 	f.called = true
-	f.gotCode = code
+	f.gotCode = proxyCode
 	f.gotCID = clientID
 	return f.retUID, f.retError
 }
