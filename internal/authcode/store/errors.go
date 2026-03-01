@@ -3,7 +3,7 @@ package store
 import "errors"
 
 var (
-	ErrClientMismatch = errors.New("authcode client mismatch")
-	ErrExpired        = errors.New("authcode expired")
-	ErrNotFound       = errors.New("authcode not found")
+	ErrClientMismatch = errors.New("proxycode client mismatch")
+	ErrExpired        = errors.New("proxycode expired")
+	ErrNotFound       = errors.New("proxycode not found")
 )

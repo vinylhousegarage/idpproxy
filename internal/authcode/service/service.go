@@ -20,37 +20,38 @@ func (s *Service) Issue(
 	clientID string,
 ) (string, error) {
 
-	authCode, err := generateAuthCode()
+	proxyCode, err := generateProxyCode()
 	if err != nil {
 		return "", err
 	}
 
-	ac := authcode.AuthCode{
-		Code:      authCode,
+	pc := authcode.ProxyCode{
+		Code:      proxyCode,
 		UserID:    userID,
 		ClientID:  clientID,
 		ExpiresAt: time.Now().Add(60 * time.Second),
 	}
 
-	if err := s.store.Save(ctx, ac); err != nil {
+	if err := s.store.Save(ctx, pc); err != nil {
 		return "", err
 	}
 
-	return authCode, nil
+	return proxyCode, nil
 }
 
 func (s *Service) Consume(
 	ctx context.Context,
-	authCode string,
+	proxyCode string,
 	clientID string,
 ) (string, error) {
-	return s.store.Consume(ctx, authCode, clientID)
+	return s.store.Consume(ctx, proxyCode, clientID)
 }
 
-func generateAuthCode() (string, error) {
+func generateProxyCode() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
+
 	return base64.RawURLEncoding.EncodeToString(b), nil
 }

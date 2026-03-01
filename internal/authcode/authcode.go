@@ -2,7 +2,7 @@ package authcode
 
 import "time"
 
-type AuthCode struct {
+type ProxyCode struct {
 	Code      string
 	UserID    string
 	ClientID  string
