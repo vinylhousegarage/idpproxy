@@ -12,8 +12,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func callbackSuccessLocation(code, qState string) string {
-	return "/oauth/github/callback/success?code=" + url.QueryEscape(code) +
+func callbackSuccessLocation(proxyCode, qState string) string {
+	return "/oauth/github/callback/success?code=" + url.QueryEscape(proxyCode) +
 		"&state=" + url.QueryEscape(qState)
 }
 
@@ -24,12 +24,12 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	code := c.Query("code")
+	githubCode := c.Query("code")
 	qState := c.Query("state")
 
-	if code == "" {
-		h.OAuth.Logger.Warn("missing code")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing code"})
+	if githubCode == "" {
+		h.OAuth.Logger.Warn("missing githubCode")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing githubCode"})
 
 		return
 	}
@@ -58,9 +58,9 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, code, qState)
+	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, githubCode, qState)
 	if err != nil {
-		h.OAuth.Logger.Error("build token request failed", zap.Error(err))
+		h.OAuth.Logger.Error("build github access token request failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "build request failed"})
 
 		return
@@ -68,40 +68,40 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	resp, err := h.API.HTTPClient.Do(req)
 	if err != nil {
-		h.OAuth.Logger.Error("token request failed", zap.Error(err))
+		h.OAuth.Logger.Error("github access token request failed", zap.Error(err))
 		c.JSON(http.StatusBadGateway, gin.H{"error": "token request failed"})
 
 		return
 	}
 
-	accessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
+	githubAccessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
 
-		h.OAuth.Logger.Warn("token response parse failed", zap.Error(err))
+		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
 		c.JSON(http.StatusBadGateway, gin.H{"error": "token exchange failed"})
 
 		return
 	}
 
-	userReq, err := githubuser.NewGitHubUserRequest(ctx, accessToken)
+	githubUserReq, err := githubuser.NewGitHubUserRequest(ctx, githubAccessToken)
 	if err != nil {
-		h.OAuth.Logger.Error("build /user request failed", zap.Error(err))
+		h.OAuth.Logger.Error("build github /user request failed", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to build user request"})
 
 		return
 	}
 
-	userResp, err := h.API.HTTPClient.Do(userReq)
+	githubUserResp, err := h.API.HTTPClient.Do(githubUserReq)
 	if err != nil {
-		h.OAuth.Logger.Error("call /user failed", zap.Error(err))
+		h.OAuth.Logger.Error("failed to call github /user", zap.Error(err))
 		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to call GitHub /user"})
 
 		return
 	}
 
-	ghUser, err := githubuser.DecodeGitHubUserResponse(userResp)
+	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
-		h.OAuth.Logger.Warn("decode /user failed", zap.Error(err))
+		h.OAuth.Logger.Warn("failed to decode github /user response", zap.Error(err))
 		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to decode GitHub /user"})
 
 		return
@@ -109,29 +109,31 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	internalUserID, err := h.UserService.UpsertFromGitHub(
 		ctx,
-		ghUser.ID,
-		ghUser.Login,
-		ghUser.Email,
+		githubUser.ID,
+		githubUser.Login,
+		githubUser.Email,
 	)
 	if err != nil {
-		h.OAuth.Logger.Error("upsert user failed", zap.Error(err))
+		h.OAuth.Logger.Error("failed to upsert github user", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upsert user"})
+
 		return
 	}
 
-	authCode, err := h.ProxyCodeService.Issue(
+	proxyCode, err := h.ProxyCodeService.Issue(
 		ctx,
 		internalUserID,
 		h.ClientID,
 	)
 	if err != nil {
-		h.OAuth.Logger.Error("issue auth code failed", zap.Error(err))
+		h.OAuth.Logger.Error("failed to issue proxy code", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to issue auth code"})
+
 		return
 	}
 
 	c.Redirect(
 		http.StatusFound,
-		callbackSuccessLocation(authCode, qState),
+		callbackSuccessLocation(proxyCode, qState),
 	)
 }

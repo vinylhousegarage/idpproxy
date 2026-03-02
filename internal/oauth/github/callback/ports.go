@@ -5,7 +5,7 @@ import (
 )
 
 type UserService interface {
-	UpsertFromGitHub(ctx context.Context, ghID int64, login, email string) (string, error)
+	UpsertFromGitHub(ctx context.Context, githubID int64, login, email string) (string, error)
 }
 
 type ProxyCodeService interface {
