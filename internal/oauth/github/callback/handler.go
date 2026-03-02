@@ -119,7 +119,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
-	authCode, err := h.AuthCodeService.Issue(
+	authCode, err := h.ProxyCodeService.Issue(
 		ctx,
 		internalUserID,
 		h.ClientID,

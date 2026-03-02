@@ -19,7 +19,7 @@ func newHandlerForTest(
 	t *testing.T,
 	httpc *fakeHTTPClient,
 	us *fakeUserService,
-	acs *fakeAuthCodeService,
+	acs *fakeProxyCodeService,
 ) *GitHubCallbackHandler {
 	t.Helper()
 

@@ -61,13 +61,13 @@ func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string,
 	return s.returnID, nil
 }
 
-type fakeAuthCodeService struct {
+type fakeProxyCodeService struct {
 	code   string
 	err    error
 	called bool
 }
 
-func (f *fakeAuthCodeService) Issue(
+func (f *fakeProxyCodeService) Issue(
 	_ context.Context,
 	_ string,
 	_ string,

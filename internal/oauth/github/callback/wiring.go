@@ -7,26 +7,26 @@ import (
 )
 
 type GitHubCallbackHandler struct {
-	OAuth           *deps.GitHubOAuthDependencies
-	API             *deps.GitHubAPIDependencies
-	UserService     UserService
-	AuthCodeService AuthCodeService
-	ClientID        string
+	OAuth            *deps.GitHubOAuthDependencies
+	API              *deps.GitHubAPIDependencies
+	UserService      UserService
+	ProxyCodeService ProxyCodeService
+	ClientID         string
 }
 
 func NewGitHubCallbackHandler(
 	oauth *deps.GitHubOAuthDependencies,
 	api *deps.GitHubAPIDependencies,
 	userSvc UserService,
-	authCodeSvc AuthCodeService,
+	proxyCodeSvc ProxyCodeService,
 	clientID string,
 ) *GitHubCallbackHandler {
 	return &GitHubCallbackHandler{
-		OAuth:           oauth,
-		API:             api,
-		UserService:     userSvc,
-		AuthCodeService: authCodeSvc,
-		ClientID:        clientID,
+		OAuth:            oauth,
+		API:              api,
+		UserService:      userSvc,
+		ProxyCodeService: proxyCodeSvc,
+		ClientID:         clientID,
 	}
 }
 
@@ -35,7 +35,7 @@ func (h *GitHubCallbackHandler) ready() bool {
 		h.OAuth != nil && h.OAuth.Config != nil && h.OAuth.Logger != nil &&
 		h.API != nil && h.API.HTTPClient != nil &&
 		h.UserService != nil &&
-		h.AuthCodeService != nil &&
+		h.ProxyCodeService != nil &&
 		h.ClientID != ""
 }
 

@@ -21,7 +21,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeAuthCodeService{code: "authcode-123"}
+		acs := &fakeProxyCodeService{code: "authcode-123"}
 
 		h := newHandlerForTest(t, httpc, us, acs)
 
@@ -56,7 +56,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 
 		if !acs.called {
-			t.Fatalf("AuthCodeService.Issue was not called")
+			t.Fatalf("ProxyCodeService.Issue was not called")
 		}
 
 		assertStateCookieDeleted(t, rr)
@@ -67,7 +67,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeAuthCodeService{code: "authcode-123"}
+		acs := &fakeProxyCodeService{code: "authcode-123"}
 
 		h := newHandlerForTest(t, httpc, us, acs)
 
@@ -88,7 +88,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 
 		if acs.called {
-			t.Fatalf("AuthCodeService.Issue must not be called on invalid state")
+			t.Fatalf("ProxyCodeService.Issue must not be called on invalid state")
 		}
 
 		assertStateCookieDeleted(t, rr)
@@ -103,7 +103,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			forceTokenErr: true,
 		}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeAuthCodeService{code: "authcode-123"}
+		acs := &fakeProxyCodeService{code: "authcode-123"}
 
 		h := newHandlerForTest(t, httpc, us, acs)
 
@@ -124,7 +124,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		}
 
 		if acs.called {
-			t.Fatalf("AuthCodeService.Issue must not be called when token exchange fails")
+			t.Fatalf("ProxyCodeService.Issue must not be called when token exchange fails")
 		}
 	})
 }
