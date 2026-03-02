@@ -21,9 +21,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeProxyCodeService{code: "authcode-123"}
+		pcs := &fakeProxyCodeService{proxyCode: "proxycode-123"}
 
-		h := newHandlerForTest(t, httpc, us, acs)
+		h := newHandlerForTest(t, httpc, us, pcs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-abc")
@@ -47,15 +47,15 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("invalid Location: %v (%s)", err, loc)
 		}
 
-		if got := u.Query().Get("code"); got != "authcode-123" {
-			t.Fatalf("expected authcode-123, got=%s (loc=%s)", got, loc)
+		if got := u.Query().Get("code"); got != "proxycode-123" {
+			t.Fatalf("expected proxycode-123, got=%s (loc=%s)", got, loc)
 		}
 
 		if got := u.Query().Get("state"); got != "st-abc" {
 			t.Fatalf("expected state=st-abc, got=%s (loc=%s)", got, loc)
 		}
 
-		if !acs.called {
+		if !pcs.called {
 			t.Fatalf("ProxyCodeService.Issue was not called")
 		}
 
@@ -67,9 +67,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		httpc := &fakeHTTPClient{tokenJSON: tokenJSON, userJSON: userJSON}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeProxyCodeService{code: "authcode-123"}
+		pcs := &fakeProxyCodeService{proxyCode: "proxycode-123"}
 
-		h := newHandlerForTest(t, httpc, us, acs)
+		h := newHandlerForTest(t, httpc, us, pcs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-wrong")
@@ -87,7 +87,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("unexpected body: %s", rr.Body.String())
 		}
 
-		if acs.called {
+		if pcs.called {
 			t.Fatalf("ProxyCodeService.Issue must not be called on invalid state")
 		}
 
@@ -103,9 +103,9 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			forceTokenErr: true,
 		}
 		us := &fakeUserService{returnID: "user-internal-123"}
-		acs := &fakeProxyCodeService{code: "authcode-123"}
+		pcs := &fakeProxyCodeService{proxyCode: "proxycode-123"}
 
-		h := newHandlerForTest(t, httpc, us, acs)
+		h := newHandlerForTest(t, httpc, us, pcs)
 
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-abc")
@@ -123,7 +123,7 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("unexpected body: %s", rr.Body.String())
 		}
 
-		if acs.called {
+		if pcs.called {
 			t.Fatalf("ProxyCodeService.Issue must not be called when token exchange fails")
 		}
 	})

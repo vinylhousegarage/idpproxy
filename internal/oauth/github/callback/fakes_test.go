@@ -62,9 +62,9 @@ func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string,
 }
 
 type fakeProxyCodeService struct {
-	code   string
-	err    error
-	called bool
+	proxyCode string
+	err       error
+	called    bool
 }
 
 func (f *fakeProxyCodeService) Issue(
@@ -78,5 +78,5 @@ func (f *fakeProxyCodeService) Issue(
 		return "", f.err
 	}
 
-	return f.code, nil
+	return f.proxyCode, nil
 }
