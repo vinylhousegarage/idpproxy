@@ -36,15 +36,17 @@ func (s *MemoryStore) Consume(ctx context.Context, proxyCodeValue, clientID stri
 		return "", ErrNotFound
 	}
 
-	delete(s.proxyCodes, proxyCodeValue)
-
 	if pc.ClientID != clientID {
 		return "", ErrClientMismatch
 	}
 
 	if time.Now().After(pc.ExpiresAt) {
+		delete(s.proxyCodes, proxyCodeValue)
+
 		return "", ErrExpired
 	}
+
+	delete(s.proxyCodes, proxyCodeValue)
 
 	return pc.UserID, nil
 }
