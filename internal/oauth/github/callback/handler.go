@@ -29,13 +29,13 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	if githubCode == "" {
 		h.OAuth.Logger.Warn("missing githubCode")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing githubCode"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorMissingGitHubCode})
 
 		return
 	}
 	if qState == "" {
 		h.OAuth.Logger.Warn("missing state")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing state"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorMissingState})
 
 		return
 	}
@@ -48,7 +48,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 			zap.Error(err),
 		)
 		http.SetCookie(c.Writer, deleteStateCookie())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorInvalidState})
 
 		return
 	}
@@ -61,7 +61,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, githubCode, qState)
 	if err != nil {
 		h.OAuth.Logger.Error("build github access token request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "build request failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ErrorBuildRequest})
 
 		return
 	}
@@ -69,7 +69,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	resp, err := h.API.HTTPClient.Do(req)
 	if err != nil {
 		h.OAuth.Logger.Error("github access token request failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": "token request failed"})
+		c.JSON(http.StatusBadGateway, gin.H{"error": ErrorGitHubTokenRequest})
 
 		return
 	}
@@ -78,7 +78,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	if err != nil {
 
 		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": "token exchange failed"})
+		c.JSON(http.StatusBadGateway, gin.H{"error": ErrorGitHubTokenExchange})
 
 		return
 	}
@@ -86,7 +86,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserReq, err := githubuser.NewGitHubUserRequest(ctx, githubAccessToken)
 	if err != nil {
 		h.OAuth.Logger.Error("build github /user request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to build user request"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ErrorGitHubUserRequestBuild})
 
 		return
 	}
@@ -94,7 +94,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserResp, err := h.API.HTTPClient.Do(githubUserReq)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to call github /user", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to call GitHub /user"})
+		c.JSON(http.StatusBadGateway, gin.H{"error": ErrorGitHubUserRequest})
 
 		return
 	}
@@ -102,7 +102,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
 		h.OAuth.Logger.Warn("failed to decode github /user response", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to decode GitHub /user"})
+		c.JSON(http.StatusBadGateway, gin.H{"error": ErrorGitHubUserDecode})
 
 		return
 	}
@@ -115,7 +115,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to upsert github user", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upsert user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ErrorUserUpsert})
 
 		return
 	}
@@ -127,7 +127,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to issue proxy code", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to issue auth code"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ErrorProxyCodeIssue})
 
 		return
 	}

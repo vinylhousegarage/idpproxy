@@ -1,7 +1,6 @@
 package callback
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"testing"
@@ -83,13 +82,10 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("expected 400, got=%d body=%s", rr.Code, rr.Body.String())
 		}
 
-		var resp map[string]string
-		if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to decode response: %v", err)
-		}
+		resp := decodeErrorResponse(t, rr)
 
-		if resp["error"] != "invalid state" {
-			t.Fatalf("expected error=invalid state, got=%v", resp["error"])
+		if resp.Error != ErrorInvalidState {
+			t.Fatalf("expected error=%s, got=%s", ErrorInvalidState, resp.Error)
 		}
 
 		if pcs.called {
@@ -124,13 +120,10 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			t.Fatalf("expected 502, got=%d body=%s", rr.Code, rr.Body.String())
 		}
 
-		var resp map[string]string
-		if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to decode response: %v", err)
-		}
+		resp := decodeErrorResponse(t, rr)
 
-		if resp["error"] != "token request failed" {
-			t.Fatalf("expected error=token request failed, got=%v", resp["error"])
+		if resp.Error != ErrorGitHubTokenRequest {
+			t.Fatalf("expected error=%s, got=%s", ErrorGitHubTokenRequest, resp.Error)
 		}
 
 		if pcs.called {

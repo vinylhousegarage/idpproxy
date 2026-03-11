@@ -2,6 +2,7 @@ package callback
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -83,4 +84,16 @@ func assertStateCookieDeleted(t *testing.T, rr *httptest.ResponseRecorder) {
 		strings.Contains(strings.ToLower(joined), "expires=")) {
 		t.Fatalf("expected deletion attributes, got: %s", joined)
 	}
+}
+
+func decodeErrorResponse(t *testing.T, rr *httptest.ResponseRecorder) ErrorResponse {
+	t.Helper()
+
+	var resp ErrorResponse
+
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to decode error response: %v", err)
+	}
+
+	return resp
 }
