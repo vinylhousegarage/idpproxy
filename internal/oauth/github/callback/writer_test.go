@@ -5,14 +5,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"go.uber.org/zap"
 )
 
 func TestWriteJSON(t *testing.T) {
 	rec := httptest.NewRecorder()
 
+	logger := zap.NewNop()
+
 	writeJSON(rec, http.StatusBadRequest, ErrorResponse{
 		Error: ErrorMissingGitHubCode,
-	})
+	}, logger)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d", rec.Code)
