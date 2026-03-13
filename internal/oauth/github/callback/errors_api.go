@@ -1,15 +1,5 @@
 package callback
 
-import "errors"
-
-// Internal errors (Go internal use)
-var (
-	ErrEncrypt      = errors.New("callback: encrypt failed")
-	ErrInvalidInput = errors.New("callback: invalid input")
-	ErrPersist      = errors.New("callback: persist failed")
-)
-
-// API error codes (HTTP response)
 const (
 	// request validation
 	ErrorMissingGitHubCode = "missing_github_code"
