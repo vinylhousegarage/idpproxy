@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
 )
 
 func TestGitHubCallbackHandler_Serve(t *testing.T) {
@@ -84,8 +85,8 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		resp := decodeErrorResponse(t, rr)
 
-		if resp.Error != ErrorInvalidState {
-			t.Fatalf("expected error=%s, got=%s", ErrorInvalidState, resp.Error)
+		if resp.Error != string(apierror.ErrorInvalidState) {
+			t.Fatalf("expected error=%s, got=%s", apierror.ErrorInvalidState, resp.Error)
 		}
 
 		if pcs.called {
@@ -122,8 +123,8 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		resp := decodeErrorResponse(t, rr)
 
-		if resp.Error != ErrorGitHubTokenRequest {
-			t.Fatalf("expected error=%s, got=%s", ErrorGitHubTokenRequest, resp.Error)
+		if resp.Error != string(apierror.ErrorGitHubTokenRequest) {
+			t.Fatalf("expected error=%s, got=%s", apierror.ErrorGitHubTokenRequest, resp.Error)
 		}
 
 		if pcs.called {

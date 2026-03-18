@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
 	"go.uber.org/zap"
 )
 
@@ -15,7 +16,7 @@ func TestWriteJSON(t *testing.T) {
 	logger := zap.NewNop()
 
 	writeJSON(rec, http.StatusBadRequest, ErrorResponse{
-		Error: ErrorMissingGitHubCode,
+		Error: string(apierror.ErrorMissingGitHubCode),
 	}, logger)
 
 	if rec.Code != http.StatusBadRequest {
@@ -36,7 +37,7 @@ func TestWriteJSON(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != ErrorMissingGitHubCode {
+	if res.Error != string(apierror.ErrorMissingGitHubCode) {
 		t.Fatalf("error = %s", res.Error)
 	}
 }
