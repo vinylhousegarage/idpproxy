@@ -16,7 +16,7 @@ func TestWriteJSON(t *testing.T) {
 	logger := zap.NewNop()
 
 	writeJSON(rec, http.StatusBadRequest, ErrorResponse{
-		Error: apierror.ErrorMissingGitHubCode,
+		Error: string(apierror.ErrorMissingGitHubCode),
 	}, logger)
 
 	if rec.Code != http.StatusBadRequest {
@@ -37,7 +37,7 @@ func TestWriteJSON(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorMissingGitHubCode {
+	if res.Error != string(apierror.ErrorMissingGitHubCode) {
 		t.Fatalf("error = %s", res.Error)
 	}
 }
