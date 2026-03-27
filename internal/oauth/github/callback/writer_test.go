@@ -15,7 +15,7 @@ func TestWriteJSON(t *testing.T) {
 
 	logger := zap.NewNop()
 
-	writeJSON(rec, http.StatusBadRequest, ErrorResponse{
+	writeJSON(rec, http.StatusBadRequest, apierror.ErrorResponse{
 		Error: string(apierror.ErrorMissingGitHubCode),
 	}, logger)
 
@@ -31,7 +31,7 @@ func TestWriteJSON(t *testing.T) {
 		t.Fatalf("body should not be empty")
 	}
 
-	var res ErrorResponse
+	var res apierror.ErrorResponse
 
 	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
 		t.Fatalf("failed to decode json: %v", err)
