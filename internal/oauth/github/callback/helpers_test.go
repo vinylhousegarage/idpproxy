@@ -14,6 +14,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
 )
 
 func newHandlerForTest(
@@ -86,10 +87,10 @@ func assertStateCookieDeleted(t *testing.T, rr *httptest.ResponseRecorder) {
 	}
 }
 
-func decodeErrorResponse(t *testing.T, rr *httptest.ResponseRecorder) ErrorResponse {
+func decodeErrorResponse(t *testing.T, rr *httptest.ResponseRecorder) apierror.ErrorResponse {
 	t.Helper()
 
-	var resp ErrorResponse
+	var resp apierror.ErrorResponse
 
 	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("failed to decode error response: %v", err)
