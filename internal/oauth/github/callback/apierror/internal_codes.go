@@ -14,4 +14,7 @@ const (
 	// internal services
 	ErrorUserUpsert     ErrorCode = "user_upsert_failed"
 	ErrorProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
+
+	// internal fallback
+	ErrorInternal ErrorCode = "internal_error"
 )
