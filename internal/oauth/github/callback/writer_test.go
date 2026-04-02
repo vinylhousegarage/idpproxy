@@ -9,18 +9,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
-	"go.uber.org/zap"
 )
 
 func TestWriteJSON(t *testing.T) {
 	t.Parallel()
 
 	rec := httptest.NewRecorder()
-	logger := zap.NewNop()
 
 	writeJSON(rec, http.StatusBadRequest, apierror.ErrorResponse{
 		Error: string(apierror.ErrorMissingGitHubCode),
-	}, logger)
+	})
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d", rec.Code)
