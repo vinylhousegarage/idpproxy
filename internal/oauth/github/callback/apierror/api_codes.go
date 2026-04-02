@@ -1,9 +1,25 @@
 package apierror
 
-import "net/http"
+const (
+	// validation
+	ErrorMissingGitHubCode ErrorCode = "missing_github_code"
+	ErrorMissingState      ErrorCode = "missing_state"
+	ErrorInvalidState      ErrorCode = "invalid_state"
 
-var (
-	ErrMissingGitHubCode = New(ErrorMissingGitHubCode, http.StatusBadRequest, nil)
-	ErrMissingState      = New(ErrorMissingState, http.StatusBadRequest, nil)
-	ErrInvalidState      = New(ErrorInvalidState, http.StatusUnauthorized, nil)
+	// github token
+	ErrorBuildRequest        ErrorCode = "build_request_failed"
+	ErrorGitHubTokenRequest  ErrorCode = "github_token_request_failed"
+	ErrorGitHubTokenExchange ErrorCode = "github_token_exchange_failed"
+
+	// github user
+	ErrorGitHubUserRequestBuild ErrorCode = "github_user_request_build_failed"
+	ErrorGitHubUserRequest      ErrorCode = "github_user_request_failed"
+	ErrorGitHubUserDecode       ErrorCode = "github_user_decode_failed"
+
+	// internal services
+	ErrorUserUpsert     ErrorCode = "user_upsert_failed"
+	ErrorProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
+
+	// fallback
+	ErrorInternal ErrorCode = "internal_error"
 )
