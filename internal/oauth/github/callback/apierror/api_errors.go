@@ -11,7 +11,7 @@ func MissingState(err error) *APIError {
 }
 
 func InvalidState(err error) *APIError {
-	return New(ErrorInvalidState, http.StatusUnauthorized, err)
+	return New(ErrorInvalidState, http.StatusBadRequest, err)
 }
 
 func ProxyCodeIssue(err error) *APIError {
