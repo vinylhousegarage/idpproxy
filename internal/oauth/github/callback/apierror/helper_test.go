@@ -2,6 +2,7 @@ package apierror
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -13,6 +14,7 @@ func TestFromInternal(t *testing.T) {
 		inputErr       error
 		expectedCode   ErrorCode
 		expectedStatus int
+		expectNil      bool
 	}{
 		{
 			name:           "invalid input",
@@ -32,6 +34,17 @@ func TestFromInternal(t *testing.T) {
 			expectedCode:   ErrorInternal,
 			expectedStatus: 500,
 		},
+		{
+			name:           "wrapped invalid input",
+			inputErr:       fmt.Errorf("wrap: %w", ErrInvalidInput),
+			expectedCode:   ErrorInvalidState,
+			expectedStatus: 400,
+		},
+		{
+			name:      "nil error",
+			inputErr:  nil,
+			expectNil: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -40,6 +53,13 @@ func TestFromInternal(t *testing.T) {
 			t.Parallel()
 
 			got := FromInternal(tt.inputErr)
+
+			if tt.expectNil {
+				if got != nil {
+					t.Fatalf("expected nil, got %v", got)
+				}
+				return
+			}
 
 			if got == nil {
 				t.Fatalf("expected APIError, got nil")
@@ -54,7 +74,7 @@ func TestFromInternal(t *testing.T) {
 			}
 
 			if !errors.Is(got.Err, tt.inputErr) {
-				t.Fatalf("wrapped error mismatch")
+				t.Fatalf("wrapped error mismatch: got %v, want %v", got.Err, tt.inputErr)
 			}
 		})
 	}
