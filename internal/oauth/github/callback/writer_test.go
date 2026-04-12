@@ -17,7 +17,7 @@ func TestWriteJSON(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	writeJSON(rec, http.StatusBadRequest, apierror.ErrorResponse{
-		Error: string(apierror.ErrorMissingGitHubCode),
+		Error: apierror.ErrorMissingGitHubCode,
 	})
 
 	if rec.Code != http.StatusBadRequest {
@@ -38,7 +38,7 @@ func TestWriteJSON(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != string(apierror.ErrorMissingGitHubCode) {
+	if res.Error != apierror.ErrorMissingGitHubCode {
 		t.Fatalf("error = %s", res.Error)
 	}
 }
@@ -65,7 +65,7 @@ func TestWriteError_WithAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != string(apierror.ErrorMissingState) {
+	if res.Error != apierror.ErrorMissingState {
 		t.Fatalf("expected %s, got %s", apierror.ErrorMissingState, res.Error)
 	}
 }
@@ -92,7 +92,7 @@ func TestWriteError_WithGenericError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != string(apierror.ErrorInternal) {
+	if res.Error != apierror.ErrorInternal {
 		t.Fatalf("expected %s, got %s", apierror.ErrorInternal, res.Error)
 	}
 }

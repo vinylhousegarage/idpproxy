@@ -17,6 +17,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	if err != nil {
 		logger.Error("writeJSON marshal error", zap.Error(err))
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+
 		return
 	}
 
@@ -33,15 +34,16 @@ func WriteError(c *gin.Context, err error) {
 
 	if ok := asAPIError(err, &apiErr); ok {
 		writeJSON(c.Writer, apiErr.HTTPStatus, apierror.ErrorResponse{
-			Error: string(apiErr.Code),
+			Error: apiErr.Code,
 		})
+
 		return
 	}
 
 	internal := apierror.Internal(err)
 
 	writeJSON(c.Writer, internal.HTTPStatus, apierror.ErrorResponse{
-		Error: string(internal.Code),
+		Error: internal.Code,
 	})
 }
 
