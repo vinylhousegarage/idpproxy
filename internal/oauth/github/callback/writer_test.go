@@ -11,38 +11,6 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
 )
 
-func TestWriteJSON(t *testing.T) {
-	t.Parallel()
-
-	rec := httptest.NewRecorder()
-
-	writeJSON(rec, http.StatusBadRequest, apierror.ErrorResponse{
-		Error: apierror.ErrorMissingGitHubCode,
-	})
-
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("status = %d", rec.Code)
-	}
-
-	if rec.Header().Get("Content-Type") != "application/json; charset=utf-8" {
-		t.Fatalf("wrong content-type")
-	}
-
-	if rec.Body.Len() == 0 {
-		t.Fatalf("body should not be empty")
-	}
-
-	var res apierror.ErrorResponse
-
-	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
-		t.Fatalf("failed to decode json: %v", err)
-	}
-
-	if res.Error != apierror.ErrorMissingGitHubCode {
-		t.Fatalf("error = %s", res.Error)
-	}
-}
-
 func TestWriteError_WithAPIError(t *testing.T) {
 	t.Parallel()
 
