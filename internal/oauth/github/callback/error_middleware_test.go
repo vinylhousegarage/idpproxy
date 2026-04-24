@@ -22,7 +22,7 @@ func TestErrorMiddleware_WithAPIError(t *testing.T) {
 
 	r.GET("/test", func(c *gin.Context) {
 		err := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
-		c.Error(err)
+		_ = c.Error(err)
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -53,7 +53,7 @@ func TestErrorMiddleware_WithGenericError(t *testing.T) {
 	r.Use(ErrorMiddleware())
 
 	r.GET("/test", func(c *gin.Context) {
-		c.Error(errors.New("unexpected error"))
+		_ = c.Error(errors.New("unexpected error"))
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -86,7 +86,7 @@ func TestErrorMiddleware_WithWrappedAPIError(t *testing.T) {
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
 		wrapped := fmt.Errorf("wrapped: %w", apiErr)
-		c.Error(wrapped)
+		_ = c.Error(wrapped)
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
