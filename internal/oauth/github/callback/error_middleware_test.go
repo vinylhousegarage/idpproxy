@@ -8,9 +8,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
 )
+
+var logger = zap.NewNop()
 
 func TestErrorMiddleware_WithAPIError(t *testing.T) {
 	t.Parallel()
@@ -18,7 +22,7 @@ func TestErrorMiddleware_WithAPIError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware())
+	r.Use(ErrorMiddleware(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		err := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
@@ -50,7 +54,7 @@ func TestErrorMiddleware_WithGenericError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware())
+	r.Use(ErrorMiddleware(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		_ = c.Error(errors.New("unexpected error"))
@@ -81,7 +85,7 @@ func TestErrorMiddleware_WithWrappedAPIError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware())
+	r.Use(ErrorMiddleware(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
