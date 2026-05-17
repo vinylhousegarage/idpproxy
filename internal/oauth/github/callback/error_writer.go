@@ -8,6 +8,8 @@ import (
 )
 
 func WriteError(c *gin.Context, err error) {
+	defer c.Abort()
+
 	var apiErr *apierror.APIError
 
 	if errors.As(err, &apiErr) {
