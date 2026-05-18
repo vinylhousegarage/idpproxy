@@ -6,6 +6,7 @@ type APIError struct {
 	Code       ErrorCode
 	HTTPStatus int
 	Err        error
+	Internal   string
 }
 
 func (e *APIError) Error() string {
