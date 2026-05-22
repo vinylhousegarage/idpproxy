@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
@@ -109,5 +110,64 @@ func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 
 	if res.Error != apierror.ErrorMissingState {
 		t.Fatalf("expected %s, got %s", apierror.ErrorMissingState, res.Error)
+	}
+}
+
+func TestErrorLogger_WithAPIError_LogsCorrectFields(t *testing.T) {
+	t.Parallel()
+
+	gin.SetMode(gin.TestMode)
+
+	core, logs := observer.New(zap.ErrorLevel)
+	observedLogger := zap.New(core)
+
+	r := gin.New()
+	r.Use(ErrorLogger(observedLogger))
+
+	r.GET("/test", func(c *gin.Context) {
+		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
+		apiErr.Internal = "debug details here"
+		_ = c.Error(apiErr)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	rec := httptest.NewRecorder()
+
+	r.ServeHTTP(rec, req)
+
+	if logs.Len() != 1 {
+		t.Fatalf("expected 1 log entry, got %d", logs.Len())
+	}
+
+	logEntry := logs.All()[0]
+
+	if logEntry.Message != "request failed" {
+		t.Errorf("expected message 'request failed', got '%s'", logEntry.Message)
+	}
+
+	fields := logEntry.ContextMap()
+
+	expectedFields := map[string]interface{}{
+		"path":          "/test",
+		"method":        "GET",
+		"code":          string(apierror.ErrorMissingState),
+		"status":        int64(http.StatusBadRequest),
+		"internal_info": "debug details here",
+	}
+
+	for k, expectedVal := range expectedFields {
+		if gotVal, ok := fields[k]; !ok {
+			t.Errorf("expected log field '%s' to be present", k)
+		} else if gotVal != expectedVal {
+			t.Errorf("expected log field '%s' to be %v, got %v", k, expectedVal, gotVal)
+		}
+	}
+
+	if errField, ok := fields["error"]; !ok {
+		t.Errorf("expected 'error' field in log")
+	} else if gotErrStr, ok := errField.(string); !ok {
+		t.Errorf("expected 'error' field to be a string")
+	} else if gotErrStr != "missing state" {
+		t.Errorf("expected log error message 'missing state', got '%s'", gotErrStr)
 	}
 }
