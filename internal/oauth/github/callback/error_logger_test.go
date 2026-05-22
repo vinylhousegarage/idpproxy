@@ -16,13 +16,13 @@ import (
 
 var logger = zap.NewNop()
 
-func TestErrorMiddleware_WithAPIError(t *testing.T) {
+func TestErrorLogger_WithAPIError(t *testing.T) {
 	t.Parallel()
 
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware(logger))
+	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		err := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
@@ -48,13 +48,13 @@ func TestErrorMiddleware_WithAPIError(t *testing.T) {
 	}
 }
 
-func TestErrorMiddleware_WithGenericError(t *testing.T) {
+func TestErrorLogger_WithGenericError(t *testing.T) {
 	t.Parallel()
 
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware(logger))
+	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		_ = c.Error(errors.New("unexpected error"))
@@ -79,13 +79,13 @@ func TestErrorMiddleware_WithGenericError(t *testing.T) {
 	}
 }
 
-func TestErrorMiddleware_WithWrappedAPIError(t *testing.T) {
+func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 	t.Parallel()
 
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	r.Use(ErrorMiddleware(logger))
+	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
