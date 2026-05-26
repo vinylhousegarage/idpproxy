@@ -85,8 +85,8 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		resp := decodeErrorResponse(t, rr)
 
-		if resp.Error != apierror.ErrorInvalidState {
-			t.Fatalf("expected error=%s, got=%s", apierror.ErrorInvalidState, resp.Error)
+		if resp.Error != apierror.ErrorCodeInvalidState {
+			t.Fatalf("expected error=%s, got=%s", apierror.ErrorCodeInvalidState, resp.Error)
 		}
 
 		if pcs.called {
@@ -123,8 +123,8 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 
 		resp := decodeErrorResponse(t, rr)
 
-		if resp.Error != apierror.ErrorGitHubTokenRequest {
-			t.Fatalf("expected error=%s, got=%s", apierror.ErrorGitHubTokenRequest, resp.Error)
+		if resp.Error != apierror.ErrorCodeGitHubTokenRequest {
+			t.Fatalf("expected error=%s, got=%s", apierror.ErrorCodeGitHubTokenRequest, resp.Error)
 		}
 
 		if pcs.called {

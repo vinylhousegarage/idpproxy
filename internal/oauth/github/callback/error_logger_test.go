@@ -26,7 +26,7 @@ func TestErrorLogger_WithAPIError(t *testing.T) {
 	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
-		err := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
+		err := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		_ = c.Error(err)
 	})
 
@@ -44,8 +44,8 @@ func TestErrorLogger_WithAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorMissingState {
-		t.Fatalf("expected %s, got %s", apierror.ErrorMissingState, res.Error)
+	if res.Error != apierror.ErrorCodeMissingState {
+		t.Fatalf("expected %s, got %s", apierror.ErrorCodeMissingState, res.Error)
 	}
 }
 
@@ -75,8 +75,8 @@ func TestErrorLogger_WithGenericError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorInternal {
-		t.Fatalf("expected %s, got %s", apierror.ErrorInternal, res.Error)
+	if res.Error != apierror.ErrorCodeInternal {
+		t.Fatalf("expected %s, got %s", apierror.ErrorCodeInternal, res.Error)
 	}
 }
 
@@ -89,7 +89,7 @@ func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
+		apiErr := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		wrapped := fmt.Errorf("wrapped: %w", apiErr)
 		_ = c.Error(wrapped)
 	})
@@ -108,8 +108,8 @@ func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorMissingState {
-		t.Fatalf("expected %s, got %s", apierror.ErrorMissingState, res.Error)
+	if res.Error != apierror.ErrorCodeMissingState {
+		t.Fatalf("expected %s, got %s", apierror.ErrorCodeMissingState, res.Error)
 	}
 }
 
@@ -125,7 +125,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	r.Use(ErrorLogger(observedLogger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := apierror.New(apierror.ErrorMissingState, http.StatusBadRequest, errors.New("missing state"))
+		apiErr := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		apiErr.Internal = "debug details here"
 		_ = c.Error(apiErr)
 	})
@@ -150,7 +150,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	expectedFields := map[string]interface{}{
 		"path":          "/test",
 		"method":        "GET",
-		"code":          string(apierror.ErrorMissingState),
+		"code":          string(apierror.ErrorCodeMissingState),
 		"status":        int64(http.StatusBadRequest),
 		"internal_info": "debug details here",
 	}
@@ -184,7 +184,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	r.Use(ErrorLogger(observedLogger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := apierror.New(apierror.ErrorInternal, http.StatusInternalServerError, errors.New("internal error"))
+		apiErr := apierror.New(apierror.ErrorCodeInternal, http.StatusInternalServerError, errors.New("internal error"))
 		apiErr.Internal = "debug details here"
 		_ = c.Error(apiErr)
 	})
@@ -209,7 +209,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	expectedFields := map[string]interface{}{
 		"path":          "/test",
 		"method":        "GET",
-		"code":          string(apierror.ErrorInternal),
+		"code":          string(apierror.ErrorCodeInternal),
 		"status":        int64(http.StatusInternalServerError),
 		"internal_info": "debug details here",
 	}

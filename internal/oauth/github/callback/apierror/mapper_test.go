@@ -19,25 +19,25 @@ func TestFromInternal(t *testing.T) {
 		{
 			name:           "invalid input",
 			inputErr:       ErrInvalidInput,
-			expectedCode:   ErrorInvalidState,
+			expectedCode:   ErrorCodeInvalidState,
 			expectedStatus: 400,
 		},
 		{
 			name:           "persist error",
 			inputErr:       ErrPersist,
-			expectedCode:   ErrorProxyCodeIssue,
+			expectedCode:   ErrorCodeProxyCodeIssue,
 			expectedStatus: 500,
 		},
 		{
 			name:           "unknown error",
 			inputErr:       errors.New("something went wrong"),
-			expectedCode:   ErrorInternal,
+			expectedCode:   ErrorCodeInternal,
 			expectedStatus: 500,
 		},
 		{
 			name:           "wrapped invalid input",
 			inputErr:       fmt.Errorf("wrap: %w", ErrInvalidInput),
-			expectedCode:   ErrorInvalidState,
+			expectedCode:   ErrorCodeInvalidState,
 			expectedStatus: 400,
 		},
 		{
