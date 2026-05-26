@@ -2,24 +2,24 @@ package apierror
 
 const (
 	// validation
-	ErrorMissingGitHubCode ErrorCode = "missing_github_code"
-	ErrorMissingState      ErrorCode = "missing_state"
-	ErrorInvalidState      ErrorCode = "invalid_state"
+	ErrorCodeMissingGitHubCode ErrorCode = "missing_github_code"
+	ErrorCodeMissingState      ErrorCode = "missing_state"
+	ErrorCodeInvalidState      ErrorCode = "invalid_state"
 
 	// github token
-	ErrorBuildRequest        ErrorCode = "build_request_failed"
-	ErrorGitHubTokenRequest  ErrorCode = "github_token_request_failed"
-	ErrorGitHubTokenExchange ErrorCode = "github_token_exchange_failed"
+	ErrorCodeBuildRequest        ErrorCode = "build_request_failed"
+	ErrorCodeGitHubTokenRequest  ErrorCode = "github_token_request_failed"
+	ErrorCodeGitHubTokenExchange ErrorCode = "github_token_exchange_failed"
 
 	// github user
-	ErrorGitHubUserRequestBuild ErrorCode = "github_user_request_build_failed"
-	ErrorGitHubUserRequest      ErrorCode = "github_user_request_failed"
-	ErrorGitHubUserDecode       ErrorCode = "github_user_decode_failed"
+	ErrorCodeGitHubUserRequestBuild ErrorCode = "github_user_request_build_failed"
+	ErrorCodeGitHubUserRequest      ErrorCode = "github_user_request_failed"
+	ErrorCodeGitHubUserDecode       ErrorCode = "github_user_decode_failed"
 
 	// internal services
-	ErrorUserUpsert     ErrorCode = "user_upsert_failed"
-	ErrorProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
+	ErrorCodeUserUpsert     ErrorCode = "user_upsert_failed"
+	ErrorCodeProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
 
 	// fallback
-	ErrorInternal ErrorCode = "internal_error"
+	ErrorCodeInternal ErrorCode = "internal_error"
 )

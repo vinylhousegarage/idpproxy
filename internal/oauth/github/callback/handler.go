@@ -30,14 +30,14 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	if githubCode == "" {
 		h.OAuth.Logger.Warn("missing githubCode")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorMissingGitHubCode})
+		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingGitHubCode})
 
 		return
 	}
 
 	if qState == "" {
 		h.OAuth.Logger.Warn("missing state")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorMissingState})
+		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingState})
 
 		return
 	}
@@ -51,7 +51,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		)
 
 		http.SetCookie(c.Writer, deleteStateCookie())
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorInvalidState})
+		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeInvalidState})
 
 		return
 	}
@@ -64,7 +64,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, githubCode, qState)
 	if err != nil {
 		h.OAuth.Logger.Error("build github access token request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorBuildRequest})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeBuildRequest})
 
 		return
 	}
@@ -72,7 +72,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	resp, err := h.API.HTTPClient.Do(req)
 	if err != nil {
 		h.OAuth.Logger.Error("github access token request failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorGitHubTokenRequest})
+		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenRequest})
 
 		return
 	}
@@ -80,7 +80,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubAccessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
 		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorGitHubTokenExchange})
+		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenExchange})
 
 		return
 	}
@@ -88,7 +88,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserReq, err := githubuser.NewGitHubUserRequest(ctx, githubAccessToken)
 	if err != nil {
 		h.OAuth.Logger.Error("build github /user request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorGitHubUserRequestBuild})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeGitHubUserRequestBuild})
 
 		return
 	}
@@ -96,7 +96,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserResp, err := h.API.HTTPClient.Do(githubUserReq)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to call github /user", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorGitHubUserRequest})
+		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserRequest})
 
 		return
 	}
@@ -104,7 +104,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
 		h.OAuth.Logger.Warn("failed to decode github /user response", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorGitHubUserDecode})
+		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserDecode})
 
 		return
 	}
@@ -117,7 +117,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to upsert github user", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorUserUpsert})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeUserUpsert})
 
 		return
 	}
@@ -129,7 +129,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to issue proxy code", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorProxyCodeIssue})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeProxyCodeIssue})
 
 		return
 	}
