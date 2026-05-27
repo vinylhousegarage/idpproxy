@@ -14,7 +14,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
 func newHandlerForTest(
