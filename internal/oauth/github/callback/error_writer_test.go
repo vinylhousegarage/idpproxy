@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
 func TestWriteError_WithAPIError(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback/apierror"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
 func WriteError(c *gin.Context, err error) {
