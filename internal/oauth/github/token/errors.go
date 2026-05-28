@@ -1,16 +1,6 @@
 package token
 
-import (
-	"errors"
-
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
-)
-
-const (
-	ErrorCodeBuildAccessTokenRequest apierror.ErrorCode = "build_access_token_request_failed"
-	ErrorCodeGitHubTokenRequest      apierror.ErrorCode = "github_token_request_failed"
-	ErrorCodeGitHubTokenExchange     apierror.ErrorCode = "github_token_exchange_failed"
-)
+import "errors"
 
 var (
 	ErrEmptyBody          = errors.New("token: empty response body")
