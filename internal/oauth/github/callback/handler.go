@@ -64,7 +64,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, githubCode, qState)
 	if err != nil {
 		h.OAuth.Logger.Error("build github access token request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeBuildRequest})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": githubtoken.ErrorCodeBuildAccessTokenRequest})
 
 		return
 	}
@@ -72,7 +72,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	resp, err := h.API.HTTPClient.Do(req)
 	if err != nil {
 		h.OAuth.Logger.Error("github access token request failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenRequest})
+		c.JSON(http.StatusBadGateway, gin.H{"error": githubtoken.ErrorCodeGitHubTokenRequest})
 
 		return
 	}
@@ -80,7 +80,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubAccessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
 		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenExchange})
+		c.JSON(http.StatusBadGateway, gin.H{"error": githubtoken.ErrorCodeGitHubTokenExchange})
 
 		return
 	}
