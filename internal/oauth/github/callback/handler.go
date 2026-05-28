@@ -88,7 +88,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserReq, err := githubuser.NewGitHubUserRequest(ctx, githubAccessToken)
 	if err != nil {
 		h.OAuth.Logger.Error("build github /user request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeGitHubUserRequestBuild})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": githubuser.ErrorCodeGitHubUserRequestBuild})
 
 		return
 	}
@@ -96,7 +96,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUserResp, err := h.API.HTTPClient.Do(githubUserReq)
 	if err != nil {
 		h.OAuth.Logger.Error("failed to call github /user", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserRequest})
+		c.JSON(http.StatusBadGateway, gin.H{"error": githubuser.ErrorCodeGitHubUserRequest})
 
 		return
 	}
@@ -104,7 +104,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
 		h.OAuth.Logger.Warn("failed to decode github /user response", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserDecode})
+		c.JSON(http.StatusBadGateway, gin.H{"error": githubuser.ErrorCodeGitHubUserDecode})
 
 		return
 	}
