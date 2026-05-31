@@ -30,14 +30,14 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	if githubCode == "" {
 		h.OAuth.Logger.Warn("missing githubCode")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingGitHubCode})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorCodeMissingGitHubCode})
 
 		return
 	}
 
 	if qState == "" {
 		h.OAuth.Logger.Warn("missing state")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingState})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorCodeMissingState})
 
 		return
 	}
@@ -51,7 +51,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		)
 
 		http.SetCookie(c.Writer, deleteStateCookie())
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeInvalidState})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrorCodeInvalidState})
 
 		return
 	}

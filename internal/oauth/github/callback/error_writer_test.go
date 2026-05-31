@@ -19,7 +19,7 @@ func TestWriteError_WithAPIError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(rec)
 
-	err := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
+	err := apierror.New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 
 	WriteError(c, err)
 
@@ -33,8 +33,8 @@ func TestWriteError_WithAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorCodeMissingState {
-		t.Fatalf("expected %s, got %s", apierror.ErrorCodeMissingState, res.Error)
+	if res.Error != ErrorCodeMissingState {
+		t.Fatalf("expected %s, got %s", ErrorCodeMissingState, res.Error)
 	}
 }
 

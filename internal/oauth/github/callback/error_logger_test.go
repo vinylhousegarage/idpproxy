@@ -26,7 +26,7 @@ func TestErrorLogger_WithAPIError(t *testing.T) {
 	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
-		err := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
+		err := apierror.New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		_ = c.Error(err)
 	})
 
@@ -44,8 +44,8 @@ func TestErrorLogger_WithAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorCodeMissingState {
-		t.Fatalf("expected %s, got %s", apierror.ErrorCodeMissingState, res.Error)
+	if res.Error != ErrorCodeMissingState {
+		t.Fatalf("expected %s, got %s", ErrorCodeMissingState, res.Error)
 	}
 }
 
@@ -89,7 +89,7 @@ func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 	r.Use(ErrorLogger(logger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
+		apiErr := apierror.New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		wrapped := fmt.Errorf("wrapped: %w", apiErr)
 		_ = c.Error(wrapped)
 	})
@@ -108,8 +108,8 @@ func TestErrorLogger_WithWrappedAPIError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorCodeMissingState {
-		t.Fatalf("expected %s, got %s", apierror.ErrorCodeMissingState, res.Error)
+	if res.Error != ErrorCodeMissingState {
+		t.Fatalf("expected %s, got %s", ErrorCodeMissingState, res.Error)
 	}
 }
 
@@ -125,7 +125,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	r.Use(ErrorLogger(observedLogger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := apierror.New(apierror.ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
+		apiErr := apierror.New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 		apiErr.Internal = "debug details here"
 		_ = c.Error(apiErr)
 	})
@@ -150,7 +150,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	expectedFields := map[string]interface{}{
 		"path":          "/test",
 		"method":        "GET",
-		"code":          string(apierror.ErrorCodeMissingState),
+		"code":          string(ErrorCodeMissingState),
 		"status":        int64(http.StatusBadRequest),
 		"internal_info": "debug details here",
 	}
