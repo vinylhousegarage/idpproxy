@@ -77,6 +77,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		return
 	}
 
+	defer resp.Body.Close()
+
 	githubAccessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
 		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
@@ -100,6 +102,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 		return
 	}
+
+	defer githubUserResp.Body.Close()
 
 	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
