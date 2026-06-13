@@ -1,10 +1,9 @@
-package callback
+package apierror
 
 import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +23,7 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 		}
 
 		logLevelFunc := logger.Error
-		var apiErr *apierror.APIError
+		var apiErr *APIError
 		if errors.As(err, &apiErr) {
 			fields = append(fields,
 				zap.String("code", string(apiErr.Code)),

@@ -1,17 +1,26 @@
 package apierror
 
-import "net/http"
+import "errors"
 
-const (
-	ErrorCodeInternal       ErrorCode = "internal_error"
-	ErrorCodeProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
-	ErrorCodeUserUpsert     ErrorCode = "user_upsert_failed"
+var (
+	// callback
+	ErrMissingGitHubCode = errors.New(string(ErrorCodeMissingGitHubCode))
+	ErrMissingState      = errors.New(string(ErrorCodeMissingState))
+	ErrInvalidState      = errors.New(string(ErrorCodeInvalidState))
+
+	// token
+	ErrBuildAccessTokenRequest  = errors.New(string(ErrorCodeBuildAccessTokenRequest))
+	ErrGitHubAccessTokenRequest = errors.New(string(ErrorCodeGitHubAccessTokenRequest))
+	ErrGitHubTokenRequest       = errors.New(string(ErrorCodeGitHubTokenRequest))
+	ErrGitHubTokenExchange      = errors.New(string(ErrorCodeGitHubTokenExchange))
+
+	// user
+	ErrGitHubUserRequestBuild = errors.New(string(ErrorCodeGitHubUserRequestBuild))
+	ErrGitHubUserRequest      = errors.New(string(ErrorCodeGitHubUserRequest))
+	ErrGitHubUserDecode       = errors.New(string(ErrorCodeGitHubUserDecode))
+
+	// internal
+	ErrInternal       = errors.New(string(ErrorCodeInternal))
+	ErrProxyCodeIssue = errors.New(string(ErrorCodeProxyCodeIssue))
+	ErrUserUpsert     = errors.New(string(ErrorCodeUserUpsert))
 )
-
-func Internal(err error, internal ...string) *APIError {
-	return New(ErrorCodeInternal, http.StatusInternalServerError, err, internal...)
-}
-
-func ProxyCodeIssue(err error, internal ...string) *APIError {
-	return New(ErrorCodeProxyCodeIssue, http.StatusInternalServerError, err, internal...)
-}

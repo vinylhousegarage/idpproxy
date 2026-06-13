@@ -1,4 +1,4 @@
-package callback
+package apierror
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
 func TestWriteError_WithAPIError(t *testing.T) {
@@ -19,7 +18,7 @@ func TestWriteError_WithAPIError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(rec)
 
-	err := apierror.New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
+	err := New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
 
 	WriteError(c, err)
 
@@ -27,7 +26,7 @@ func TestWriteError_WithAPIError(t *testing.T) {
 		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
 	}
 
-	var res apierror.ErrorResponse
+	var res ErrorResponse
 
 	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
 		t.Fatalf("failed to decode json: %v", err)
@@ -54,13 +53,13 @@ func TestWriteError_WithGenericError(t *testing.T) {
 		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, rec.Code)
 	}
 
-	var res apierror.ErrorResponse
+	var res ErrorResponse
 
 	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != apierror.ErrorCodeInternal {
-		t.Fatalf("expected %s, got %s", apierror.ErrorCodeInternal, res.Error)
+	if res.Error != ErrorCodeInternal {
+		t.Fatalf("expected %s, got %s", ErrorCodeInternal, res.Error)
 	}
 }
