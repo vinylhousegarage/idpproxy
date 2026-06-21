@@ -54,7 +54,7 @@ func main() {
 
 	systemDeps := deps.NewSystemDeps(config.GoogleOIDCMetadataURL, httpClient, logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, systemDeps)
+	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
 	r := router.NewRouter(d)
 
 	logger.Info("starting idpproxy (dev)", zap.String("addr", ":"+config.GetPort()))

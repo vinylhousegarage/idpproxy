@@ -24,7 +24,7 @@ func TestPrivacyPolicyPage(t *testing.T) {
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, systemDeps)
+	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
 	r := router.NewRouter(d)
 
 	req := httptest.NewRequest(http.MethodGet, "/privacy", nil)

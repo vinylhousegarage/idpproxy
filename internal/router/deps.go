@@ -3,6 +3,8 @@ package router
 import (
 	"io/fs"
 
+	"go.uber.org/zap"
+
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
@@ -11,6 +13,7 @@ type RouterDeps struct {
 	GitHubAPI   *deps.GitHubAPIDependencies
 	GitHubOAuth *deps.GitHubOAuthDependencies
 	Google      *deps.GoogleDependencies
+	Logger      *zap.Logger
 	System      *deps.SystemDependencies
 }
 
@@ -19,6 +22,7 @@ func NewRouterDeps(
 	githubAPI *deps.GitHubAPIDependencies,
 	githubOAuth *deps.GitHubOAuthDependencies,
 	google *deps.GoogleDependencies,
+	logger *zap.Logger,
 	system *deps.SystemDependencies,
 ) RouterDeps {
 	return RouterDeps{
@@ -26,6 +30,7 @@ func NewRouterDeps(
 		GitHubAPI:   githubAPI,
 		GitHubOAuth: githubOAuth,
 		Google:      google,
+		Logger:      logger,
 		System:      system,
 	}
 }

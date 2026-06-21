@@ -25,7 +25,7 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, systemDeps)
+	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
 	r := router.NewRouter(d)
 
 	w := httptest.NewRecorder()
