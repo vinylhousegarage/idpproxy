@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/vinylhousegarage/idpproxy/internal/deps"
 )
 
 func TestRouter_ErrorLoggerMiddlewareIsApplied(t *testing.T) {
@@ -17,16 +19,19 @@ func TestRouter_ErrorLoggerMiddlewareIsApplied(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	core, logs := observer.New(zap.ErrorLevel)
-	testLogger := zap.New(core)
 
-	deps := router.RouterDeps{
-		Logger: testLogger,
+	deps := RouterDeps{
+		GitHubAPI:   &deps.GitHubAPIDependencies{},
+		GitHubOAuth: &deps.GitHubOAuthDependencies{},
+		Google:      &deps.GoogleDependencies{},
+		Logger:      zap.New(core),
+		System:      &deps.SystemDependencies{},
 	}
 	r := gin.New()
-	router.RegisterRoutes(r, deps)
+	RegisterRoutes(r, deps)
 
 	r.GET("/test-error-middleware", func(c *gin.Context) {
-		c.Error(errors.New("test error"))
+		_ = c.Error(errors.New("test error"))
 		c.Status(http.StatusInternalServerError)
 	})
 
