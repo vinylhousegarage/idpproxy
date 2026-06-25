@@ -29,8 +29,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	qState := c.Query("state")
 
 	if githubCode == "" {
-		h.OAuth.Logger.Warn("missing githubCode")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingGitHubCode})
+		_ = c.Error(apierror.MissingGitHubCode(apierror.ErrMissingGitHubCode))
 
 		return
 	}
