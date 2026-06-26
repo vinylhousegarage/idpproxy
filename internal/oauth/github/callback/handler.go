@@ -35,8 +35,7 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	}
 
 	if qState == "" {
-		h.OAuth.Logger.Warn("missing state")
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeMissingState})
+		_ = c.Error(apierror.MissingState(apierror.ErrMissingState))
 
 		return
 	}
