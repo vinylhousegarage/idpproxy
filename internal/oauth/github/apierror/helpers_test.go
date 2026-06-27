@@ -3,6 +3,7 @@ package apierror
 import (
 	"errors"
 	"net/http"
+	"reflect"
 	"testing"
 )
 
@@ -10,13 +11,13 @@ func TestAPIErrors(t *testing.T) {
 	t.Parallel()
 
 	originalErr := errors.New("base error")
-	internalInfo := "debug info"
 
 	tests := []struct {
 		name           string
 		fn             func(error, ...string) *APIError
 		expectedCode   ErrorCode
 		expectedStatus int
+		internalInfo   []string
 	}{
 		{
 			name:           "MissingGitHubCode",
@@ -60,7 +61,7 @@ func TestAPIErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tt.fn(originalErr, internalInfo)
+			got := tt.fn(originalErr, tt.internalInfo...)
 
 			if got.Code != tt.expectedCode {
 				t.Errorf("expected code %s, got %s", tt.expectedCode, got.Code)
@@ -71,8 +72,8 @@ func TestAPIErrors(t *testing.T) {
 			if !errors.Is(got.Err, originalErr) {
 				t.Error("expected original error to be wrapped")
 			}
-			if got.Internal != internalInfo {
-				t.Errorf("expected internal info %s, got %s", internalInfo, got.Internal)
+			if !reflect.DeepEqual(got.Internal, tt.internalInfo) {
+				t.Errorf("expected internal %v, got %v", tt.internalInfo, got.Internal)
 			}
 		})
 	}

@@ -2,6 +2,7 @@ package apierror
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -28,9 +29,14 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 			fields = append(fields,
 				zap.String("code", string(apiErr.Code)),
 				zap.Int("status", apiErr.HTTPStatus),
-				zap.String("internal_info", apiErr.Internal),
 				zap.Error(apiErr.Err),
 			)
+
+			for i, info := range apiErr.Internal {
+				key := fmt.Sprintf("internal_info_%d", i+1)
+				fields = append(fields, zap.String(key, info))
+			}
+
 			if apiErr.HTTPStatus >= 400 && apiErr.HTTPStatus < 500 {
 				logLevelFunc = logger.Warn
 			}
