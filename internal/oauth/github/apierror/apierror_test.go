@@ -3,6 +3,7 @@ package apierror
 import (
 	"errors"
 	"net/http"
+	"reflect"
 	"testing"
 )
 
@@ -10,7 +11,6 @@ func TestNew(t *testing.T) {
 	t.Parallel()
 
 	originalErr := errors.New("base error")
-	internalInfo := "debug info"
 
 	tests := []struct {
 		name         string
@@ -18,15 +18,15 @@ func TestNew(t *testing.T) {
 		status       int
 		err          error
 		internalArgs []string
-		wantInternal string
+		wantInternal []string
 	}{
 		{
 			name:         "All arguments provided",
 			code:         "TEST_CODE",
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
-			internalArgs: []string{internalInfo},
-			wantInternal: internalInfo,
+			internalArgs: []string{"debug info"},
+			wantInternal: []string{"debug info"},
 		},
 		{
 			name:         "No internal info",
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 			status:       http.StatusBadRequest,
 			err:          originalErr,
 			internalArgs: nil,
-			wantInternal: "",
+			wantInternal: nil,
 		},
 		{
 			name:         "Nil error",
@@ -42,7 +42,7 @@ func TestNew(t *testing.T) {
 			status:       http.StatusUnauthorized,
 			err:          nil,
 			internalArgs: nil,
-			wantInternal: "",
+			wantInternal: nil,
 		},
 		{
 			name:         "Multiple internal infos (ignores after first)",
@@ -50,7 +50,7 @@ func TestNew(t *testing.T) {
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
 			internalArgs: []string{"first info", "second info"},
-			wantInternal: "first info",
+			wantInternal: []string{"first info", "second info"},
 		},
 	}
 
@@ -69,8 +69,8 @@ func TestNew(t *testing.T) {
 			if got.Err != tt.err {
 				t.Errorf("expected err %v, got %v", tt.err, got.Err)
 			}
-			if got.Internal != tt.wantInternal {
-				t.Errorf("expected internal %q, got %q", tt.wantInternal, got.Internal)
+			if !reflect.DeepEqual(got.Internal, tt.wantInternal) {
+				t.Errorf("expected internal %v, got %v", tt.wantInternal, got.Internal)
 			}
 		})
 	}
