@@ -148,11 +148,11 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-		"path":            "/test",
-		"method":          "GET",
-		"code":            string(ErrorCodeMissingState),
-		"status":          int64(http.StatusBadRequest),
-		"internal_info_1": "debug details here",
+		"path":     "/test",
+		"method":   "GET",
+		"code":     string(ErrorCodeMissingState),
+		"status":   int64(http.StatusBadRequest),
+		"detail_1": "debug details here",
 	}
 
 	for k, expectedVal := range expectedFields {
@@ -207,11 +207,11 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-		"path":            "/test",
-		"method":          "GET",
-		"code":            string(ErrorCodeInternal),
-		"status":          int64(http.StatusInternalServerError),
-		"internal_info_1": "debug details here",
+		"path":     "/test",
+		"method":   "GET",
+		"code":     string(ErrorCodeInternal),
+		"status":   int64(http.StatusInternalServerError),
+		"detail_1": "debug details here",
 	}
 
 	for k, expectedVal := range expectedFields {
@@ -265,8 +265,8 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 	fields := logs.All()[0].ContextMap()
 
 	expected := map[string]interface{}{
-		"internal_info_1": "first debug info",
-		"internal_info_2": "second debug info",
+		"detail_1": "first debug info",
+		"detail_2": "second debug info",
 	}
 
 	for k, v := range expected {
