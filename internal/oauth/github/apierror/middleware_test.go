@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"go.uber.org/zap"
@@ -125,7 +126,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
-		apiErr.Internal = "debug details here"
+		apiErr.Internal = []string{"debug details here"}
 		_ = c.Error(apiErr)
 	})
 
@@ -147,11 +148,11 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-		"path":          "/test",
-		"method":        "GET",
-		"code":          string(ErrorCodeMissingState),
-		"status":        int64(http.StatusBadRequest),
-		"internal_info": "debug details here",
+		"path":            "/test",
+		"method":          "GET",
+		"code":            string(ErrorCodeMissingState),
+		"status":          int64(http.StatusBadRequest),
+		"internal_info_1": "debug details here",
 	}
 
 	for k, expectedVal := range expectedFields {
@@ -184,7 +185,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("internal error"))
-		apiErr.Internal = "debug details here"
+		apiErr.Internal = []string{"debug details here"}
 		_ = c.Error(apiErr)
 	})
 
@@ -206,18 +207,28 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-		"path":          "/test",
-		"method":        "GET",
-		"code":          string(ErrorCodeInternal),
-		"status":        int64(http.StatusInternalServerError),
-		"internal_info": "debug details here",
+		"path":            "/test",
+		"method":          "GET",
+		"code":            string(ErrorCodeInternal),
+		"status":          int64(http.StatusInternalServerError),
+		"internal_info_1": "debug details here",
 	}
 
 	for k, expectedVal := range expectedFields {
-		if gotVal, ok := fields[k]; !ok {
+		gotVal, ok := fields[k]
+		if !ok {
 			t.Errorf("expected log field '%s' to be present", k)
-		} else if gotVal != expectedVal {
-			t.Errorf("expected log field '%s' to be %v, got %v", k, expectedVal, gotVal)
+			continue
+		}
+
+		if reflect.TypeOf(expectedVal).Kind() == reflect.Slice {
+			if !reflect.DeepEqual(gotVal, expectedVal) {
+				t.Errorf("expected log field '%s' to be %v, got %v", k, expectedVal, gotVal)
+			}
+		} else {
+			if gotVal != expectedVal {
+				t.Errorf("expected log field '%s' to be %v, got %v", k, expectedVal, gotVal)
+			}
 		}
 	}
 
@@ -227,5 +238,42 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 		t.Errorf("expected 'error' field to be a string")
 	} else if gotErrStr != "internal error" {
 		t.Errorf("expected log error message 'internal error', got '%s'", gotErrStr)
+	}
+}
+
+func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
+	t.Parallel()
+
+	gin.SetMode(gin.TestMode)
+	core, logs := observer.New(zap.ErrorLevel)
+	observedLogger := zap.New(core)
+
+	r := gin.New()
+	r.Use(ErrorLogger(observedLogger))
+
+	r.GET("/test", func(c *gin.Context) {
+		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("multiple info error"))
+
+		apiErr.Internal = []string{"first debug info", "second debug info"}
+		_ = c.Error(apiErr)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	fields := logs.All()[0].ContextMap()
+
+	expected := map[string]interface{}{
+		"internal_info_1": "first debug info",
+		"internal_info_2": "second debug info",
+	}
+
+	for k, v := range expected {
+		if got, ok := fields[k]; !ok {
+			t.Errorf("expected log field '%s' to be present", k)
+		} else if got != v {
+			t.Errorf("expected log field '%s' to be %v, got %v", k, v, got)
+		}
 	}
 }

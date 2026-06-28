@@ -6,7 +6,7 @@ type APIError struct {
 	Code       ErrorCode
 	HTTPStatus int
 	Err        error
-	Internal   string
+	Internal   []string
 }
 
 func (e *APIError) Error() string {
@@ -18,15 +18,10 @@ func (e *APIError) Unwrap() error {
 }
 
 func New(code ErrorCode, status int, err error, internal ...string) *APIError {
-	apiErr := &APIError{
+	return &APIError{
 		Code:       code,
 		HTTPStatus: status,
 		Err:        err,
+		Internal:   internal,
 	}
-
-	if len(internal) > 0 {
-		apiErr.Internal = internal[0]
-	}
-
-	return apiErr
 }
