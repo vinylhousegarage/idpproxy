@@ -33,7 +33,7 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 			)
 
 			for i, info := range apiErr.Internal {
-				key := fmt.Sprintf("internal_info_%d", i+1)
+				key := fmt.Sprintf("detail_%d", i+1)
 				fields = append(fields, zap.String(key, info))
 			}
 
