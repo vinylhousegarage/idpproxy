@@ -2,9 +2,11 @@ package apierror
 
 const (
 	// callback
-	ErrorCodeMissingGitHubCode ErrorCode = "missing_github_code"
-	ErrorCodeMissingState      ErrorCode = "missing_state"
-	ErrorCodeInvalidState      ErrorCode = "invalid_state"
+	ErrorCodeMissingGitHubCode  ErrorCode = "missing_github_code"
+	ErrorCodeMissingState       ErrorCode = "missing_state"
+	ErrorCodeInvalidCookieState ErrorCode = "invalid_cookie_state"
+	ErrorCodeInvalidQueryState  ErrorCode = "invalid_query_state"
+	ErrorCodeInvalidState       ErrorCode = "invalid_state"
 
 	// token
 	ErrorCodeBuildAccessTokenRequest  ErrorCode = "build_access_token_request_failed"

@@ -4,9 +4,11 @@ import "errors"
 
 var (
 	// callback
-	ErrMissingGitHubCode = errors.New(string(ErrorCodeMissingGitHubCode))
-	ErrMissingState      = errors.New(string(ErrorCodeMissingState))
-	ErrInvalidState      = errors.New(string(ErrorCodeInvalidState))
+	ErrMissingGitHubCode  = errors.New(string(ErrorCodeMissingGitHubCode))
+	ErrMissingState       = errors.New(string(ErrorCodeMissingState))
+	ErrInvalidCookieState = errors.New(string(ErrorCodeInvalidCookieState))
+	ErrInvalidQueryState  = errors.New(string(ErrorCodeInvalidQueryState))
+	ErrInvalidState       = errors.New(string(ErrorCodeInvalidState))
 
 	// token
 	ErrBuildAccessTokenRequest  = errors.New(string(ErrorCodeBuildAccessTokenRequest))
