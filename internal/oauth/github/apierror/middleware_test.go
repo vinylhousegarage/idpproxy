@@ -75,8 +75,8 @@ func TestErrorLogger_WithGenericError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != ErrorCodeInternal {
-		t.Fatalf("expected %s, got %s", ErrorCodeInternal, res.Error)
+	if res.Error != ErrorCodeServerError {
+		t.Fatalf("expected %s, got %s", ErrorCodeServerError, res.Error)
 	}
 }
 
@@ -184,7 +184,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	r.Use(ErrorLogger(observedLogger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("internal error"))
+		apiErr := New(ErrorCodeServerError, http.StatusInternalServerError, errors.New("internal error"))
 		apiErr.ServerError = []string{"debug details here"}
 		_ = c.Error(apiErr)
 	})
@@ -209,7 +209,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	expectedFields := map[string]interface{}{
 		"path":     "/test",
 		"method":   "GET",
-		"code":     string(ErrorCodeInternal),
+		"code":     string(ErrorCodeServerError),
 		"status":   int64(http.StatusInternalServerError),
 		"detail_1": "debug details here",
 	}
@@ -252,7 +252,7 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 	r.Use(ErrorLogger(observedLogger))
 
 	r.GET("/test", func(c *gin.Context) {
-		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("multiple info error"))
+		apiErr := New(ErrorCodeServerError, http.StatusInternalServerError, errors.New("multiple info error"))
 
 		apiErr.ServerError = []string{"first debug info", "second debug info"}
 		_ = c.Error(apiErr)
