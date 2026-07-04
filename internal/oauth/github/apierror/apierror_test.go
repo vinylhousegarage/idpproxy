@@ -11,22 +11,23 @@ func TestNew(t *testing.T) {
 	t.Parallel()
 
 	originalErr := errors.New("base error")
+	mockInternalErr := errors.New("internal debug info")
 
 	tests := []struct {
 		name         string
 		code         ErrorCode
 		status       int
 		err          error
-		internalArgs []string
-		wantInternal []string
+		internalArgs []Internal
+		wantInternal []Internal
 	}{
 		{
 			name:         "All arguments provided",
 			code:         "TEST_CODE",
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
-			internalArgs: []string{"debug info"},
-			wantInternal: []string{"debug info"},
+			internalArgs: []Internal{{Code: "INTERNAL_DEBUG_CODE", Err: mockInternalErr}},
+			wantInternal: []Internal{{Code: "INTERNAL_DEBUG_CODE", Err: mockInternalErr}},
 		},
 		{
 			name:         "No internal info",
@@ -49,8 +50,14 @@ func TestNew(t *testing.T) {
 			code:         "TEST_CODE_MULTI_INTERNAL",
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
-			internalArgs: []string{"first info", "second info"},
-			wantInternal: []string{"first info", "second info"},
+			internalArgs: []Internal{
+				{Code: "FIRST_CODE", Err: mockInternalErr},
+				{Code: "SECOND_CODE", Err: mockInternalErr},
+			},
+			wantInternal: []Internal{
+				{Code: "FIRST_CODE", Err: mockInternalErr},
+				{Code: "SECOND_CODE", Err: mockInternalErr},
+			},
 		},
 	}
 
