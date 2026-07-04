@@ -216,11 +216,12 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-		"path":     "/test",
-		"method":   "GET",
-		"code":     string(ErrorCodeServerError),
-		"status":   int64(http.StatusInternalServerError),
-		"detail_1": "debug details here",
+		"path":            "/test",
+		"method":          "GET",
+		"code":            string(ErrorCodeServerError),
+		"status":          int64(http.StatusInternalServerError),
+		"detail_1_code":   "INTERNAL_DEBUG_CODE",
+		"detail_1_status": int64(500),
 	}
 
 	for k, expectedVal := range expectedFields {
@@ -239,6 +240,14 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 				t.Errorf("expected log field '%s' to be %v, got %v", k, expectedVal, gotVal)
 			}
 		}
+	}
+
+	if errField, ok := fields["detail_1_err"]; !ok {
+		t.Errorf("expected 'detail_1_err' field in log")
+	} else if gotErrStr, ok := errField.(string); !ok {
+		t.Errorf("expected 'detail_1_err' field to be a string")
+	} else if gotErrStr != "debug details here" {
+		t.Errorf("expected log error message 'debug details here', got '%s'", gotErrStr)
 	}
 
 	if errField, ok := fields["error"]; !ok {
