@@ -42,14 +42,19 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	cookie, err := c.Request.Cookie(stateCookieName)
 	if err != nil || cookie == nil || cookie.Value == "" || cookie.Value != qState {
-		h.OAuth.Logger.Warn("state mismatch or missing cookie",
-			zap.String("query_state", qState),
-			zap.String("cookie_state", safeCookieVal(cookie)),
-			zap.Error(err),
-		)
+		query_state, query_err := apierror.FormatDetail("query_state", qState)
+		if query_err != nil {
+			h.OAuth.Logger.Error("failed to format query_state detail", zap.Error(query_err))
+		}
+
+		cookie_state, cookie_err := apierror.FormatDetail("cookie_state", safeCookieVal(cookie))
+		if cookie_err != nil {
+			h.OAuth.Logger.Error("failed to format cookie_state detail", zap.Error(cookie_err))
+		}
+
+		_ = c.Error(apierror.InvalidState(apierror.ErrInvalidState, query_state, cookie_state))
 
 		http.SetCookie(c.Writer, deleteStateCookie())
-		c.JSON(http.StatusBadRequest, gin.H{"error": apierror.ErrorCodeInvalidState})
 
 		return
 	}

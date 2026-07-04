@@ -74,17 +74,18 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-wrong")
 
-		ctx, _ := gin.CreateTestContext(rr)
-		ctx.Request = req
+		_, r := gin.CreateTestContext(rr)
+		r.Use(apierror.ErrorLogger(h.OAuth.Logger))
 
-		h.Serve(ctx)
+		r.GET("/oauth/github/callback", h.Serve)
+
+		r.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusBadRequest {
 			t.Fatalf("expected 400, got=%d body=%s", rr.Code, rr.Body.String())
 		}
 
 		resp := decodeErrorResponse(t, rr)
-
 		if resp.Error != apierror.ErrorCodeInvalidState {
 			t.Fatalf("expected error=%s, got=%s", apierror.ErrorCodeInvalidState, resp.Error)
 		}
