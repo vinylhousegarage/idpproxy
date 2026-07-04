@@ -286,9 +286,11 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 	fields := logs.All()[0].ContextMap()
 
 	expected := map[string]interface{}{
-		"detail_1": "first debug info",
-		"detail_2": "second debug info",
-	}
+    "detail_1_code":   "FIRST_CODE",
+    "detail_1_status": int64(500),
+    "detail_2_code":   "SECOND_CODE",
+    "detail_2_status": int64(500),
+  }
 
 	for k, v := range expected {
 		if got, ok := fields[k]; !ok {
@@ -297,4 +299,16 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 			t.Errorf("expected log field '%s' to be %v, got %v", k, v, got)
 		}
 	}
+
+if err1, ok := fields["detail_1_err"]; !ok {
+    t.Errorf("expected 'detail_1_err' field in log")
+  } else if gotStr, ok := err1.(string); !ok || gotStr != "first debug info" {
+    t.Errorf("expected 'detail_1_err' to be 'first debug info', got '%v'", err1)
+  }
+
+  if err2, ok := fields["detail_2_err"]; !ok {
+    t.Errorf("expected 'detail_2_err' field in log")
+  } else if gotStr, ok := err2.(string); !ok || gotStr != "second debug info" {
+    t.Errorf("expected 'detail_2_err' to be 'second debug info', got '%v'", err2)
+  }
 }
