@@ -56,12 +56,12 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		_ = c.Error(apierror.InvalidState(
 			apierror.ErrInvalidState,
 			apierror.Internal{
-					Code: apierror.ErrorCodeInvalidQueryState,
-					Err:  fmt.Errorf("query state is invalid: %s", query_state),
+				Code: apierror.ErrorCodeInvalidQueryState,
+				Err:  fmt.Errorf("query state is invalid: %s", query_state),
 			},
 			apierror.Internal{
-					Code: apierror.ErrorCodeInvalidCookieState,
-					Err:  fmt.Errorf("cookie state is invalid: %s", cookie_state),
+				Code: apierror.ErrorCodeInvalidCookieState,
+				Err:  fmt.Errorf("cookie state is invalid: %s", cookie_state),
 			},
 		))
 

@@ -148,13 +148,13 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	fields := logEntry.ContextMap()
 
 	expectedFields := map[string]interface{}{
-    "path":            "/test",
-    "method":          "GET",
-    "code":            string(ErrorCodeMissingState),
-    "status":          int64(http.StatusBadRequest),
-    "detail_1_code":   "INTERNAL_DEBUG_CODE",
-    "detail_1_status": int64(500),
-  }
+		"path":            "/test",
+		"method":          "GET",
+		"code":            string(ErrorCodeMissingState),
+		"status":          int64(http.StatusBadRequest),
+		"detail_1_code":   "INTERNAL_DEBUG_CODE",
+		"detail_1_status": int64(500),
+	}
 
 	for k, expectedVal := range expectedFields {
 		if gotVal, ok := fields[k]; !ok {
@@ -165,12 +165,12 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 	}
 
 	if errField, ok := fields["detail_1_err"]; !ok {
-    t.Errorf("expected 'detail_1_err' field in log")
-  } else if gotErrStr, ok := errField.(string); !ok {
-    t.Errorf("expected 'detail_1_err' field to be a string")
-  } else if gotErrStr != "debug details here" {
-    t.Errorf("expected log error message 'debug details here', got '%s'", gotErrStr)
-  }
+		t.Errorf("expected 'detail_1_err' field in log")
+	} else if gotErrStr, ok := errField.(string); !ok {
+		t.Errorf("expected 'detail_1_err' field to be a string")
+	} else if gotErrStr != "debug details here" {
+		t.Errorf("expected log error message 'debug details here', got '%s'", gotErrStr)
+	}
 
 	if errField, ok := fields["error"]; !ok {
 		t.Errorf("expected 'error' field in log")
@@ -286,11 +286,11 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 	fields := logs.All()[0].ContextMap()
 
 	expected := map[string]interface{}{
-    "detail_1_code":   "FIRST_CODE",
-    "detail_1_status": int64(500),
-    "detail_2_code":   "SECOND_CODE",
-    "detail_2_status": int64(500),
-  }
+		"detail_1_code":   "FIRST_CODE",
+		"detail_1_status": int64(500),
+		"detail_2_code":   "SECOND_CODE",
+		"detail_2_status": int64(500),
+	}
 
 	for k, v := range expected {
 		if got, ok := fields[k]; !ok {
@@ -300,15 +300,15 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 		}
 	}
 
-if err1, ok := fields["detail_1_err"]; !ok {
-    t.Errorf("expected 'detail_1_err' field in log")
-  } else if gotStr, ok := err1.(string); !ok || gotStr != "first debug info" {
-    t.Errorf("expected 'detail_1_err' to be 'first debug info', got '%v'", err1)
-  }
+	if err1, ok := fields["detail_1_err"]; !ok {
+		t.Errorf("expected 'detail_1_err' field in log")
+	} else if gotStr, ok := err1.(string); !ok || gotStr != "first debug info" {
+		t.Errorf("expected 'detail_1_err' to be 'first debug info', got '%v'", err1)
+	}
 
-  if err2, ok := fields["detail_2_err"]; !ok {
-    t.Errorf("expected 'detail_2_err' field in log")
-  } else if gotStr, ok := err2.(string); !ok || gotStr != "second debug info" {
-    t.Errorf("expected 'detail_2_err' to be 'second debug info', got '%v'", err2)
-  }
+	if err2, ok := fields["detail_2_err"]; !ok {
+		t.Errorf("expected 'detail_2_err' field in log")
+	} else if gotStr, ok := err2.(string); !ok || gotStr != "second debug info" {
+		t.Errorf("expected 'detail_2_err' to be 'second debug info', got '%v'", err2)
+	}
 }

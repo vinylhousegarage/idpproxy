@@ -46,10 +46,10 @@ func TestNew(t *testing.T) {
 			wantInternal: nil,
 		},
 		{
-			name:         "Multiple internal infos (ignores after first)",
-			code:         "TEST_CODE_MULTI_INTERNAL",
-			status:       http.StatusInternalServerError,
-			err:          originalErr,
+			name:   "Multiple internal infos (ignores after first)",
+			code:   "TEST_CODE_MULTI_INTERNAL",
+			status: http.StatusInternalServerError,
+			err:    originalErr,
 			internalArgs: []Internal{
 				{Code: "FIRST_CODE", Err: mockInternalErr},
 				{Code: "SECOND_CODE", Err: mockInternalErr},
