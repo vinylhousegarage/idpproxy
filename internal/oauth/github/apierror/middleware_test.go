@@ -126,7 +126,7 @@ func TestErrorLogger_WithStatus400Error_LogsCorrectFields(t *testing.T) {
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := New(ErrorCodeMissingState, http.StatusBadRequest, errors.New("missing state"))
-		apiErr.Internal = []string{"debug details here"}
+		apiErr.ServerError = []string{"debug details here"}
 		_ = c.Error(apiErr)
 	})
 
@@ -185,7 +185,7 @@ func TestErrorLogger_WithStatus500Error_LogsCorrectFields(t *testing.T) {
 
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("internal error"))
-		apiErr.Internal = []string{"debug details here"}
+		apiErr.ServerError = []string{"debug details here"}
 		_ = c.Error(apiErr)
 	})
 
@@ -254,7 +254,7 @@ func TestErrorLogger_WithMultipleInternalInfo_LogsCorrectFields(t *testing.T) {
 	r.GET("/test", func(c *gin.Context) {
 		apiErr := New(ErrorCodeInternal, http.StatusInternalServerError, errors.New("multiple info error"))
 
-		apiErr.Internal = []string{"first debug info", "second debug info"}
+		apiErr.ServerError = []string{"first debug info", "second debug info"}
 		_ = c.Error(apiErr)
 	})
 

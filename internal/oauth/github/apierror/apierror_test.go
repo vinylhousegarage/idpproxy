@@ -17,40 +17,40 @@ func TestNew(t *testing.T) {
 		code         ErrorCode
 		status       int
 		err          error
-		internalArgs []string
-		wantInternal []string
+		serverErrorArgs []string
+		wantServerError []string
 	}{
 		{
 			name:         "All arguments provided",
 			code:         "TEST_CODE",
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
-			internalArgs: []string{"debug info"},
-			wantInternal: []string{"debug info"},
+			serverErrorArgs: []string{"debug info"},
+			wantServerError: []string{"debug info"},
 		},
 		{
-			name:         "No internal info",
-			code:         "TEST_CODE_NO_INTERNAL",
+			name:         "No server error info",
+			code:         "TEST_CODE_NO_SERVER_ERROR",
 			status:       http.StatusBadRequest,
 			err:          originalErr,
-			internalArgs: nil,
-			wantInternal: nil,
+			serverErrorArgs: nil,
+			wantServerError: nil,
 		},
 		{
 			name:         "Nil error",
 			code:         "TEST_CODE_NIL_ERR",
 			status:       http.StatusUnauthorized,
 			err:          nil,
-			internalArgs: nil,
-			wantInternal: nil,
+			serverErrorArgs: nil,
+			wantServerError: nil,
 		},
 		{
-			name:         "Multiple internal infos (ignores after first)",
-			code:         "TEST_CODE_MULTI_INTERNAL",
+			name:         "Multiple server error infos (ignores after first)",
+			code:         "TEST_CODE_MULTI_SERVER_ERROR",
 			status:       http.StatusInternalServerError,
 			err:          originalErr,
-			internalArgs: []string{"first info", "second info"},
-			wantInternal: []string{"first info", "second info"},
+			serverErrorArgs: []string{"first info", "second info"},
+			wantServerError: []string{"first info", "second info"},
 		},
 	}
 
@@ -58,7 +58,7 @@ func TestNew(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := New(tt.code, tt.status, tt.err, tt.internalArgs...)
+			got := New(tt.code, tt.status, tt.err, tt.serverErrorArgs...)
 
 			if got.Code != tt.code {
 				t.Errorf("expected code %q, got %q", tt.code, got.Code)
@@ -69,8 +69,8 @@ func TestNew(t *testing.T) {
 			if got.Err != tt.err {
 				t.Errorf("expected err %v, got %v", tt.err, got.Err)
 			}
-			if !reflect.DeepEqual(got.Internal, tt.wantInternal) {
-				t.Errorf("expected internal %v, got %v", tt.wantInternal, got.Internal)
+			if !reflect.DeepEqual(got.ServerError, tt.wantServerError) {
+				t.Errorf("expected server error %v, got %v", tt.wantServerError, got.ServerError)
 			}
 		})
 	}

@@ -21,7 +21,7 @@ func GitHubAccessTokenRequestError(err error, internal ...string) *APIError {
 }
 
 // internal
-func Internal(err error, internal ...string) *APIError {
+func ServerError(err error, internal ...string) *APIError {
 	return New(ErrorCodeInternal, http.StatusInternalServerError, err, internal...)
 }
 
