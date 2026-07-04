@@ -20,7 +20,7 @@ const (
 	ErrorCodeGitHubUserDecode       ErrorCode = "github_user_decode_failed"
 
 	// internal
-	ErrorCodeInternal       ErrorCode = "internal_error"
 	ErrorCodeProxyCodeIssue ErrorCode = "proxy_code_issue_failed"
+	ErrorCodeServerError    ErrorCode = "server_error"
 	ErrorCodeUserUpsert     ErrorCode = "user_upsert_failed"
 )

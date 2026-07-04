@@ -22,7 +22,7 @@ var (
 	ErrGitHubUserDecode       = errors.New(string(ErrorCodeGitHubUserDecode))
 
 	// internal
-	ErrInternal       = errors.New(string(ErrorCodeInternal))
 	ErrProxyCodeIssue = errors.New(string(ErrorCodeProxyCodeIssue))
+	ErrServerError    = errors.New(string(ErrorCodeServerError))
 	ErrUserUpsert     = errors.New(string(ErrorCodeUserUpsert))
 )
