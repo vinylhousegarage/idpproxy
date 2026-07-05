@@ -21,8 +21,8 @@ func GitHubAccessTokenRequestError(err error, internal ...Internal) *APIError {
 }
 
 // internal
-func ServerError(err error, internal ...Internal) *APIError {
-	return New(ErrorCodeServerError, http.StatusInternalServerError, err, internal...)
+func InternalError(err error, internal ...Internal) *APIError {
+	return New(ErrorCodeInternalError, http.StatusInternalServerError, err, internal...)
 }
 
 func ProxyCodeIssue(err error, internal ...Internal) *APIError {
