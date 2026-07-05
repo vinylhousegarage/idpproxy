@@ -2,6 +2,7 @@ package callback
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -52,7 +53,17 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 			h.OAuth.Logger.Error("failed to format cookie_state detail", zap.Error(cookie_err))
 		}
 
-		_ = c.Error(apierror.InvalidState(apierror.ErrInvalidState, query_state, cookie_state))
+		_ = c.Error(apierror.InvalidState(
+			apierror.ErrInvalidState,
+			apierror.Internal{
+				Code: apierror.ErrorCodeInvalidQueryState,
+				Err:  fmt.Errorf("query state is invalid: %s", query_state),
+			},
+			apierror.Internal{
+				Code: apierror.ErrorCodeInvalidCookieState,
+				Err:  fmt.Errorf("cookie state is invalid: %s", cookie_state),
+			},
+		))
 
 		http.SetCookie(c.Writer, deleteStateCookie())
 

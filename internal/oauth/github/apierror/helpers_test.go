@@ -12,12 +12,14 @@ func TestAPIErrors(t *testing.T) {
 
 	originalErr := errors.New("base error")
 
+	mockInternalErr := errors.New("internal debug info")
+
 	tests := []struct {
 		name           string
-		fn             func(error, ...string) *APIError
+		fn             func(error, ...Internal) *APIError
 		expectedCode   ErrorCode
 		expectedStatus int
-		internalInfo   []string
+		internalInfo   []Internal
 	}{
 		{
 			name:           "MissingGitHubCode",
@@ -36,6 +38,10 @@ func TestAPIErrors(t *testing.T) {
 			fn:             InvalidState,
 			expectedCode:   ErrorCodeInvalidState,
 			expectedStatus: http.StatusBadRequest,
+			internalInfo: []Internal{
+				{Code: ErrorCodeInvalidQueryState, Err: mockInternalErr},
+				{Code: ErrorCodeInvalidCookieState, Err: mockInternalErr},
+			},
 		},
 		{
 			name:           "GitHubAccessTokenRequestError",
@@ -44,9 +50,9 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusBadGateway,
 		},
 		{
-			name:           "Internal",
-			fn:             Internal,
-			expectedCode:   ErrorCodeInternal,
+			name:           "ServerError",
+			fn:             ServerError,
+			expectedCode:   ErrorCodeServerError,
 			expectedStatus: http.StatusInternalServerError,
 		},
 		{

@@ -33,8 +33,11 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 			)
 
 			for i, info := range apiErr.Internal {
-				key := fmt.Sprintf("detail_%d", i+1)
-				fields = append(fields, zap.String(key, info))
+				fields = append(fields,
+					zap.String(fmt.Sprintf("detail_%d_code", i+1), string(info.Code)),
+					zap.Int(fmt.Sprintf("detail_%d_status", i+1), 500),
+					zap.NamedError(fmt.Sprintf("detail_%d_err", i+1), info.Err),
+				)
 			}
 
 			if apiErr.HTTPStatus >= 400 && apiErr.HTTPStatus < 500 {
