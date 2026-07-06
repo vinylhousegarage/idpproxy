@@ -59,7 +59,7 @@ func TestWriteError_WithGenericError(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 
-	if res.Error != ErrorCodeInternalError {
-		t.Fatalf("expected %s, got %s", ErrorCodeInternalError, res.Error)
+	if res.Error != ErrorCodeInternalServerError {
+		t.Fatalf("expected %s, got %s", ErrorCodeInternalServerError, res.Error)
 	}
 }
