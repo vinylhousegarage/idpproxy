@@ -1,27 +1,11 @@
 package apierror
 
-import (
-	"errors"
+import "github.com/gin-gonic/gin"
 
-	"github.com/gin-gonic/gin"
-)
-
-func WriteError(c *gin.Context, err error) {
+func WriteError(c *gin.Context, apiErr *APIError) {
 	defer c.Abort()
 
-	var apiErr *APIError
-
-	if errors.As(err, &apiErr) {
-		c.JSON(apiErr.HTTPStatus, ErrorResponse{
-			Error: apiErr.Code,
-		})
-
-		return
-	}
-
-	internalServerErr := InternalServerError(err)
-
-	c.JSON(internalServerErr.HTTPStatus, ErrorResponse{
-		Error: internalServerErr.Code,
+	c.JSON(apiErr.HTTPStatus, ErrorResponse{
+		Error: apiErr.Code,
 	})
 }
