@@ -50,9 +50,9 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusBadGateway,
 		},
 		{
-			name:           "InternalError",
-			fn:             InternalError,
-			expectedCode:   ErrorCodeInternalError,
+			name:           "InternalServerError",
+			fn:             InternalServerError,
+			expectedCode:   ErrorCodeInternalServerError,
 			expectedStatus: http.StatusInternalServerError,
 		},
 		{

@@ -19,9 +19,9 @@ func WriteError(c *gin.Context, err error) {
 		return
 	}
 
-	internalErr := InternalError(err)
+	internalServerErr := InternalServerError(err)
 
-	c.JSON(internalErr.HTTPStatus, ErrorResponse{
-		Error: internalErr.Code,
+	c.JSON(internalServerErr.HTTPStatus, ErrorResponse{
+		Error: internalServerErr.Code,
 	})
 }
