@@ -3,8 +3,9 @@ package apierror
 type ErrorCode string
 
 type Internal struct {
-	Code ErrorCode
-	Err  error
+	Code   ErrorCode
+	Status int
+	Err    error
 }
 
 type APIError struct {
