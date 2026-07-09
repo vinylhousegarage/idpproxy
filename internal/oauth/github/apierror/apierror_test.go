@@ -82,3 +82,25 @@ func TestNew(t *testing.T) {
 		})
 	}
 }
+
+func TestNewDetail(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New("test internal error")
+	code := ErrorCode("DETAIL_ERR")
+	status := http.StatusInternalServerError
+
+	t.Run("creates internal detail correctly", func(t *testing.T) {
+		got := NewDetail(code, status, err)
+
+		if got.Code != code {
+			t.Errorf("expected code %q, got %q", code, got.Code)
+		}
+		if got.Status != status {
+			t.Errorf("expected status %d, got %d", status, got.Status)
+		}
+		if got.Err != err {
+			t.Errorf("expected err %v, got %v", err, got.Err)
+		}
+	})
+}
