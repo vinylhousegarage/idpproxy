@@ -31,3 +31,11 @@ func New(code ErrorCode, status int, err error, internal ...Internal) *APIError 
 		Internal:   internal,
 	}
 }
+
+func NewDetail(code ErrorCode, status int, err error) *Internal {
+	return &Internal{
+		Code:   code,
+		Status: status,
+		Err:    err,
+	}
+}
