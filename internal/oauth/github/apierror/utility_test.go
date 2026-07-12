@@ -52,7 +52,7 @@ func TestAPIError_GetHTTPStatus(t *testing.T) {
 			name: "Fallback to first Internal error status when HTTPStatus is 0",
 			err: &APIError{
 				HTTPStatus: 0,
-				Internal:   []InternalError{{Status: 400}, {Status: 403}},
+				Internal:   []Internal{{Status: 400}, {Status: 403}},
 			},
 			want: 400,
 		},
