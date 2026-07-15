@@ -35,6 +35,50 @@ func TestFormatDetail(t *testing.T) {
 	}
 }
 
+func TestAPIError_AddInternal(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success: internal error is added correctly", func(t *testing.T) {
+		t.Parallel()
+
+		apiErr := &APIError{}
+		code := ErrorCode("TEST_CODE")
+		value := "something went wrong"
+
+		res1 := apiErr.AddInternal(code, value)
+		if len(res1.Internal) != 1 {
+			t.Fatalf("expected 1 internal error, but got %d", len(res1.Internal))
+		}
+
+		res2 := res1.AddInternal(code, value)
+		if len(res2.Internal) != 2 {
+			t.Fatalf("expected 2 internal errors, but got %d", len(res2.Internal))
+		}
+
+		if res1 != res2 {
+			t.Error("expected returned APIError to be the same instance")
+		}
+
+		if res2.Internal[0].Code != code {
+			t.Errorf("expected code: %s, got: %s", code, res2.Internal[0].Code)
+		}
+		if res2.Internal[0].Err.Error() != value {
+			t.Errorf("expected error message: %s, got: %s", value, res2.Internal[0].Err.Error())
+		}
+	})
+
+	t.Run("failure: empty values are ignored", func(t *testing.T) {
+		t.Parallel()
+
+		apiErr := &APIError{}
+		res := apiErr.AddInternal("", "")
+
+		if len(res.Internal) != 0 {
+			t.Error("internal error should not be added when arguments are empty")
+		}
+	})
+}
+
 func TestAPIError_GetHTTPStatus(t *testing.T) {
 	t.Parallel()
 
