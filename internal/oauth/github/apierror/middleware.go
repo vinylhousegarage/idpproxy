@@ -23,11 +23,13 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 			apiErr = InternalServerError(err)
 		}
 
+		responseStatus := apiErr.GetHTTPStatus()
+
 		fields := []zap.Field{
 			zap.String("path", c.Request.URL.Path),
 			zap.String("method", c.Request.Method),
 			zap.String("code", string(apiErr.Code)),
-			zap.Int("status", apiErr.HTTPStatus),
+			zap.Int("status", responseStatus),
 			zap.Error(apiErr.Err),
 		}
 
@@ -40,7 +42,7 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 		}
 
 		logLevelFunc := logger.Error
-		if apiErr.HTTPStatus >= 400 && apiErr.HTTPStatus < 500 {
+		if responseStatus >= 400 && responseStatus < 500 {
 			logLevelFunc = logger.Warn
 		}
 
