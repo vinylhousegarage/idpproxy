@@ -16,10 +16,10 @@ func TestAPIErrors(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		fn             func(error, ...Internal) *APIError
+		fn             func(error, ...APIInternal) *APIError
 		expectedCode   ErrorCode
 		expectedStatus int
-		internalInfo   []Internal
+		internalsInfo  []APIInternal
 	}{
 		{
 			name:           "MissingGitHubCode",
@@ -38,7 +38,7 @@ func TestAPIErrors(t *testing.T) {
 			fn:             InvalidState,
 			expectedCode:   ErrorCodeInvalidState,
 			expectedStatus: http.StatusBadRequest,
-			internalInfo: []Internal{
+			internalsInfo: []APIInternal{
 				{Code: ErrorCodeInvalidQueryState, Err: mockInternalErr},
 				{Code: ErrorCodeInvalidCookieState, Err: mockInternalErr},
 			},
@@ -67,7 +67,7 @@ func TestAPIErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tt.fn(originalErr, tt.internalInfo...)
+			got := tt.fn(originalErr, tt.internalsInfo...)
 
 			if got.Code != tt.expectedCode {
 				t.Errorf("expected code %s, got %s", tt.expectedCode, got.Code)
@@ -78,8 +78,8 @@ func TestAPIErrors(t *testing.T) {
 			if !errors.Is(got.Err, originalErr) {
 				t.Error("expected original error to be wrapped")
 			}
-			if !reflect.DeepEqual(got.Internal, tt.internalInfo) {
-				t.Errorf("expected internal %v, got %v", tt.internalInfo, got.Internal)
+			if !reflect.DeepEqual(got.Internals, tt.internalsInfo) {
+				t.Errorf("expected internal %v, got %v", tt.internalsInfo, got.Internals)
 			}
 		})
 	}
