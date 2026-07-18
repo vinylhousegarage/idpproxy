@@ -46,24 +46,24 @@ func TestAPIError_AddInternal(t *testing.T) {
 		value := "something went wrong"
 
 		res1 := apiErr.AddInternal(code, value)
-		if len(res1.Internal) != 1 {
-			t.Fatalf("expected 1 internal error, but got %d", len(res1.Internal))
+		if len(res1.Internals) != 1 {
+			t.Fatalf("expected 1 internal error, but got %d", len(res1.Internals))
 		}
 
 		res2 := res1.AddInternal(code, value)
-		if len(res2.Internal) != 2 {
-			t.Fatalf("expected 2 internal errors, but got %d", len(res2.Internal))
+		if len(res2.Internals) != 2 {
+			t.Fatalf("expected 2 internal errors, but got %d", len(res2.Internals))
 		}
 
 		if res1 != res2 {
 			t.Error("expected returned APIError to be the same instance")
 		}
 
-		if res2.Internal[0].Code != code {
-			t.Errorf("expected code: %s, got: %s", code, res2.Internal[0].Code)
+		if res2.Internals[0].Code != code {
+			t.Errorf("expected code: %s, got: %s", code, res2.Internals[0].Code)
 		}
-		if res2.Internal[0].Err.Error() != value {
-			t.Errorf("expected error message: %s, got: %s", value, res2.Internal[0].Err.Error())
+		if res2.Internals[0].Err.Error() != value {
+			t.Errorf("expected error message: %s, got: %s", value, res2.Internals[0].Err.Error())
 		}
 	})
 
@@ -73,7 +73,7 @@ func TestAPIError_AddInternal(t *testing.T) {
 		apiErr := &APIError{}
 		res := apiErr.AddInternal("", "")
 
-		if len(res.Internal) != 0 {
+		if len(res.Internals) != 0 {
 			t.Error("internal error should not be added when arguments are empty")
 		}
 	})
@@ -96,13 +96,13 @@ func TestAPIError_GetHTTPStatus(t *testing.T) {
 			name: "Fallback to first Internal error status when HTTPStatus is 0",
 			err: &APIError{
 				HTTPStatus: 0,
-				Internal:   []Internal{{Status: 400}, {Status: 403}},
+				Internals:  []APIInternal{{Status: 400}, {Status: 403}},
 			},
 			want: 400,
 		},
 		{
 			name: "Default to 500 when neither HTTPStatus nor Internal is set",
-			err:  &APIError{HTTPStatus: 0, Internal: nil},
+			err:  &APIError{HTTPStatus: 0, Internals: nil},
 			want: 500,
 		},
 	}

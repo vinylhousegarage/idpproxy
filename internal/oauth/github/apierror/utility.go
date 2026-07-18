@@ -18,7 +18,7 @@ func (e *APIError) AddInternal(code ErrorCode, value string) *APIError {
 		return e
 	}
 
-	e.Internal = append(e.Internal, Internal{
+	e.Internals = append(e.Internals, APIInternal{
 		Code:   code,
 		Status: 500,
 		Err:    errors.New(value),
@@ -32,8 +32,8 @@ func (e *APIError) GetHTTPStatus() int {
 		return e.HTTPStatus
 	}
 
-	if len(e.Internal) > 0 {
-		return e.Internal[0].Status
+	if len(e.Internals) > 0 {
+		return e.Internals[0].Status
 	}
 
 	return 500

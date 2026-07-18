@@ -33,7 +33,7 @@ func ErrorLogger(logger *zap.Logger) gin.HandlerFunc {
 			zap.Error(apiErr.Err),
 		}
 
-		for i, info := range apiErr.Internal {
+		for i, info := range apiErr.Internals {
 			fields = append(fields,
 				zap.String(fmt.Sprintf("detail_%d_code", i+1), string(info.Code)),
 				zap.Int(fmt.Sprintf("detail_%d_status", i+1), 500),

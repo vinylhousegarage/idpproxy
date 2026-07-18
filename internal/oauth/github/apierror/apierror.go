@@ -2,7 +2,7 @@ package apierror
 
 type ErrorCode string
 
-type Internal struct {
+type APIInternal struct {
 	Code   ErrorCode
 	Status int
 	Err    error
@@ -12,7 +12,7 @@ type APIError struct {
 	Code       ErrorCode
 	HTTPStatus int
 	Err        error
-	Internal   []Internal
+	Internals  []APIInternal
 }
 
 func (e *APIError) Error() string {
@@ -23,17 +23,17 @@ func (e *APIError) Unwrap() error {
 	return e.Err
 }
 
-func New(code ErrorCode, status int, err error, internal ...Internal) *APIError {
+func New(code ErrorCode, status int, err error, internals ...APIInternal) *APIError {
 	return &APIError{
 		Code:       code,
 		HTTPStatus: status,
 		Err:        err,
-		Internal:   internal,
+		Internals:  internals,
 	}
 }
 
-func NewDetail(code ErrorCode, status int, err error) *Internal {
-	return &Internal{
+func NewDetail(code ErrorCode, status int, err error) *APIInternal {
+	return &APIInternal{
 		Code:   code,
 		Status: status,
 		Err:    err,
