@@ -91,7 +91,7 @@ func TestNewDetail(t *testing.T) {
 	status := http.StatusInternalServerError
 
 	t.Run("creates internal detail correctly", func(t *testing.T) {
-		got := NewDetail(code, status, err)
+		got := NewAPIInternal(code, status, err)
 
 		if got.Code != code {
 			t.Errorf("expected code %q, got %q", code, got.Code)
