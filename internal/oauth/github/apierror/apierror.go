@@ -32,7 +32,7 @@ func New(code ErrorCode, status int, err error, internals ...APIInternal) *APIEr
 	}
 }
 
-func NewDetail(code ErrorCode, status int, err error) *APIInternal {
+func NewAPIInternal(code ErrorCode, status int, err error) *APIInternal {
 	return &APIInternal{
 		Code:   code,
 		Status: status,
