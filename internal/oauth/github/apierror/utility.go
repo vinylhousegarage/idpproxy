@@ -13,7 +13,7 @@ func FormatDetail(key string, value string) (string, error) {
 	return fmt.Sprintf("%s: %s", key, value), nil
 }
 
-func (e *APIError) AddInternal(code ErrorCode, value string) *APIError {
+func (e *APIError) AddInternal(code ErrorCode, key, value string) *APIError {
 	if code == "" || value == "" {
 		return e
 	}
@@ -21,7 +21,7 @@ func (e *APIError) AddInternal(code ErrorCode, value string) *APIError {
 	e.Internals = append(e.Internals, APIInternal{
 		Code:   code,
 		Status: 500,
-		Err:    errors.New(value),
+		Err:    fmt.Errorf("%s: %s", key, value),
 	})
 
 	return e
