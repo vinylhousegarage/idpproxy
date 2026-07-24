@@ -43,14 +43,16 @@ func TestAPIError_AddInternal(t *testing.T) {
 
 		apiErr := &APIError{}
 		code := ErrorCode("TEST_CODE")
+		key := "field"
 		value := "something went wrong"
+		expectedErrMsg := "field: something went wrong"
 
-		res1 := apiErr.AddInternal(code, value)
+		res1 := apiErr.AddInternal(code, key, value)
 		if len(res1.Internals) != 1 {
 			t.Fatalf("expected 1 internal error, but got %d", len(res1.Internals))
 		}
 
-		res2 := res1.AddInternal(code, value)
+		res2 := res1.AddInternal(code, key, value)
 		if len(res2.Internals) != 2 {
 			t.Fatalf("expected 2 internal errors, but got %d", len(res2.Internals))
 		}
@@ -62,8 +64,8 @@ func TestAPIError_AddInternal(t *testing.T) {
 		if res2.Internals[0].Code != code {
 			t.Errorf("expected code: %s, got: %s", code, res2.Internals[0].Code)
 		}
-		if res2.Internals[0].Err.Error() != value {
-			t.Errorf("expected error message: %s, got: %s", value, res2.Internals[0].Err.Error())
+		if res2.Internals[0].Err.Error() != expectedErrMsg {
+			t.Errorf("expected error message: %s, got: %s", expectedErrMsg, res2.Internals[0].Err.Error())
 		}
 	})
 
@@ -71,7 +73,7 @@ func TestAPIError_AddInternal(t *testing.T) {
 		t.Parallel()
 
 		apiErr := &APIError{}
-		res := apiErr.AddInternal("", "")
+		res := apiErr.AddInternal("", "", "")
 
 		if len(res.Internals) != 0 {
 			t.Error("internal error should not be added when arguments are empty")
