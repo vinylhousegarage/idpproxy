@@ -42,9 +42,9 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	cookie, err := c.Request.Cookie(stateCookieName)
 	if err != nil || cookie == nil || cookie.Value == "" || cookie.Value != qState {
-	apiErr := apierror.InvalidState(apierror.ErrInvalidState).
-		AddInternal(apierror.ErrorCodeInvalidQueryState, "query_state", qState).
-		AddInternal(apierror.ErrorCodeInvalidCookieState, "cookie_state", safeCookieVal(cookie))
+		apiErr := apierror.InvalidState(apierror.ErrInvalidState).
+			AddInternal(apierror.ErrorCodeInvalidQueryState, "query_state", qState).
+			AddInternal(apierror.ErrorCodeInvalidCookieState, "cookie_state", safeCookieVal(cookie))
 
 		_ = c.Error(apiErr)
 
