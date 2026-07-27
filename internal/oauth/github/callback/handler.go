@@ -60,8 +60,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	req, err := githubtoken.BuildAccessTokenRequest(ctx, h.OAuth.Config, githubCode, qState)
 	if err != nil {
-		h.OAuth.Logger.Error("build github access token request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeBuildAccessTokenRequest})
+		apiErr := apierror.GitHubAccessTokenRequestError(apierror.ErrGitHubAccessTokenRequest)
+		_ = c.Error(apiErr)
 
 		return
 	}
