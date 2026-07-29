@@ -20,6 +20,10 @@ func GitHubAccessTokenRequestError(err error, internals ...APIInternal) *APIErro
 	return New(ErrorCodeGitHubAccessTokenRequest, http.StatusBadGateway, err, internals...)
 }
 
+func GitHubTokenRequestError(err error, internals ...APIInternal) *APIError {
+	return New(ErrorCodeGitHubTokenRequest, http.StatusBadGateway, err, internals...)
+}
+
 // internal
 func InternalServerError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeInternalServerError, http.StatusInternalServerError, err, internals...)
