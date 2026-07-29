@@ -113,10 +113,12 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		rr, req := newCallbackRequest(t, "/oauth/github/callback", "code123", "st-abc")
 		setStateCookie(req, "st-abc")
 
-		ctx, _ := gin.CreateTestContext(rr)
-		ctx.Request = req
+		_, r := gin.CreateTestContext(rr)
+		r.Use(apierror.ErrorLogger(h.OAuth.Logger))
 
-		h.Serve(ctx)
+		r.GET("/oauth/github/callback", h.Serve)
+
+		r.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusBadGateway {
 			t.Fatalf("expected 502, got=%d body=%s", rr.Code, rr.Body.String())
