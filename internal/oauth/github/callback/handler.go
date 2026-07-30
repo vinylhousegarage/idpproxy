@@ -68,8 +68,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	resp, err := h.API.HTTPClient.Do(req)
 	if err != nil {
-		h.OAuth.Logger.Error("github access token request failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenRequest})
+		apiErr := apierror.GitHubTokenRequestError(apierror.ErrGitHubTokenRequest)
+		_ = c.Error(apiErr)
 
 		return
 	}
