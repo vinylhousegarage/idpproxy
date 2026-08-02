@@ -78,8 +78,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	githubAccessToken, err := githubtoken.ExtractAccessTokenFromResponse(resp)
 	if err != nil {
-		h.OAuth.Logger.Warn("github access token response parse failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubTokenExchange})
+		apiErr := apierror.GitHubTokenExchangeError(apierror.ErrGitHubTokenExchange)
+		_ = c.Error(apiErr)
 
 		return
 	}
