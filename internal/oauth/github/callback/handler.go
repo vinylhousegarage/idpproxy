@@ -86,8 +86,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	githubUserReq, err := githubuser.NewGitHubUserRequest(ctx, githubAccessToken)
 	if err != nil {
-		h.OAuth.Logger.Error("build github /user request failed", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeGitHubUserRequestBuild})
+		apiErr := apierror.GitHubUserRequestBuildError(apierror.ErrGitHubUserRequestBuild)
+		_ = c.Error(apiErr)
 
 		return
 	}
