@@ -8,8 +8,6 @@ import (
 )
 
 func TestAPIErrors(t *testing.T) {
-	t.Parallel()
-
 	originalErr := errors.New("base error")
 
 	mockInternalErr := errors.New("internal debug info")
@@ -62,12 +60,6 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusBadGateway,
 		},
 		{
-			name:           "GitHubUserRequestBuildError",
-			fn:             GitHubUserRequestBuildError,
-			expectedCode:   ErrorCodeGitHubUserRequestBuild,
-			expectedStatus: http.StatusInternalServerError,
-		},
-		{
 			name:           "InternalServerError",
 			fn:             InternalServerError,
 			expectedCode:   ErrorCodeInternalServerError,
@@ -83,8 +75,6 @@ func TestAPIErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			got := tt.fn(originalErr, tt.internalsInfo...)
 
 			if got.Code != tt.expectedCode {

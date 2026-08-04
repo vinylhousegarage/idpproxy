@@ -28,11 +28,6 @@ func GitHubTokenExchangeError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeGitHubTokenExchange, http.StatusBadGateway, err, internals...)
 }
 
-// user
-func GitHubUserRequestBuildError(err error, internals ...APIInternal) *APIError {
-	return New(ErrorCodeGitHubUserRequestBuild, http.StatusInternalServerError, err, internals...)
-}
-
 // internal
 func InternalServerError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeInternalServerError, http.StatusInternalServerError, err, internals...)
