@@ -33,6 +33,10 @@ func GitHubUserRequestBuildError(err error, internals ...APIInternal) *APIError 
 	return New(ErrorCodeGitHubUserRequestBuild, http.StatusInternalServerError, err, internals...)
 }
 
+func GitHubUserRequestError(err error, internals ...APIInternal) *APIError {
+	return New(ErrorCodeGitHubUserRequest, http.StatusBadGateway, err, internals...)
+}
+
 // internal
 func InternalServerError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeInternalServerError, http.StatusInternalServerError, err, internals...)
