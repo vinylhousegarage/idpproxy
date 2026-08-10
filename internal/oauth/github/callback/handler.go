@@ -94,8 +94,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	githubUserResp, err := h.API.HTTPClient.Do(githubUserReq)
 	if err != nil {
-		h.OAuth.Logger.Error("failed to call github /user", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserRequest})
+		apiErr := apierror.GitHubUserRequestError(apierror.ErrGitHubUserRequest)
+		_ = c.Error(apiErr)
 
 		return
 	}
