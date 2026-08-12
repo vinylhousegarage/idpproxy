@@ -72,6 +72,12 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusBadGateway,
 		},
 		{
+			name:           "GitHubUserDecodeError",
+			fn:             GitHubUserDecodeError,
+			expectedCode:   ErrorCodeGitHubUserDecode,
+			expectedStatus: http.StatusBadGateway,
+		},
+		{
 			name:           "InternalServerError",
 			fn:             InternalServerError,
 			expectedCode:   ErrorCodeInternalServerError,
