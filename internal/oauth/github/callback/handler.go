@@ -104,8 +104,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 
 	githubUser, err := githubuser.DecodeGitHubUserResponse(githubUserResp)
 	if err != nil {
-		h.OAuth.Logger.Warn("failed to decode github /user response", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{"error": apierror.ErrorCodeGitHubUserDecode})
+		apiErr := apierror.GitHubUserDecodeError(apierror.ErrGitHubUserDecode)
+		_ = c.Error(apiErr)
 
 		return
 	}
