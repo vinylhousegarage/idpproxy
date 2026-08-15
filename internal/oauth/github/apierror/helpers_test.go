@@ -89,6 +89,12 @@ func TestAPIErrors(t *testing.T) {
 			expectedCode:   ErrorCodeProxyCodeIssue,
 			expectedStatus: http.StatusInternalServerError,
 		},
+		{
+			name:           "UserUpsertError",
+			fn:             UserUpsertError,
+			expectedCode:   ErrorCodeUserUpsert,
+			expectedStatus: http.StatusInternalServerError,
+		},
 	}
 
 	for _, tt := range tests {
