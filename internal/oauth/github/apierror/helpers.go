@@ -41,10 +41,6 @@ func GitHubUserDecodeError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeGitHubUserDecode, http.StatusBadGateway, err, internals...)
 }
 
-func GitHubUserUpsertError(err error, internals ...APIInternal) *APIError {
-	return New(ErrorCodeGitHubUserUpsert, http.StatusBadGateway, err, internals...)
-}
-
 // internal
 func InternalServerError(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeInternalServerError, http.StatusInternalServerError, err, internals...)
