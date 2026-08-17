@@ -49,3 +49,7 @@ func InternalServerError(err error, internals ...APIInternal) *APIError {
 func ProxyCodeIssue(err error, internals ...APIInternal) *APIError {
 	return New(ErrorCodeProxyCodeIssue, http.StatusInternalServerError, err, internals...)
 }
+
+func UserUpsertError(err error, internals ...APIInternal) *APIError {
+	return New(ErrorCodeUserUpsert, http.StatusInternalServerError, err, internals...)
+}
