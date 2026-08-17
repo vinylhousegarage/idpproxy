@@ -51,5 +51,5 @@ func ProxyCodeIssue(err error, internals ...APIInternal) *APIError {
 }
 
 func UserUpsertError(err error, internals ...APIInternal) *APIError {
-	return New(ErrorCodebUserUpsert http.StatusInternalServerError, err, internals...)
+	return New(ErrorCodeUserUpsert, http.StatusInternalServerError, err, internals...)
 }
