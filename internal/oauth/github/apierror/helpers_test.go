@@ -84,8 +84,8 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusInternalServerError,
 		},
 		{
-			name:           "ProxyCodeIssue",
-			fn:             ProxyCodeIssue,
+			name:           "ProxyCodeIssueError",
+			fn:             ProxyCodeIssueError,
 			expectedCode:   ErrorCodeProxyCodeIssue,
 			expectedStatus: http.StatusInternalServerError,
 		},
