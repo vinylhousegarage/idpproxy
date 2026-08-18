@@ -117,8 +117,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		githubUser.Email,
 	)
 	if err != nil {
-		h.OAuth.Logger.Error("failed to upsert github user", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeUserUpsert})
+		apiErr := apierror.UserUpsertError(apierror.ErrUserUpsert)
+		_ = c.Error(apiErr)
 
 		return
 	}
