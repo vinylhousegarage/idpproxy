@@ -10,7 +10,6 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 	githubtoken "github.com/vinylhousegarage/idpproxy/internal/oauth/github/token"
 	githubuser "github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
-	"go.uber.org/zap"
 )
 
 func callbackSuccessLocation(proxyCode, qState string) string {
@@ -129,8 +128,8 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 		h.ClientID,
 	)
 	if err != nil {
-		h.OAuth.Logger.Error("failed to issue proxy code", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": apierror.ErrorCodeProxyCodeIssue})
+		apiErr := apierror.ProxyCodeIssueError(apierror.ErrProxyCodeIssue)
+		_ = c.Error(apiErr)
 
 		return
 	}
