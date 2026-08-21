@@ -1,8 +1,8 @@
 package store
 
 type Ciphertext struct {
-	KID  string
-	Blob string
+	KID  string `firestore:"kid"`
+	Blob string `firestore:"blob"`
 }
 
 type TokenEncryptor interface {
