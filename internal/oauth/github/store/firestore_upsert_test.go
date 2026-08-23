@@ -2,32 +2,12 @@ package store
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"testing"
 	"time"
-
-	"cloud.google.com/go/firestore"
 )
-
-type fakeTokenEncryptor struct {
-	ciphertext Ciphertext
-	err        error
-}
-
-func (e fakeTokenEncryptor) EncryptString(_ string) (Ciphertext, error) {
-	if e.err != nil {
-		return Ciphertext{}, e.err
-	}
-
-	return e.ciphertext, nil
-}
-
-func (e fakeTokenEncryptor) DecryptString(_ Ciphertext) (string, error) {
-	return "", errors.New("not implemented")
-}
 
 func TestFirestoreGitHubTokenRepo_Upsert(t *testing.T) {
 	if os.Getenv("FIRESTORE_EMULATOR_HOST") == "" {
@@ -37,12 +17,7 @@ func TestFirestoreGitHubTokenRepo_Upsert(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-
-	client, err := firestore.NewClient(ctx, "idpproxy-test")
-	if err != nil {
-		t.Fatalf("create firestore client: %v", err)
-	}
-	defer client.Close()
+	client := newFirestoreTestClient(t, ctx)
 
 	now := time.Date(2026, time.August, 23, 0, 0, 0, 0, time.UTC)
 
@@ -53,7 +28,9 @@ func TestFirestoreGitHubTokenRepo_Upsert(t *testing.T) {
 
 	repo := NewFirestoreGitHubTokenRepo(
 		client,
-		fakeTokenEncryptor{ciphertext: encryptedToken},
+		fakeTokenEncryptor{
+			ciphertext: encryptedToken,
+		},
 	)
 	repo.now = func() time.Time {
 		return now
@@ -77,8 +54,7 @@ func TestFirestoreGitHubTokenRepo_Upsert(t *testing.T) {
 		LastUsedAt:  now.Add(-1 * time.Hour),
 	}
 
-	err = repo.Upsert(ctx, rec)
-	if err != nil {
+	if err := repo.Upsert(ctx, rec); err != nil {
 		t.Fatalf("upsert GitHub token: %v", err)
 	}
 
@@ -107,6 +83,10 @@ func TestFirestoreGitHubTokenRepo_Upsert(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("saved token mismatch (-got +want):\n got: %#v\nwant: %#v", got, want)
+		t.Errorf(
+			"saved token mismatch (-got +want):\n got: %#v\nwant: %#v",
+			got,
+			want,
+		)
 	}
 }
