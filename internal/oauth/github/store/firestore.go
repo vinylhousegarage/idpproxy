@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 const (
 	collectionGitHubTokens = "github_tokens"
 )
+
+var ErrGitHubTokenNotFound = errors.New("GitHub token not found")
 
 type FirestoreGitHubTokenRepo struct {
 	client *firestore.Client
@@ -105,4 +108,42 @@ func (r *FirestoreGitHubTokenRepo) Upsert(
 	}
 
 	return nil
+}
+
+func (r *FirestoreGitHubTokenRepo) GetByFirebaseUID(
+	ctx context.Context,
+	firebaseUID string,
+) (*GitHubTokenRecord, error) {
+	snapshot, err := r.col.Doc(firebaseUID).Get(ctx)
+	if status.Code(err) == codes.NotFound {
+		return nil, ErrGitHubTokenNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get GitHub token: %w", err)
+	}
+
+	var token firestoreGitHubToken
+	if err := snapshot.DataTo(&token); err != nil {
+		return nil, fmt.Errorf("decode GitHub token: %w", err)
+	}
+
+	accessToken, err := r.enc.DecryptString(token.AccessToken)
+	if err != nil {
+		return nil, fmt.Errorf("decrypt GitHub access token: %w", err)
+	}
+
+	return &GitHubTokenRecord{
+		GitHubID:    token.GitHubID,
+		Provider:    token.Provider,
+		FirebaseUID: token.FirebaseUID,
+		Login:       token.Login,
+		Scopes:      token.Scopes,
+		TokenType:   token.TokenType,
+		AccessToken: accessToken,
+		ExpiresAt:   token.ExpiresAt,
+		LastUsedAt:  token.LastUsedAt,
+		CreatedAt:   token.CreatedAt,
+		UpdatedAt:   token.UpdatedAt,
+		DeleteAt:    token.DeleteAt,
+	}, nil
 }
