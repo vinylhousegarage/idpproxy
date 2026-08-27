@@ -147,3 +147,23 @@ func (r *FirestoreGitHubTokenRepo) GetByFirebaseUID(
 		DeleteAt:    token.DeleteAt,
 	}, nil
 }
+
+func (r *FirestoreGitHubTokenRepo) TouchLastUsed(
+	ctx context.Context,
+	firebaseUID string,
+) error {
+	now := r.now()
+
+	_, err := r.col.Doc(firebaseUID).Update(ctx, []firestore.Update{
+		{Path: "last_used_at", Value: now},
+		{Path: "updated_at", Value: now},
+	})
+	if status.Code(err) == codes.NotFound {
+		return ErrGitHubTokenNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("touch GitHub token last used: %w", err)
+	}
+
+	return nil
+}
