@@ -167,3 +167,15 @@ func (r *FirestoreGitHubTokenRepo) TouchLastUsed(
 
 	return nil
 }
+
+func (r *FirestoreGitHubTokenRepo) DeleteByFirebaseUID(
+	ctx context.Context,
+	firebaseUID string,
+) error {
+	_, err := r.col.Doc(firebaseUID).Delete(ctx)
+	if err != nil {
+		return fmt.Errorf("delete GitHub token: %w", err)
+	}
+
+	return nil
+}
