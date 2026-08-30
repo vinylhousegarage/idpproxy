@@ -13,6 +13,7 @@ const (
 	ErrorCodeGitHubAccessTokenRequest ErrorCode = "github_access_token_request_failed"
 	ErrorCodeGitHubTokenRequest       ErrorCode = "github_token_request_failed"
 	ErrorCodeGitHubTokenExchange      ErrorCode = "github_token_exchange_failed"
+	ErrorCodeGitHubTokenUpsert        ErrorCode = "github_token_upsert_failed"
 
 	// user
 	ErrorCodeGitHubUserRequestBuild ErrorCode = "github_user_request_build_failed"
