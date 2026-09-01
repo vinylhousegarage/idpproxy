@@ -60,6 +60,12 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusBadGateway,
 		},
 		{
+			name:           "GitHubTokenUpsertError",
+			fn:             GitHubTokenUpsertError,
+			expectedCode:   ErrorCodeGitHubTokenUpsert,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
 			name:           "GitHubUserRequestBuildError",
 			fn:             GitHubUserRequestBuildError,
 			expectedCode:   ErrorCodeGitHubUserRequestBuild,
