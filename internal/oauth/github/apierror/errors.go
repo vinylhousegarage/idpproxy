@@ -15,6 +15,7 @@ var (
 	ErrGitHubAccessTokenRequest = errors.New(string(ErrorCodeGitHubAccessTokenRequest))
 	ErrGitHubTokenRequest       = errors.New(string(ErrorCodeGitHubTokenRequest))
 	ErrGitHubTokenExchange      = errors.New(string(ErrorCodeGitHubTokenExchange))
+	ErrGitHubTokenUpsert        = errors.New(string(ErrorCodeGitHubTokenUpsert))
 
 	// user
 	ErrGitHubUserRequestBuild = errors.New(string(ErrorCodeGitHubUserRequestBuild))
