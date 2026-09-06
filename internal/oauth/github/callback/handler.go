@@ -4,10 +4,12 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
+	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 	githubtoken "github.com/vinylhousegarage/idpproxy/internal/oauth/github/token"
 	githubuser "github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 )
@@ -118,6 +120,22 @@ func (h *GitHubCallbackHandler) Serve(c *gin.Context) {
 	if err != nil {
 		apiErr := apierror.UserUpsertError(apierror.ErrUserUpsert)
 		_ = c.Error(apiErr)
+
+		return
+	}
+
+	err = h.TokenRepo.Upsert(ctx, &githubstore.GitHubTokenRecord{
+		GitHubID:    strconv.FormatInt(githubUser.ID, 10),
+		Provider:    "github",
+		FirebaseUID: internalUserID,
+		Login:       githubUser.Login,
+		AccessToken: githubAccessToken,
+		LastUsedAt:  time.Now(),
+	})
+	if err != nil {
+		_ = c.Error(
+			apierror.GitHubTokenUpsertError(apierror.ErrGitHubTokenUpsert),
+		)
 
 		return
 	}

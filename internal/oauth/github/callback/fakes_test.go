@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/vinylhousegarage/idpproxy/internal/config"
+	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 )
 
 type fakeHTTPClient struct {
@@ -79,4 +80,20 @@ func (f *fakeProxyCodeService) Issue(
 	}
 
 	return f.proxyCode, nil
+}
+
+type fakeGitHubTokenRepo struct {
+	called bool
+	rec    *githubstore.GitHubTokenRecord
+	err    error
+}
+
+func (r *fakeGitHubTokenRepo) Upsert(
+	_ context.Context,
+	rec *githubstore.GitHubTokenRecord,
+) error {
+	r.called = true
+	r.rec = rec
+
+	return r.err
 }

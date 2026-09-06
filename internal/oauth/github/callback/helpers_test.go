@@ -22,6 +22,7 @@ func newHandlerForTest(
 	httpc *fakeHTTPClient,
 	us *fakeUserService,
 	pcs *fakeProxyCodeService,
+	tokenRepo *fakeGitHubTokenRepo,
 ) *GitHubCallbackHandler {
 	t.Helper()
 
@@ -35,7 +36,7 @@ func newHandlerForTest(
 		httpc,
 		logger,
 	)
-	return NewGitHubCallbackHandler(oauth, api, us, pcs, "test-client")
+	return NewGitHubCallbackHandler(oauth, api, us, pcs, tokenRepo, "test-client")
 }
 
 func newCallbackRequest(t *testing.T, path, githubCode, state string) (*httptest.ResponseRecorder, *http.Request) {
