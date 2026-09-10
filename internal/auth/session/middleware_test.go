@@ -49,7 +49,7 @@ func TestRequireSession(t *testing.T) {
 		router := gin.New()
 		router.Use(RequireSession(validator))
 		router.GET("/me", func(c *gin.Context) {
-			userID, ok := c.Get(contextUserIDKey)
+			userID, ok := c.Get(ContextUserIDKey)
 			if !ok {
 				t.Error("user ID was not set in Gin context")
 				c.Status(http.StatusInternalServerError)
@@ -66,7 +66,7 @@ func TestRequireSession(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodGet, "/me", nil)
 		req.AddCookie(&http.Cookie{
-			Name:  sessionCookieName,
+			Name:  SessionCookieName,
 			Value: "session-123",
 			Path:  "/",
 		})
@@ -139,7 +139,7 @@ func TestRequireSession(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodGet, "/me", nil)
 		req.AddCookie(&http.Cookie{
-			Name:  sessionCookieName,
+			Name:  SessionCookieName,
 			Value: "expired-session-123",
 			Path:  "/",
 		})
