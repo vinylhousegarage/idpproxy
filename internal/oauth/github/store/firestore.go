@@ -11,9 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const (
-	collectionGitHubTokens = "github_tokens"
-)
+const collectionGitHubTokens = "github_tokens"
 
 var ErrGitHubTokenNotFound = errors.New("GitHub token not found")
 
@@ -55,7 +53,7 @@ func (r *FirestoreGitHubTokenRepo) Upsert(
 	ctx context.Context,
 	rec *GitHubTokenRecord,
 ) error {
-	encryptedToken, err := r.enc.EncryptString(rec.AccessToken)
+	encryptedToken, err := r.enc.EncryptString(ctx, rec.AccessToken)
 	if err != nil {
 		return fmt.Errorf("encrypt GitHub access token: %w", err)
 	}
@@ -127,7 +125,7 @@ func (r *FirestoreGitHubTokenRepo) GetByFirebaseUID(
 		return nil, fmt.Errorf("decode GitHub token: %w", err)
 	}
 
-	accessToken, err := r.enc.DecryptString(token.AccessToken)
+	accessToken, err := r.enc.DecryptString(ctx, token.AccessToken)
 	if err != nil {
 		return nil, fmt.Errorf("decrypt GitHub access token: %w", err)
 	}

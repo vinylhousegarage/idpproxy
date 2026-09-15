@@ -14,7 +14,10 @@ type fakeTokenEncryptor struct {
 	decryptErr error
 }
 
-func (e fakeTokenEncryptor) EncryptString(_ string) (Ciphertext, error) {
+func (e fakeTokenEncryptor) EncryptString(
+	_ context.Context,
+	_ string,
+) (Ciphertext, error) {
 	if e.encryptErr != nil {
 		return Ciphertext{}, e.encryptErr
 	}
@@ -22,7 +25,10 @@ func (e fakeTokenEncryptor) EncryptString(_ string) (Ciphertext, error) {
 	return e.ciphertext, nil
 }
 
-func (e fakeTokenEncryptor) DecryptString(_ Ciphertext) (string, error) {
+func (e fakeTokenEncryptor) DecryptString(
+	_ context.Context,
+	_ Ciphertext,
+) (string, error) {
 	if e.decryptErr != nil {
 		return "", e.decryptErr
 	}
