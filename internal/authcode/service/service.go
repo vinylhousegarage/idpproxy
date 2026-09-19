@@ -14,6 +14,12 @@ type Service struct {
 	store store.Store
 }
 
+func NewService(codeStore store.Store) *Service {
+	return &Service{
+		store: codeStore,
+	}
+}
+
 func (s *Service) Issue(
 	ctx context.Context,
 	userID string,
