@@ -37,16 +37,27 @@ func TestLoadFirebaseConfig(t *testing.T) {
 		cfg, err := LoadFirebaseConfig()
 		require.Error(t, err)
 		require.Nil(t, cfg)
-		require.Contains(t, err.Error(), "GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set")
+		require.Contains(
+			t,
+			err.Error(),
+			"GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set",
+		)
 	})
 
 	t.Run("invalid base64", func(t *testing.T) {
-		t.Setenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64", "not-base64!!!")
+		t.Setenv(
+			"GOOGLE_APPLICATION_CREDENTIALS_BASE64",
+			"not-base64!!!",
+		)
 
 		cfg, err := LoadFirebaseConfig()
 		require.Error(t, err)
 		require.Nil(t, cfg)
-		require.ErrorContains(t, err, "failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64")
+		require.ErrorContains(
+			t,
+			err,
+			"failed to decode GOOGLE_APPLICATION_CREDENTIALS_BASE64",
+		)
 	})
 }
 
@@ -54,13 +65,20 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "test-github-client-id")
 		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
-		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
+		t.Setenv(
+			"GITHUB_REDIRECT_URI",
+			"https://idpproxy.com/github/callback",
+		)
 
 		cfg, err := LoadGitHubOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-client-id", cfg.ClientID)
 		require.Equal(t, "test-github-client-secret", cfg.ClientSecret)
-		require.Equal(t, "https://idpproxy.com/github/callback", cfg.RedirectURI)
+		require.Equal(
+			t,
+			"https://idpproxy.com/github/callback",
+			cfg.RedirectURI,
+		)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
 	})
@@ -73,13 +91,21 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.EqualError(t, err, "GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET and GITHUB_REDIRECT_URI are not set")
+		require.EqualError(
+			t,
+			err,
+			"GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET and "+
+				"GITHUB_REDIRECT_URI are not set",
+		)
 	})
 
 	t.Run("missing client ID", func(t *testing.T) {
 		t.Setenv("GITHUB_CLIENT_ID", "")
 		t.Setenv("GITHUB_CLIENT_SECRET", "test-github-client-secret")
-		t.Setenv("GITHUB_REDIRECT_URI", "https://idpproxy.com/github/callback")
+		t.Setenv(
+			"GITHUB_REDIRECT_URI",
+			"https://idpproxy.com/github/callback",
+		)
 
 		cfg, err := LoadGitHubOAuthConfig()
 		require.Nil(t, cfg)
@@ -102,14 +128,24 @@ func TestLoadGitHubOAuthConfig(t *testing.T) {
 func TestLoadGitHubDevConfig(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
-		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
-		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
+		t.Setenv(
+			"GITHUB_DEV_CLIENT_SECRET",
+			"test-github-dev-client-secret",
+		)
+		t.Setenv(
+			"GITHUB_DEV_REDIRECT_URI",
+			"http://localhost:9000/github/callback",
+		)
 
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.NoError(t, err)
 		require.Equal(t, "test-github-dev-client-id", cfg.ClientID)
 		require.Equal(t, "test-github-dev-client-secret", cfg.ClientSecret)
-		require.Equal(t, "http://localhost:9000/github/callback", cfg.RedirectURI)
+		require.Equal(
+			t,
+			"http://localhost:9000/github/callback",
+			cfg.RedirectURI,
+		)
 		require.Equal(t, "read:user", cfg.Scope)
 		require.Equal(t, "true", cfg.AllowSignup)
 	})
@@ -122,13 +158,24 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.EqualError(t, err, "GITHUB_DEV_CLIENT_ID, GITHUB_DEV_CLIENT_SECRET and GITHUB_DEV_REDIRECT_URI are not set")
+		require.EqualError(
+			t,
+			err,
+			"GITHUB_DEV_CLIENT_ID, GITHUB_DEV_CLIENT_SECRET and "+
+				"GITHUB_DEV_REDIRECT_URI are not set",
+		)
 	})
 
 	t.Run("missing client ID", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "")
-		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
-		t.Setenv("GITHUB_DEV_REDIRECT_URI", "http://localhost:9000/github/callback")
+		t.Setenv(
+			"GITHUB_DEV_CLIENT_SECRET",
+			"test-github-dev-client-secret",
+		)
+		t.Setenv(
+			"GITHUB_DEV_REDIRECT_URI",
+			"http://localhost:9000/github/callback",
+		)
 
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
@@ -138,32 +185,91 @@ func TestLoadGitHubDevConfig(t *testing.T) {
 
 	t.Run("missing redirect URI", func(t *testing.T) {
 		t.Setenv("GITHUB_DEV_CLIENT_ID", "test-github-dev-client-id")
-		t.Setenv("GITHUB_DEV_CLIENT_SECRET", "test-github-dev-client-secret")
+		t.Setenv(
+			"GITHUB_DEV_CLIENT_SECRET",
+			"test-github-dev-client-secret",
+		)
 		t.Setenv("GITHUB_DEV_REDIRECT_URI", "")
 
 		cfg, err := LoadGitHubDevOAuthConfig()
 		require.Nil(t, cfg)
 		require.Error(t, err)
-		require.EqualError(t, err, "GITHUB_DEV_REDIRECT_URI is not set")
+		require.EqualError(
+			t,
+			err,
+			"GITHUB_DEV_REDIRECT_URI is not set",
+		)
 	})
 }
 
 func TestLoadServiceAccountConfig(t *testing.T) {
 	t.Run("when env var is not set", func(t *testing.T) {
 		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "")
+
 		cfg := LoadServiceAccountConfig()
+
 		require.Equal(t, "", cfg.ImpersonateSA)
 	})
 
 	t.Run("when env var is set", func(t *testing.T) {
-		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "sa@example.iam.gserviceaccount.com")
+		t.Setenv(
+			"IMPERSONATE_SERVICE_ACCOUNT",
+			"sa@example.iam.gserviceaccount.com",
+		)
+
 		cfg := LoadServiceAccountConfig()
-		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
+
+		require.Equal(
+			t,
+			"sa@example.iam.gserviceaccount.com",
+			cfg.ImpersonateSA,
+		)
 	})
 
 	t.Run("when env var has spaces", func(t *testing.T) {
-		t.Setenv("IMPERSONATE_SERVICE_ACCOUNT", "  sa@example.iam.gserviceaccount.com  ")
+		t.Setenv(
+			"IMPERSONATE_SERVICE_ACCOUNT",
+			"  sa@example.iam.gserviceaccount.com  ",
+		)
+
 		cfg := LoadServiceAccountConfig()
-		require.Equal(t, "sa@example.iam.gserviceaccount.com", cfg.ImpersonateSA)
+
+		require.Equal(
+			t,
+			"sa@example.iam.gserviceaccount.com",
+			cfg.ImpersonateSA,
+		)
+	})
+}
+
+func TestLoadGitHubTokenKMSConfig(t *testing.T) {
+	t.Run("loads key name", func(t *testing.T) {
+		t.Setenv(
+			"GITHUB_TOKEN_KMS_KEY_NAME",
+			"  projects/test/locations/global/keyRings/ring/cryptoKeys/key  ",
+		)
+
+		cfg, err := LoadGitHubTokenKMSConfig()
+
+		require.NoError(t, err)
+		require.NotNil(t, cfg)
+		require.Equal(
+			t,
+			"projects/test/locations/global/keyRings/ring/cryptoKeys/key",
+			cfg.KeyName,
+		)
+	})
+
+	t.Run("returns error when key name is not set", func(t *testing.T) {
+		t.Setenv("GITHUB_TOKEN_KMS_KEY_NAME", "")
+
+		cfg, err := LoadGitHubTokenKMSConfig()
+
+		require.Nil(t, cfg)
+		require.EqualError(
+			t,
+			err,
+			"GITHUB_TOKEN_KMS_KEY_NAME is not set",
+		)
 	})
 }
