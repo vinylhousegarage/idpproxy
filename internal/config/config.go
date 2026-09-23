@@ -107,3 +107,22 @@ func LoadServiceAccountConfig() *ServiceAccountConfig {
 		ImpersonateSA: strings.TrimSpace(os.Getenv("IMPERSONATE_SERVICE_ACCOUNT")),
 	}
 }
+
+type GitHubTokenKMSConfig struct {
+	KeyName string
+}
+
+func LoadGitHubTokenKMSConfig() (*GitHubTokenKMSConfig, error) {
+	keyName := strings.TrimSpace(
+		os.Getenv("GITHUB_TOKEN_KMS_KEY_NAME"),
+	)
+	if keyName == "" {
+		return nil, fmt.Errorf(
+			"GITHUB_TOKEN_KMS_KEY_NAME is not set",
+		)
+	}
+
+	return &GitHubTokenKMSConfig{
+		KeyName: keyName,
+	}, nil
+}
