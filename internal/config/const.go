@@ -19,6 +19,9 @@ const (
 	// for BuildAccessTokenRequest
 	GitHubTokenURL = "https://github.com/login/oauth/access_token"
 
+	// for GitHub access-token encryption
+	GitHubTokenKMSAAD = "idpproxy:github-token:v1"
+
 	// for fetching Google OIDC metadata
 	GoogleOIDCMetadataURL = "https://accounts.google.com/.well-known/openid-configuration"
 

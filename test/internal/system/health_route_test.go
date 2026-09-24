@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -24,10 +25,19 @@ func TestHealthRoute_Returns200AndJSONHealthy(t *testing.T) {
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
+	d := router.NewRouterDeps(
+		public.PublicFS,
+		githubAPIDeps,
+		githubOAuthDeps,
+		&githubcallback.GitHubCallbackHandler{},
+		googleDeps,
+		logger,
+		systemDeps,
+	)
 	r := router.NewRouter(d)
 
 	w := httptest.NewRecorder()
+
 	req, err := http.NewRequest(http.MethodGet, "/health", nil)
 	require.NoError(t, err)
 
