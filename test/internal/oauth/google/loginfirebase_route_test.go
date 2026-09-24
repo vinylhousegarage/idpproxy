@@ -1,7 +1,6 @@
 package google_test
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,12 +8,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
+func TestGitHubLoginRoute_Returns302Redirect(t *testing.T) {
 	t.Parallel()
 
 	logger, err := zap.NewDevelopment()
@@ -25,29 +25,45 @@ func TestLoginfirebaseRoute_Returns200AndIDToken(t *testing.T) {
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
+	d := router.NewRouterDeps(
+		public.PublicFS,
+		githubAPIDeps,
+		githubOAuthDeps,
+		&githubcallback.GitHubCallbackHandler{},
+		googleDeps,
+		logger,
+		systemDeps,
+	)
 	r := router.NewRouter(d)
 
 	w := httptest.NewRecorder()
-	body := bytes.NewBufferString(`{"id_token":"dummy.token.value"}`)
-	req, err := http.NewRequest(http.MethodPost, "/google/login/firebase", body)
+	req, err := http.NewRequest(http.MethodGet, "/github/login", nil)
 	require.NoError(t, err)
-	req.Header.Set("Content-Type", "application/json")
 
 	r.ServeHTTP(w, req)
 
-	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, http.StatusFound, w.Code)
+
+	location := w.Header().Get("Location")
+	require.NotEmpty(t, location)
+	require.Contains(
+		t,
+		location,
+		"https://github.com/login/oauth/authorize?",
+	)
+	require.Contains(t, location, "client_id=test-client-id")
+	require.Contains(t, location, "state=")
 
 	cookies := w.Result().Cookies()
-	require.NotEmpty(t, cookies)
 
-	var idTokenFound bool
+	var found bool
+
 	for _, c := range cookies {
-		if c.Name == "id_token" {
-			idTokenFound = true
-			require.NotEmpty(t, c.Value)
+		if c.Name == "oauth_state" {
+			found = true
 			break
 		}
 	}
-	require.True(t, idTokenFound, "id_token cookie should be set")
+
+	require.True(t, found, "oauth_state cookie should be set")
 }

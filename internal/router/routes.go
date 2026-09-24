@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/login"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/loginfirebase"
@@ -14,20 +15,32 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine, d RouterDeps) {
-	if d.GitHubAPI == nil || d.GitHubOAuth == nil || d.Google == nil || d.Logger == nil || d.System == nil {
+	if d.GitHubAPI == nil ||
+		d.GitHubOAuth == nil ||
+		d.GitHubCallback == nil ||
+		d.Google == nil ||
+		d.Logger == nil ||
+		d.System == nil {
 		panic("router: missing dependencies")
 	}
 
 	r.Use(apierror.ErrorLogger(d.Logger))
 
 	if d.FS != nil {
-		r.GET("/", func(c *gin.Context) { c.FileFromFS("root.html", http.FS(d.FS)) })
-		r.GET("/privacy", func(c *gin.Context) { c.FileFromFS("privacy.html", http.FS(d.FS)) })
-		r.GET("/terms", func(c *gin.Context) { c.FileFromFS("terms.html", http.FS(d.FS)) })
+		r.GET("/", func(c *gin.Context) {
+			c.FileFromFS("root.html", http.FS(d.FS))
+		})
+		r.GET("/privacy", func(c *gin.Context) {
+			c.FileFromFS("privacy.html", http.FS(d.FS))
+		})
+		r.GET("/terms", func(c *gin.Context) {
+			c.FileFromFS("terms.html", http.FS(d.FS))
+		})
 	}
 
 	// GitHub
 	login.RegisterRoutes(r, d.GitHubOAuth)
+	callback.RegisterRoutes(r, d.GitHubCallback)
 	user.RegisterRoutes(r, d.GitHubAPI)
 
 	// Google

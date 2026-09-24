@@ -12,12 +12,16 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
+	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
-func newMockGoogleDepsWithFunc(logger *zap.Logger, fn func(ctx context.Context, idToken string) (*firebaseauth.Token, error)) *deps.GoogleDependencies {
+func newMockGoogleDepsWithFunc(
+	logger *zap.Logger,
+	fn func(ctx context.Context, idToken string) (*firebaseauth.Token, error),
+) *deps.GoogleDependencies {
 	return &deps.GoogleDependencies{
 		Logger: logger,
 		Verifier: &testhelpers.MockVerifier{
@@ -32,26 +36,41 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	googleDeps := newMockGoogleDepsWithFunc(logger, func(ctx context.Context, idToken string) (*firebaseauth.Token, error) {
-		return &firebaseauth.Token{
-			UID: "test-sub",
-			Claims: map[string]interface{}{
-				"iss": "https://issuer.example.com",
-				"aud": "test-audience",
-				"exp": float64(1234567890),
-			},
-		}, nil
-	})
+	googleDeps := newMockGoogleDepsWithFunc(
+		logger,
+		func(
+			ctx context.Context,
+			idToken string,
+		) (*firebaseauth.Token, error) {
+			return &firebaseauth.Token{
+				UID: "test-sub",
+				Claims: map[string]interface{}{
+					"iss": "https://issuer.example.com",
+					"aud": "test-audience",
+					"exp": float64(1234567890),
+				},
+			}, nil
+		},
+	)
 
 	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
 	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
+	d := router.NewRouterDeps(
+		public.PublicFS,
+		githubAPIDeps,
+		githubOAuthDeps,
+		&githubcallback.GitHubCallbackHandler{},
+		googleDeps,
+		logger,
+		systemDeps,
+	)
 	r := router.NewRouter(d)
 
 	req, err := http.NewRequest(http.MethodGet, "/me", nil)
 	require.NoError(t, err)
+
 	req.Header.Set("Authorization", "Bearer dummy.token.value")
 
 	w := httptest.NewRecorder()
@@ -61,9 +80,14 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.Equal(t, "application/json; charset=utf-8", w.Header().Get("Content-Type"))
+	require.Equal(
+		t,
+		"application/json; charset=utf-8",
+		w.Header().Get("Content-Type"),
+	)
 
 	var body map[string]interface{}
+
 	err = json.NewDecoder(resp.Body).Decode(&body)
 	require.NoError(t, err)
 

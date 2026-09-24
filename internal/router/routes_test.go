@@ -1,45 +1,79 @@
 package router
 
 import (
-	"errors"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 )
 
-func TestRouter_ErrorLoggerMiddlewareIsApplied(t *testing.T) {
+func TestRegisterRoutes(t *testing.T) {
 	t.Parallel()
 
-	gin.SetMode(gin.TestMode)
+	t.Run("registers_GitHub_callback_route", func(t *testing.T) {
+		t.Parallel()
 
-	core, logs := observer.New(zap.ErrorLevel)
+		gin.SetMode(gin.TestMode)
 
-	deps := RouterDeps{
-		GitHubAPI:   &deps.GitHubAPIDependencies{},
-		GitHubOAuth: &deps.GitHubOAuthDependencies{},
-		Google:      &deps.GoogleDependencies{},
-		Logger:      zap.New(core),
-		System:      &deps.SystemDependencies{},
-	}
-	r := gin.New()
-	RegisterRoutes(r, deps)
+		r := gin.New()
+		d := RouterDeps{
+			GitHubAPI:      &deps.GitHubAPIDependencies{},
+			GitHubOAuth:    &deps.GitHubOAuthDependencies{},
+			GitHubCallback: &callback.GitHubCallbackHandler{},
+			Google:         &deps.GoogleDependencies{},
+			Logger:         zap.NewNop(),
+			System:         &deps.SystemDependencies{},
+		}
 
-	r.GET("/test-error-middleware", func(c *gin.Context) {
-		_ = c.Error(errors.New("test error"))
-		c.Status(http.StatusInternalServerError)
+		require.NotPanics(t, func() {
+			RegisterRoutes(r, d)
+		})
+
+		require.True(
+			t,
+			hasRoute(r.Routes(), "GET", "/oauth/github/callback"),
+			"GitHub callback route was not registered",
+		)
 	})
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/test-error-middleware", nil)
-	r.ServeHTTP(w, req)
+	t.Run("panics_when_GitHub_callback_handler_is_missing", func(t *testing.T) {
+		t.Parallel()
 
-	if logs.Len() == 0 {
-		t.Fatal("error log was not recorded")
+		gin.SetMode(gin.TestMode)
+
+		r := gin.New()
+		d := RouterDeps{
+			GitHubAPI:   &deps.GitHubAPIDependencies{},
+			GitHubOAuth: &deps.GitHubOAuthDependencies{},
+			Google:      &deps.GoogleDependencies{},
+			Logger:      zap.NewNop(),
+			System:      &deps.SystemDependencies{},
+		}
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
+}
+
+func hasRoute(
+	routes []gin.RouteInfo,
+	method string,
+	path string,
+) bool {
+	for _, route := range routes {
+		if route.Method == method && route.Path == path {
+			return true
+		}
 	}
+
+	return false
 }

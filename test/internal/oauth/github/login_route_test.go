@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -24,7 +25,15 @@ func TestGitHubLoginRoute_Returns302Redirect(t *testing.T) {
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
 
-	d := router.NewRouterDeps(public.PublicFS, githubAPIDeps, githubOAuthDeps, googleDeps, logger, systemDeps)
+	d := router.NewRouterDeps(
+		public.PublicFS,
+		githubAPIDeps,
+		githubOAuthDeps,
+		&githubcallback.GitHubCallbackHandler{},
+		googleDeps,
+		logger,
+		systemDeps,
+	)
 	r := router.NewRouter(d)
 
 	w := httptest.NewRecorder()
@@ -37,17 +46,24 @@ func TestGitHubLoginRoute_Returns302Redirect(t *testing.T) {
 
 	location := w.Header().Get("Location")
 	require.NotEmpty(t, location)
-	require.Contains(t, location, "https://github.com/login/oauth/authorize?")
+	require.Contains(
+		t,
+		location,
+		"https://github.com/login/oauth/authorize?",
+	)
 	require.Contains(t, location, "client_id=test-client-id")
 	require.Contains(t, location, "state=")
 
 	cookies := w.Result().Cookies()
+
 	var found bool
+
 	for _, c := range cookies {
 		if c.Name == "oauth_state" {
 			found = true
 			break
 		}
 	}
+
 	require.True(t, found, "oauth_state cookie should be set")
 }
