@@ -12,25 +12,13 @@ import (
 )
 
 func TestRegisterRoutes(t *testing.T) {
-	t.Parallel()
+	gin.SetMode(gin.TestMode)
 
 	t.Run("registers_GitHub_callback_route", func(t *testing.T) {
-		t.Parallel()
-
-		gin.SetMode(gin.TestMode)
-
 		r := gin.New()
-		d := RouterDeps{
-			GitHubAPI:      &deps.GitHubAPIDependencies{},
-			GitHubOAuth:    &deps.GitHubOAuthDependencies{},
-			GitHubCallback: &callback.GitHubCallbackHandler{},
-			Google:         &deps.GoogleDependencies{},
-			Logger:         zap.NewNop(),
-			System:         &deps.SystemDependencies{},
-		}
 
 		require.NotPanics(t, func() {
-			RegisterRoutes(r, d)
+			RegisterRoutes(r, testRouterDeps())
 		})
 
 		require.True(
@@ -41,18 +29,9 @@ func TestRegisterRoutes(t *testing.T) {
 	})
 
 	t.Run("panics_when_GitHub_callback_handler_is_missing", func(t *testing.T) {
-		t.Parallel()
-
-		gin.SetMode(gin.TestMode)
-
 		r := gin.New()
-		d := RouterDeps{
-			GitHubAPI:   &deps.GitHubAPIDependencies{},
-			GitHubOAuth: &deps.GitHubOAuthDependencies{},
-			Google:      &deps.GoogleDependencies{},
-			Logger:      zap.NewNop(),
-			System:      &deps.SystemDependencies{},
-		}
+		d := testRouterDeps()
+		d.GitHubCallback = nil
 
 		require.PanicsWithValue(
 			t,
@@ -62,6 +41,17 @@ func TestRegisterRoutes(t *testing.T) {
 			},
 		)
 	})
+}
+
+func testRouterDeps() RouterDeps {
+	return RouterDeps{
+		GitHubAPI:      &deps.GitHubAPIDependencies{},
+		GitHubOAuth:    &deps.GitHubOAuthDependencies{},
+		GitHubCallback: &callback.GitHubCallbackHandler{},
+		Google:         &deps.GoogleDependencies{},
+		Logger:         zap.NewNop(),
+		System:         &deps.SystemDependencies{},
+	}
 }
 
 func hasRoute(
