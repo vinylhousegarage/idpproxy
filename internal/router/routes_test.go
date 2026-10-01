@@ -9,6 +9,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
+	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 )
 
 func TestRegisterRoutes(t *testing.T) {
@@ -41,6 +42,20 @@ func TestRegisterRoutes(t *testing.T) {
 			},
 		)
 	})
+
+	t.Run("panics_when_GitHub_me_handler_is_missing", func(t *testing.T) {
+		r := gin.New()
+		d := testRouterDeps()
+		d.GitHubMe = nil
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
 }
 
 func testRouterDeps() RouterDeps {
@@ -48,6 +63,7 @@ func testRouterDeps() RouterDeps {
 		GitHubAPI:      &deps.GitHubAPIDependencies{},
 		GitHubOAuth:    &deps.GitHubOAuthDependencies{},
 		GitHubCallback: &callback.GitHubCallbackHandler{},
+		GitHubMe:       &githubme.GitHubMeHandler{},
 		Google:         &deps.GoogleDependencies{},
 		Logger:         zap.NewNop(),
 		System:         &deps.SystemDependencies{},
