@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
+	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -30,6 +31,7 @@ func TestRootServesRootHTML(t *testing.T) {
 		githubAPIDeps,
 		githubOAuthDeps,
 		&githubcallback.GitHubCallbackHandler{},
+		&githubme.GitHubMeHandler{},
 		googleDeps,
 		logger,
 		systemDeps,

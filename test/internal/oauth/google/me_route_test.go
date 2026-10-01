@@ -13,6 +13,7 @@ import (
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
+	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -62,6 +63,7 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 		githubAPIDeps,
 		githubOAuthDeps,
 		&githubcallback.GitHubCallbackHandler{},
+		&githubme.GitHubMeHandler{},
 		googleDeps,
 		logger,
 		systemDeps,

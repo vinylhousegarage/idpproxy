@@ -16,6 +16,7 @@ import (
 	firebaseutil "github.com/vinylhousegarage/idpproxy/internal/firebase"
 	"github.com/vinylhousegarage/idpproxy/internal/kms"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
+	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
@@ -160,6 +161,15 @@ func main() {
 		logger,
 	)
 
+	githubMeService := githubme.NewService(
+		githubTokenRepo,
+		httpClient,
+	)
+
+	githubMeHandler := githubme.NewGitHubMeHandler(
+		githubMeService,
+	)
+
 	githubUserService := authuser.NewService(authClient)
 
 	proxyCodeService := authcodeservice.NewService(
@@ -186,6 +196,7 @@ func main() {
 		githubAPIDeps,
 		githubOAuthDeps,
 		githubCallbackHandler,
+		githubMeHandler,
 		googleDeps,
 		logger,
 		systemDeps,
