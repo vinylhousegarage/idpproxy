@@ -8,6 +8,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/login"
+	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/user"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/loginfirebase"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/google/me"
@@ -18,6 +19,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 	if d.GitHubAPI == nil ||
 		d.GitHubOAuth == nil ||
 		d.GitHubCallback == nil ||
+		d.GitHubMe == nil ||
 		d.Google == nil ||
 		d.Logger == nil ||
 		d.System == nil {
@@ -42,6 +44,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 	login.RegisterRoutes(r, d.GitHubOAuth)
 	callback.RegisterRoutes(r, d.GitHubCallback)
 	user.RegisterRoutes(r, d.GitHubAPI)
+	githubme.RegisterRoutes(r, d.GitHubMe)
 
 	// Google
 	loginfirebase.RegisterRoutes(r, d.Google)
