@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 )
@@ -24,15 +25,19 @@ func (f *fakeHTTPClient) Do(req *http.Request) (*http.Response, error) {
 		if f.forceTokenErr {
 			return nil, errors.New("token http error")
 		}
+
 		return okJSON(f.tokenJSON), nil
+
 	case config.GitHubUserURL:
 		if f.forceUserErr {
 			return nil, errors.New("user http error")
 		}
+
 		return okJSON(f.userJSON), nil
+
 	default:
 		return &http.Response{
-			StatusCode: 404,
+			StatusCode: http.StatusNotFound,
 			Body:       io.NopCloser(bytes.NewBufferString(`not found`)),
 		}, nil
 	}
@@ -43,7 +48,7 @@ func okJSON(s string) *http.Response {
 	h.Set("Content-Type", "application/json")
 
 	return &http.Response{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(bytes.NewBufferString(s)),
 		Header:     h,
 	}
@@ -54,7 +59,12 @@ type fakeUserService struct {
 	err      error
 }
 
-func (s *fakeUserService) UpsertFromGitHub(_ context.Context, _ int64, _ string, _ string) (string, error) {
+func (s *fakeUserService) UpsertFromGitHub(
+	_ context.Context,
+	_ int64,
+	_ string,
+	_ string,
+) (string, error) {
 	if s.err != nil {
 		return "", s.err
 	}
@@ -96,4 +106,26 @@ func (r *fakeGitHubTokenRepo) Upsert(
 	r.rec = rec
 
 	return r.err
+}
+
+type fakeSessionService struct {
+	session *authsession.Session
+	err     error
+
+	called bool
+	userID string
+}
+
+func (s *fakeSessionService) Start(
+	_ context.Context,
+	userID string,
+) (*authsession.Session, error) {
+	s.called = true
+	s.userID = userID
+
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	return s.session, nil
 }

@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
+	firesessionstore "github.com/vinylhousegarage/idpproxy/internal/auth/sessionstore/firestore"
 	authuser "github.com/vinylhousegarage/idpproxy/internal/auth/user"
 	authcodeservice "github.com/vinylhousegarage/idpproxy/internal/authcode/service"
 	authcodestore "github.com/vinylhousegarage/idpproxy/internal/authcode/store"
@@ -21,6 +25,12 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 	"github.com/vinylhousegarage/idpproxy/public"
+)
+
+const (
+	sessionCollectionName = "sessions"
+	sessionTTL            = 24 * time.Hour
+	sessionIDBytes        = 32
 )
 
 func main() {
@@ -138,6 +148,18 @@ func main() {
 		tokenEncryptor,
 	)
 
+	sessionRepo := firesessionstore.NewRepository(
+		firestoreClient,
+		sessionCollectionName,
+	)
+
+	sessionUsecase := &authsession.Usecase{
+		Repo:        sessionRepo,
+		Now:         time.Now,
+		TTL:         sessionTTL,
+		IDGenerator: generateSessionID,
+	}
+
 	googleDeps := deps.NewGoogleDeps(authClient, logger)
 
 	githubCfg, err := config.LoadGitHubDevOAuthConfig()
@@ -182,6 +204,7 @@ func main() {
 		githubUserService,
 		proxyCodeService,
 		githubTokenRepo,
+		sessionUsecase,
 		githubOAuthDeps.Config.ClientID,
 	)
 
@@ -210,4 +233,14 @@ func main() {
 	)
 
 	server.StartServer(r, logger)
+}
+
+func generateSessionID() (string, error) {
+	b := make([]byte, sessionIDBytes)
+
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }
