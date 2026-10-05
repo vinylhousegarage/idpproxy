@@ -23,24 +23,50 @@ func newHandlerForTest(
 	us *fakeUserService,
 	pcs *fakeProxyCodeService,
 	tokenRepo *fakeGitHubTokenRepo,
+	sessionSvc *fakeSessionService,
 ) *GitHubCallbackHandler {
 	t.Helper()
 
 	logger := zaptest.NewLogger(t)
+
 	oauth := deps.NewGitHubOAuthDeps(
-		&config.GitHubOAuthConfig{ClientID: "cid", ClientSecret: "sec", RedirectURI: "http://localhost/cb"},
+		&config.GitHubOAuthConfig{
+			ClientID:     "cid",
+			ClientSecret: "sec",
+			RedirectURI:  "http://localhost/cb",
+		},
 		logger,
 	)
+
 	api := deps.NewGitHubAPIDeps(
-		&config.GitHubAPIConfig{APIVersion: config.GitHubAPIVersion, BaseURL: "https://api.github.com", UserAgent: config.UserAgent()},
+		&config.GitHubAPIConfig{
+			APIVersion: config.GitHubAPIVersion,
+			BaseURL:    "https://api.github.com",
+			UserAgent:  config.UserAgent(),
+		},
 		httpc,
 		logger,
 	)
-	return NewGitHubCallbackHandler(oauth, api, us, pcs, tokenRepo, "test-client")
+
+	return NewGitHubCallbackHandler(
+		oauth,
+		api,
+		us,
+		pcs,
+		tokenRepo,
+		sessionSvc,
+		"test-client",
+	)
 }
 
-func newCallbackRequest(t *testing.T, path, githubCode, state string) (*httptest.ResponseRecorder, *http.Request) {
+func newCallbackRequest(
+	t *testing.T,
+	path string,
+	githubCode string,
+	state string,
+) (*httptest.ResponseRecorder, *http.Request) {
 	t.Helper()
+
 	q := url.Values{}
 	if githubCode != "" {
 		q.Set("code", githubCode)
@@ -48,7 +74,12 @@ func newCallbackRequest(t *testing.T, path, githubCode, state string) (*httptest
 	if state != "" {
 		q.Set("state", state)
 	}
-	req := httptest.NewRequest(http.MethodGet, path+"?"+q.Encode(), nil)
+
+	req := httptest.NewRequest(
+		http.MethodGet,
+		path+"?"+q.Encode(),
+		nil,
+	)
 	req = req.WithContext(context.Background())
 
 	return httptest.NewRecorder(), req
@@ -56,26 +87,36 @@ func newCallbackRequest(t *testing.T, path, githubCode, state string) (*httptest
 
 func setStateCookie(r *http.Request, state string) {
 	r.AddCookie(&http.Cookie{
-		Name: stateCookieName, Value: state, Path: "/",
-		HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode, MaxAge: 60,
+		Name:     stateCookieName,
+		Value:    state,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   60,
 	})
 }
 
 func loadTestDataJSON(t *testing.T, path string) string {
 	t.Helper()
+
 	b, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read %s: %v", path, err)
 	}
+
 	return string(b)
 }
 
-func assertStateCookieDeleted(t *testing.T, rr *httptest.ResponseRecorder) {
+func assertStateCookieDeleted(
+	t *testing.T,
+	rr *httptest.ResponseRecorder,
+) {
 	t.Helper()
 
 	setCookies := rr.Header().Values("Set-Cookie")
 	if len(setCookies) == 0 {
-		t.Fatalf("expected Set-Cookie header, got none")
+		t.Fatal("expected Set-Cookie header, got none")
 	}
 
 	joined := strings.Join(setCookies, "\n")
@@ -88,7 +129,10 @@ func assertStateCookieDeleted(t *testing.T, rr *httptest.ResponseRecorder) {
 	}
 }
 
-func decodeErrorResponse(t *testing.T, rr *httptest.ResponseRecorder) apierror.ErrorResponse {
+func decodeErrorResponse(
+	t *testing.T,
+	rr *httptest.ResponseRecorder,
+) apierror.ErrorResponse {
 	t.Helper()
 
 	var resp apierror.ErrorResponse

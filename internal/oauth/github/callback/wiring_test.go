@@ -14,6 +14,7 @@ func TestGitHubCallbackHandler_ready(t *testing.T) {
 			&fakeUserService{},
 			&fakeProxyCodeService{},
 			&fakeGitHubTokenRepo{},
+			&fakeSessionService{},
 		)
 
 		if !h.ready() {
@@ -30,8 +31,27 @@ func TestGitHubCallbackHandler_ready(t *testing.T) {
 			&fakeUserService{},
 			&fakeProxyCodeService{},
 			&fakeGitHubTokenRepo{},
+			&fakeSessionService{},
 		)
 		h.TokenRepo = nil
+
+		if h.ready() {
+			t.Fatal("ready() = true, want false")
+		}
+	})
+
+	t.Run("returns_false_when_session_service_is_nil", func(t *testing.T) {
+		t.Parallel()
+
+		h := newHandlerForTest(
+			t,
+			&fakeHTTPClient{},
+			&fakeUserService{},
+			&fakeProxyCodeService{},
+			&fakeGitHubTokenRepo{},
+			&fakeSessionService{},
+		)
+		h.SessionService = nil
 
 		if h.ready() {
 			t.Fatal("ready() = true, want false")

@@ -21,6 +21,7 @@ type GitHubCallbackHandler struct {
 	UserService      UserService
 	ProxyCodeService ProxyCodeService
 	TokenRepo        GitHubTokenRepository
+	SessionService   SessionService
 	ClientID         string
 }
 
@@ -30,6 +31,7 @@ func NewGitHubCallbackHandler(
 	userSvc UserService,
 	proxyCodeSvc ProxyCodeService,
 	tokenRepo GitHubTokenRepository,
+	sessionSvc SessionService,
 	clientID string,
 ) *GitHubCallbackHandler {
 	return &GitHubCallbackHandler{
@@ -38,6 +40,7 @@ func NewGitHubCallbackHandler(
 		UserService:      userSvc,
 		ProxyCodeService: proxyCodeSvc,
 		TokenRepo:        tokenRepo,
+		SessionService:   sessionSvc,
 		ClientID:         clientID,
 	}
 }
@@ -52,6 +55,7 @@ func (h *GitHubCallbackHandler) ready() bool {
 		h.UserService != nil &&
 		h.ProxyCodeService != nil &&
 		h.TokenRepo != nil &&
+		h.SessionService != nil &&
 		h.ClientID != ""
 }
 

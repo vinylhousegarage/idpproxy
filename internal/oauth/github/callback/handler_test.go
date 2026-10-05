@@ -7,20 +7,17 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
 func TestGitHubCallbackHandler_Serve(t *testing.T) {
-	t.Parallel()
-
 	gin.SetMode(gin.TestMode)
 
 	tokenJSON := loadTestDataJSON(t, "testdata/token_success.json")
 	userJSON := loadTestDataJSON(t, "testdata/user_success.json")
 
 	t.Run("successfully_exchanges_code_saves_token_and_redirects", func(t *testing.T) {
-		t.Parallel()
-
 		httpc := &fakeHTTPClient{
 			tokenJSON: tokenJSON,
 			userJSON:  userJSON,
@@ -32,8 +29,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			proxyCode: "proxycode-123",
 		}
 		tokenRepo := &fakeGitHubTokenRepo{}
+		sessionSvc := &fakeSessionService{}
 
-		h := newHandlerForTest(t, httpc, us, pcs, tokenRepo)
+		h := newHandlerForTest(
+			t,
+			httpc,
+			us,
+			pcs,
+			tokenRepo,
+			sessionSvc,
+		)
 
 		rr, req := newCallbackRequest(
 			t,
@@ -106,8 +111,6 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	})
 
 	t.Run("returns_400_when_state_is_invalid_and_deletes_cookie", func(t *testing.T) {
-		t.Parallel()
-
 		httpc := &fakeHTTPClient{
 			tokenJSON: tokenJSON,
 			userJSON:  userJSON,
@@ -119,8 +122,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			proxyCode: "proxycode-123",
 		}
 		tokenRepo := &fakeGitHubTokenRepo{}
+		sessionSvc := &fakeSessionService{}
 
-		h := newHandlerForTest(t, httpc, us, pcs, tokenRepo)
+		h := newHandlerForTest(
+			t,
+			httpc,
+			us,
+			pcs,
+			tokenRepo,
+			sessionSvc,
+		)
 
 		rr, req := newCallbackRequest(
 			t,
@@ -160,8 +171,6 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	})
 
 	t.Run("returns_502_when_token_exchange_fails", func(t *testing.T) {
-		t.Parallel()
-
 		httpc := &fakeHTTPClient{
 			tokenJSON:     tokenJSON,
 			userJSON:      userJSON,
@@ -174,8 +183,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			proxyCode: "proxycode-123",
 		}
 		tokenRepo := &fakeGitHubTokenRepo{}
+		sessionSvc := &fakeSessionService{}
 
-		h := newHandlerForTest(t, httpc, us, pcs, tokenRepo)
+		h := newHandlerForTest(
+			t,
+			httpc,
+			us,
+			pcs,
+			tokenRepo,
+			sessionSvc,
+		)
 
 		rr, req := newCallbackRequest(
 			t,
@@ -213,8 +230,6 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 	})
 
 	t.Run("returns_500_when_GitHub_token_save_fails", func(t *testing.T) {
-		t.Parallel()
-
 		httpc := &fakeHTTPClient{
 			tokenJSON: tokenJSON,
 			userJSON:  userJSON,
@@ -228,8 +243,16 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 		tokenRepo := &fakeGitHubTokenRepo{
 			err: errors.New("Firestore unavailable"),
 		}
+		sessionSvc := &fakeSessionService{}
 
-		h := newHandlerForTest(t, httpc, us, pcs, tokenRepo)
+		h := newHandlerForTest(
+			t,
+			httpc,
+			us,
+			pcs,
+			tokenRepo,
+			sessionSvc,
+		)
 
 		rr, req := newCallbackRequest(
 			t,
