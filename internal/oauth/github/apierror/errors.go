@@ -25,5 +25,6 @@ var (
 	// internal
 	ErrInternalServerError = errors.New(string(ErrorCodeInternalServerError))
 	ErrProxyCodeIssue      = errors.New(string(ErrorCodeProxyCodeIssue))
+	ErrSessionStart        = errors.New(string(ErrorCodeSessionStart))
 	ErrUserUpsert          = errors.New(string(ErrorCodeUserUpsert))
 )
