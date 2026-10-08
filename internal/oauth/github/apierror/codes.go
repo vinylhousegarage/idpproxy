@@ -23,5 +23,6 @@ const (
 	// internal
 	ErrorCodeInternalServerError ErrorCode = "internal_server_error"
 	ErrorCodeProxyCodeIssue      ErrorCode = "proxy_code_issue_failed"
+	ErrorCodeSessionStart        ErrorCode = "session_start_failed"
 	ErrorCodeUserUpsert          ErrorCode = "user_upsert_failed"
 )
