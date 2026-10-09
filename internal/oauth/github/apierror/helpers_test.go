@@ -96,6 +96,12 @@ func TestAPIErrors(t *testing.T) {
 			expectedStatus: http.StatusInternalServerError,
 		},
 		{
+			name:           "SessionStartError",
+			fn:             SessionStartError,
+			expectedCode:   ErrorCodeSessionStart,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
 			name:           "UserUpsertError",
 			fn:             UserUpsertError,
 			expectedCode:   ErrorCodeUserUpsert,
