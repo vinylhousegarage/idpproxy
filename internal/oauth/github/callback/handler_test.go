@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 )
 
@@ -29,7 +31,22 @@ func TestGitHubCallbackHandler_Serve(t *testing.T) {
 			proxyCode: "proxycode-123",
 		}
 		tokenRepo := &fakeGitHubTokenRepo{}
-		sessionSvc := &fakeSessionService{}
+		sessionSvc := &fakeSessionService{
+			session: &authsession.Session{
+				SessionID: "session-123",
+				UserID:    "user-internal-123",
+				ExpiresAt: time.Date(
+					2026,
+					time.October,
+					6,
+					0,
+					0,
+					0,
+					0,
+					time.UTC,
+				),
+			},
+		}
 
 		h := newHandlerForTest(
 			t,
