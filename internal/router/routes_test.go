@@ -1,16 +1,27 @@
 package router
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 )
+
+type fakeSessionValidator struct{}
+
+func (fakeSessionValidator) Validate(
+	_ context.Context,
+	_ string,
+) (*authsession.Session, error) {
+	return nil, nil
+}
 
 func TestRegisterRoutes(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -56,17 +67,32 @@ func TestRegisterRoutes(t *testing.T) {
 			},
 		)
 	})
+
+	t.Run("panics_when_session_validator_is_missing", func(t *testing.T) {
+		r := gin.New()
+		d := testRouterDeps()
+		d.SessionValidator = nil
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
 }
 
 func testRouterDeps() RouterDeps {
 	return RouterDeps{
-		GitHubAPI:      &deps.GitHubAPIDependencies{},
-		GitHubOAuth:    &deps.GitHubOAuthDependencies{},
-		GitHubCallback: &callback.GitHubCallbackHandler{},
-		GitHubMe:       &githubme.GitHubMeHandler{},
-		Google:         &deps.GoogleDependencies{},
-		Logger:         zap.NewNop(),
-		System:         &deps.SystemDependencies{},
+		GitHubAPI:        &deps.GitHubAPIDependencies{},
+		GitHubOAuth:      &deps.GitHubOAuthDependencies{},
+		GitHubCallback:   &callback.GitHubCallbackHandler{},
+		GitHubMe:         &githubme.GitHubMeHandler{},
+		SessionValidator: fakeSessionValidator{},
+		Google:           &deps.GoogleDependencies{},
+		Logger:           zap.NewNop(),
+		System:           &deps.SystemDependencies{},
 	}
 }
 

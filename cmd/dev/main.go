@@ -220,6 +220,7 @@ func main() {
 		githubOAuthDeps,
 		githubCallbackHandler,
 		githubMeHandler,
+		sessionUsecase,
 		googleDeps,
 		logger,
 		systemDeps,

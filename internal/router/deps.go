@@ -5,20 +5,22 @@ import (
 
 	"go.uber.org/zap"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 )
 
 type RouterDeps struct {
-	FS             fs.FS
-	GitHubAPI      *deps.GitHubAPIDependencies
-	GitHubOAuth    *deps.GitHubOAuthDependencies
-	GitHubCallback *callback.GitHubCallbackHandler
-	GitHubMe       *githubme.GitHubMeHandler
-	Google         *deps.GoogleDependencies
-	Logger         *zap.Logger
-	System         *deps.SystemDependencies
+	FS               fs.FS
+	GitHubAPI        *deps.GitHubAPIDependencies
+	GitHubOAuth      *deps.GitHubOAuthDependencies
+	GitHubCallback   *callback.GitHubCallbackHandler
+	GitHubMe         *githubme.GitHubMeHandler
+	SessionValidator authsession.SessionValidator
+	Google           *deps.GoogleDependencies
+	Logger           *zap.Logger
+	System           *deps.SystemDependencies
 }
 
 func NewRouterDeps(
@@ -27,18 +29,20 @@ func NewRouterDeps(
 	githubOAuth *deps.GitHubOAuthDependencies,
 	githubCallback *callback.GitHubCallbackHandler,
 	githubMe *githubme.GitHubMeHandler,
+	sessionValidator authsession.SessionValidator,
 	google *deps.GoogleDependencies,
 	logger *zap.Logger,
 	system *deps.SystemDependencies,
 ) RouterDeps {
 	return RouterDeps{
-		FS:             fsys,
-		GitHubAPI:      githubAPI,
-		GitHubOAuth:    githubOAuth,
-		GitHubCallback: githubCallback,
-		GitHubMe:       githubMe,
-		Google:         google,
-		Logger:         logger,
-		System:         system,
+		FS:               fsys,
+		GitHubAPI:        githubAPI,
+		GitHubOAuth:      githubOAuth,
+		GitHubCallback:   githubCallback,
+		GitHubMe:         githubMe,
+		SessionValidator: sessionValidator,
+		Google:           google,
+		Logger:           logger,
+		System:           system,
 	}
 }

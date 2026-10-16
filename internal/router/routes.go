@@ -20,6 +20,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		d.GitHubOAuth == nil ||
 		d.GitHubCallback == nil ||
 		d.GitHubMe == nil ||
+		d.SessionValidator == nil ||
 		d.Google == nil ||
 		d.Logger == nil ||
 		d.System == nil {
@@ -44,7 +45,11 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 	login.RegisterRoutes(r, d.GitHubOAuth)
 	callback.RegisterRoutes(r, d.GitHubCallback)
 	user.RegisterRoutes(r, d.GitHubAPI)
-	githubme.RegisterRoutes(r, d.GitHubMe)
+	githubme.RegisterRoutes(
+		r,
+		d.GitHubMe,
+		d.SessionValidator,
+	)
 
 	// Google
 	loginfirebase.RegisterRoutes(r, d.Google)
