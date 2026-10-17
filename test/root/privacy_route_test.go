@@ -25,6 +25,7 @@ func TestPrivacyPolicyPage(t *testing.T) {
 	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
 	googleDeps := testhelpers.NewMockGoogleDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
+	sessionValidator := testhelpers.NewMockSessionValidator()
 
 	d := router.NewRouterDeps(
 		public.PublicFS,
@@ -32,6 +33,7 @@ func TestPrivacyPolicyPage(t *testing.T) {
 		githubOAuthDeps,
 		&githubcallback.GitHubCallbackHandler{},
 		&githubme.GitHubMeHandler{},
+		sessionValidator,
 		googleDeps,
 		logger,
 		systemDeps,

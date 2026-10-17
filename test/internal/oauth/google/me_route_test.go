@@ -57,6 +57,7 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
 	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
 	systemDeps := testhelpers.NewMockSystemDeps(logger)
+	sessionValidator := testhelpers.NewMockSessionValidator()
 
 	d := router.NewRouterDeps(
 		public.PublicFS,
@@ -64,6 +65,7 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 		githubOAuthDeps,
 		&githubcallback.GitHubCallbackHandler{},
 		&githubme.GitHubMeHandler{},
+		sessionValidator,
 		googleDeps,
 		logger,
 		systemDeps,
