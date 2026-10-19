@@ -49,7 +49,7 @@ func (s *Service) Consume(
 	ctx context.Context,
 	proxyCode string,
 	clientID string,
-) (string, error) {
+) (authcode.ProxyCode, error) {
 	return s.store.Consume(ctx, proxyCode, clientID)
 }
 

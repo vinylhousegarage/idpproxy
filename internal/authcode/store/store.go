@@ -7,6 +7,14 @@ import (
 )
 
 type Store interface {
-	Save(ctx context.Context, proxyCode authcode.ProxyCode) error
-	Consume(ctx context.Context, proxyCodeValue, clientID string) (string, error)
+	Save(
+		ctx context.Context,
+		proxyCode authcode.ProxyCode,
+	) error
+
+	Consume(
+		ctx context.Context,
+		proxyCodeValue string,
+		clientID string,
+	) (authcode.ProxyCode, error)
 }

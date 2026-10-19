@@ -27,26 +27,30 @@ func (s *MemoryStore) Save(ctx context.Context, proxyCode authcode.ProxyCode) er
 	return nil
 }
 
-func (s *MemoryStore) Consume(ctx context.Context, proxyCodeValue, clientID string) (string, error) {
+func (s *MemoryStore) Consume(
+	ctx context.Context,
+	proxyCodeValue string,
+	clientID string,
+) (authcode.ProxyCode, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	pc, ok := s.proxyCodes[proxyCodeValue]
 	if !ok {
-		return "", ErrNotFound
+		return authcode.ProxyCode{}, ErrNotFound
 	}
 
 	if pc.ClientID != clientID {
-		return "", ErrClientMismatch
+		return authcode.ProxyCode{}, ErrClientMismatch
 	}
 
 	if time.Now().After(pc.ExpiresAt) {
 		delete(s.proxyCodes, proxyCodeValue)
 
-		return "", ErrExpired
+		return authcode.ProxyCode{}, ErrExpired
 	}
 
 	delete(s.proxyCodes, proxyCodeValue)
 
-	return pc.UserID, nil
+	return pc, nil
 }

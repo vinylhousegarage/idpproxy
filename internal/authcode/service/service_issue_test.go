@@ -25,7 +25,7 @@ func (f *fakeIssueStore) Consume(
 	ctx context.Context,
 	proxyCode string,
 	clientID string,
-) (string, error) {
+) (authcode.ProxyCode, error) {
 	panic("not used")
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/vinylhousegarage/idpproxy/internal/authcode"
 )
@@ -12,26 +13,27 @@ type fakeConsumeStore struct {
 	called   bool
 	gotCode  string
 	gotCID   string
-	retUID   string
+	retCode  authcode.ProxyCode
 	retError error
 }
 
 func (f *fakeConsumeStore) Save(
-	ctx context.Context,
-	proxyCode authcode.ProxyCode,
+	context.Context,
+	authcode.ProxyCode,
 ) error {
 	panic("not used")
 }
 
 func (f *fakeConsumeStore) Consume(
-	ctx context.Context,
+	_ context.Context,
 	proxyCode string,
 	clientID string,
-) (string, error) {
+) (authcode.ProxyCode, error) {
 	f.called = true
 	f.gotCode = proxyCode
 	f.gotCID = clientID
-	return f.retUID, f.retError
+
+	return f.retCode, f.retError
 }
 
 func TestService_Consume(t *testing.T) {
@@ -39,52 +41,51 @@ func TestService_Consume(t *testing.T) {
 
 	ctx := context.Background()
 
-	t.Run("success_returns_user_id", func(t *testing.T) {
+	t.Run("success_returns_proxy_code", func(t *testing.T) {
 		t.Parallel()
 
-		store := &fakeConsumeStore{
-			retUID:   "user-123",
-			retError: nil,
+		want := authcode.ProxyCode{
+			Code:      "code-abc",
+			UserID:    "user-123",
+			ClientID:  "client-xyz",
+			ExpiresAt: time.Date(2026, time.October, 19, 1, 0, 0, 0, time.UTC),
 		}
+		store := &fakeConsumeStore{retCode: want}
 		svc := &Service{store: store}
 
-		uid, err := svc.Consume(ctx, "code-abc", "client-xyz")
+		got, err := svc.Consume(ctx, "code-abc", "client-xyz")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if uid != "user-123" {
-			t.Fatalf("unexpected uid: got=%s", uid)
+		if got != want {
+			t.Fatalf("Consume() = %#v, want %#v", got, want)
 		}
 
 		if !store.called {
-			t.Fatalf("store.Consume was not called")
+			t.Fatal("store.Consume was not called")
 		}
 		if store.gotCode != "code-abc" {
-			t.Fatalf("unexpected code: got=%s", store.gotCode)
+			t.Fatalf("code = %q, want %q", store.gotCode, "code-abc")
 		}
 		if store.gotCID != "client-xyz" {
-			t.Fatalf("unexpected clientID: got=%s", store.gotCID)
+			t.Fatalf("clientID = %q, want %q", store.gotCID, "client-xyz")
 		}
 	})
 
-	t.Run("error_is_propagated", func(t *testing.T) {
+	t.Run("propagates_error", func(t *testing.T) {
 		t.Parallel()
 
 		wantErr := errors.New("invalid code")
-		store := &fakeConsumeStore{
-			retError: wantErr,
-		}
+		store := &fakeConsumeStore{retError: wantErr}
 		svc := &Service{store: store}
 
-		uid, err := svc.Consume(ctx, "bad-code", "client-xyz")
-		if err == nil {
-			t.Fatalf("expected error, got nil")
-		}
+		got, err := svc.Consume(ctx, "bad-code", "client-xyz")
+
 		if err != wantErr {
-			t.Fatalf("unexpected error: %v", err)
+			t.Fatalf("error = %v, want %v", err, wantErr)
 		}
-		if uid != "" {
-			t.Fatalf("unexpected uid: got=%s", uid)
+		if got != (authcode.ProxyCode{}) {
+			t.Fatalf("Consume() = %#v, want zero ProxyCode", got)
 		}
 	})
 }
