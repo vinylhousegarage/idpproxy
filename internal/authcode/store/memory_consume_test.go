@@ -32,7 +32,7 @@ func TestMemoryStore_Consume(t *testing.T) {
 			Code:      "code-expired",
 			UserID:    "user-1",
 			ClientID:  "client-1",
-			ExpiresAt: time.Now().Add(-1 * time.Minute),
+			ExpiresAt: time.Now().Add(-time.Minute),
 		}
 
 		_ = s.Save(ctx, pc)
@@ -48,7 +48,7 @@ func TestMemoryStore_Consume(t *testing.T) {
 		}
 	})
 
-	t.Run("returns ErrClientMismatch and does not delete code when client id does not match", func(t *testing.T) {
+	t.Run("returns ErrClientMismatch and does not delete code when client ID does not match", func(t *testing.T) {
 		t.Parallel()
 
 		s := NewMemoryStore()
@@ -66,12 +66,12 @@ func TestMemoryStore_Consume(t *testing.T) {
 			t.Fatalf("expected ErrClientMismatch, got %v", err)
 		}
 
-		uid, err := s.Consume(ctx, "code-client", "client-1")
+		got, err := s.Consume(ctx, "code-client", "client-1")
 		if err != nil {
 			t.Fatalf("expected success after mismatch, got %v", err)
 		}
-		if uid != "user-1" {
-			t.Fatalf("unexpected user id: %s", uid)
+		if got != pc {
+			t.Fatalf("Consume() = %#v, want %#v", got, pc)
 		}
 	})
 
@@ -88,12 +88,12 @@ func TestMemoryStore_Consume(t *testing.T) {
 
 		_ = s.Save(ctx, pc)
 
-		uid, err := s.Consume(ctx, "code-ok", "client-1")
+		got, err := s.Consume(ctx, "code-ok", "client-1")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if uid != "user-1" {
-			t.Fatalf("unexpected user id: %s", uid)
+		if got != pc {
+			t.Fatalf("Consume() = %#v, want %#v", got, pc)
 		}
 
 		_, err = s.Consume(ctx, "code-ok", "client-1")
