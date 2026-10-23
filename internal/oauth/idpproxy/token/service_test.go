@@ -2,9 +2,11 @@ package token
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 )
 
 type fixedClock struct {
@@ -20,43 +22,47 @@ type mockStore struct {
 	err  error
 }
 
-func (m *mockStore) Consume(ctx context.Context, code, clientID string) (*AuthCode, error) {
+func (m *mockStore) Consume(
+	_ context.Context,
+	_ string,
+	_ string,
+) (*AuthCode, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+
 	return m.code, nil
+}
+
+type mockIDTokenIssuer struct {
+	called bool
+	input  *idtoken.IDTokenInput
+	token  string
+	err    error
+}
+
+func (m *mockIDTokenIssuer) Issue(
+	_ context.Context,
+	in *idtoken.IDTokenInput,
+) (string, string, error) {
+	m.called = true
+	m.input = in
+
+	if m.err != nil {
+		return "", "", m.err
+	}
+
+	return m.token, "test-key-id", nil
 }
 
 func newTestService() *Service {
 	return &Service{
 		Store: &mockStore{err: ErrInvalidGrant},
 		Clock: fixedClock{t: time.Now()},
-	}
-}
-
-func newTestServiceWithExpiredCode() *Service {
-	return &Service{
-		Store: &mockStore{
-			code: &AuthCode{
-				UserID:    "user1",
-				ClientID:  "client-1",
-				ExpiresAt: time.Now().Add(-time.Hour),
-			},
+		IDTokenIssuer: &mockIDTokenIssuer{
+			token: "signed-id-token",
 		},
-		Clock: fixedClock{t: time.Now()},
-	}
-}
-
-func newTestServiceWithValidCode() *Service {
-	return &Service{
-		Store: &mockStore{
-			code: &AuthCode{
-				UserID:    "user1",
-				ClientID:  "client-1",
-				ExpiresAt: time.Now().Add(time.Hour),
-			},
-		},
-		Clock: fixedClock{t: time.Now()},
+		IDTokenTTL: time.Hour,
 	}
 }
 
@@ -64,8 +70,24 @@ func TestService_Exchange(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
+	now := time.Date(
+		2026,
+		time.October,
+		23,
+		0,
+		0,
+		0,
+		0,
+		time.UTC,
+	)
 
-	t.Run("unsupported grant_type returns ErrUnsupportedGrantType", func(t *testing.T) {
+	validRequest := TokenRequest{
+		GrantType: "authorization_code",
+		Code:      "valid-code",
+		ClientID:  "client-1",
+	}
+
+	t.Run("unsupported grant type returns ErrUnsupportedGrantType", func(t *testing.T) {
 		t.Parallel()
 
 		svc := newTestService()
@@ -74,8 +96,12 @@ func TestService_Exchange(t *testing.T) {
 			GrantType: "password",
 		})
 
-		if err != ErrUnsupportedGrantType {
-			t.Fatalf("expected ErrUnsupportedGrantType, got %v", err)
+		if !errors.Is(err, ErrUnsupportedGrantType) {
+			t.Fatalf(
+				"error = %v, want %v",
+				err,
+				ErrUnsupportedGrantType,
+			)
 		}
 	})
 
@@ -84,58 +110,69 @@ func TestService_Exchange(t *testing.T) {
 
 		svc := newTestService()
 
-		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType: "authorization_code",
-			Code:      "no-such-code",
-			ClientID:  "client-1",
-		})
+		_, err := svc.Exchange(ctx, validRequest)
 
-		if err != ErrInvalidGrant {
-			t.Fatalf("expected ErrInvalidGrant, got %v", err)
+		if !errors.Is(err, ErrInvalidGrant) {
+			t.Fatalf("error = %v, want %v", err, ErrInvalidGrant)
 		}
 	})
 
 	t.Run("expired auth code returns ErrInvalidGrant", func(t *testing.T) {
 		t.Parallel()
 
-		svc := newTestServiceWithExpiredCode()
+		issuer := &mockIDTokenIssuer{
+			token: "signed-id-token",
+		}
+		svc := &Service{
+			Store: &mockStore{
+				code: &AuthCode{
+					UserID:    "user1",
+					ClientID:  "client-1",
+					ExpiresAt: now.Add(-time.Hour),
+				},
+			},
+			Clock:         fixedClock{t: now},
+			IDTokenIssuer: issuer,
+			IDTokenTTL:    time.Hour,
+		}
 
-		_, err := svc.Exchange(ctx, TokenRequest{
-			GrantType: "authorization_code",
-			Code:      "expired-code",
-			ClientID:  "client-1",
-		})
+		_, err := svc.Exchange(ctx, validRequest)
 
-		if err != ErrInvalidGrant {
-			t.Fatalf("expected ErrInvalidGrant, got %v", err)
+		if !errors.Is(err, ErrInvalidGrant) {
+			t.Fatalf("error = %v, want %v", err, ErrInvalidGrant)
+		}
+		if issuer.called {
+			t.Fatal("ID token issuer must not be called for an expired code")
 		}
 	})
 
-	t.Run("valid request returns id_token", func(t *testing.T) {
+	t.Run("auth code expiring now returns ErrInvalidGrant", func(t *testing.T) {
 		t.Parallel()
 
-		svc := newTestServiceWithValidCode()
-
-		resp, err := svc.Exchange(ctx, TokenRequest{
-			GrantType: "authorization_code",
-			Code:      "valid-code",
-			ClientID:  "client-1",
-		})
-
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+		issuer := &mockIDTokenIssuer{
+			token: "signed-id-token",
+		}
+		svc := &Service{
+			Store: &mockStore{
+				code: &AuthCode{
+					UserID:    "user1",
+					ClientID:  "client-1",
+					ExpiresAt: now,
+				},
+			},
+			Clock:         fixedClock{t: now},
+			IDTokenIssuer: issuer,
+			IDTokenTTL:    time.Hour,
 		}
 
-		if resp == nil {
-			t.Fatal("response should not be nil")
-		}
+		_, err := svc.Exchange(ctx, validRequest)
 
-		if resp.IDToken == "" {
-			t.Fatal("id_token should not be empty")
+		if !errors.Is(err, ErrInvalidGrant) {
+			t.Fatalf("error = %v, want %v", err, ErrInvalidGrant)
 		}
-
-		if !strings.Contains(resp.IDToken, "user1") {
-			t.Fatalf("id_token should contain user info")
+		if issuer.called {
+			t.Fatal("ID token issuer must not be called for an expired code")
 		}
 	})
 }
+a
