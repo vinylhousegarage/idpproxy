@@ -23,21 +23,35 @@ func TestTokenHandler(t *testing.T) {
 	t.Run("success returns 200 and id_token response", func(t *testing.T) {
 		t.Parallel()
 
+		now := time.Now()
+
 		svc := &Service{
 			Store: &mockStore{
 				code: &AuthCode{
 					UserID:    "user1",
 					ClientID:  "client-1",
-					ExpiresAt: time.Now().Add(time.Hour),
+					ExpiresAt: now.Add(time.Hour),
 				},
 			},
-			Clock: fixedClock{t: time.Now()},
+			Clock: fixedClock{t: now},
+			IDTokenIssuer: &mockIDTokenIssuer{
+				token: "signed-id-token",
+			},
+			IDTokenTTL: time.Hour,
 		}
 
 		handler := NewHandler(svc, zap.NewNop())
 
-		body, _ := json.Marshal(validReq)
-		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
+		body, err := json.Marshal(validReq)
+		if err != nil {
+			t.Fatalf("marshal request: %v", err)
+		}
+
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/token",
+			bytes.NewReader(body),
+		)
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)
@@ -51,8 +65,12 @@ func TestTokenHandler(t *testing.T) {
 			t.Fatalf("decode error: %v", err)
 		}
 
-		if resp.IDToken == "" {
-			t.Fatal("id_token should not be empty")
+		if resp.IDToken != "signed-id-token" {
+			t.Fatalf(
+				"id_token = %q, want %q",
+				resp.IDToken,
+				"signed-id-token",
+			)
 		}
 	})
 
@@ -62,8 +80,16 @@ func TestTokenHandler(t *testing.T) {
 		svc := newTestService()
 		handler := NewHandler(svc, zap.NewNop())
 
-		body, _ := json.Marshal(validReq)
-		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
+		body, err := json.Marshal(validReq)
+		if err != nil {
+			t.Fatalf("marshal request: %v", err)
+		}
+
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/token",
+			bytes.NewReader(body),
+		)
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)
@@ -88,7 +114,11 @@ func TestTokenHandler(t *testing.T) {
 		svc := newTestService()
 		handler := NewHandler(svc, zap.NewNop())
 
-		req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewBufferString("{bad json"))
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/token",
+			bytes.NewBufferString("{bad json"),
+		)
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)
