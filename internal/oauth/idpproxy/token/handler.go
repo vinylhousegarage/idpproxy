@@ -2,6 +2,7 @@ package token
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -23,23 +24,27 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req TokenRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.Logger.Warn("invalid token request",
+		h.Logger.Warn(
+			"invalid token request",
 			zap.Error(err),
 		)
 
 		http.Error(w, "invalid request", http.StatusBadRequest)
+
 		return
 	}
 
 	resp, err := h.Service.Exchange(r.Context(), req)
 	if err != nil {
-		h.Logger.Warn("token exchange failed",
+		h.Logger.Warn(
+			"token exchange failed",
 			zap.String("client_id", req.ClientID),
 			zap.String("grant_type", req.GrantType),
 			zap.Error(err),
 		)
 
 		writeOAuthError(w, err)
+
 		return
 	}
 
@@ -47,10 +52,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		h.Logger.Error("encode token response failed",
+		h.Logger.Error(
+			"encode token response failed",
 			zap.Error(err),
 		)
-		return
 	}
 }
 
@@ -61,18 +66,21 @@ func writeOAuthError(w http.ResponseWriter, err error) {
 		Error string `json:"error"`
 	}
 
-	code := "invalid_request"
+	status := http.StatusBadRequest
+	var code string
 
-	switch err {
-	case ErrUnsupportedGrantType:
+	switch {
+	case errors.Is(err, ErrUnsupportedGrantType):
 		code = "unsupported_grant_type"
-	case ErrInvalidClient:
+	case errors.Is(err, ErrInvalidClient):
 		code = "invalid_client"
-	case ErrInvalidGrant:
+	case errors.Is(err, ErrInvalidGrant):
 		code = "invalid_grant"
+	default:
+		status = http.StatusInternalServerError
+		code = "server_error"
 	}
 
-	w.WriteHeader(http.StatusBadRequest)
-
+	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(oauthErr{Error: code})
 }
