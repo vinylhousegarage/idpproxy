@@ -14,6 +14,7 @@ import (
 	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/response"
+	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -140,6 +141,7 @@ func newGitHubMeRouter(
 		&githubcallback.GitHubCallbackHandler{},
 		githubme.NewGitHubMeHandler(service),
 		validator,
+		&idpproxytoken.Handler{},
 		testhelpers.NewMockGoogleDeps(logger),
 		logger,
 		testhelpers.NewMockSystemDeps(logger),

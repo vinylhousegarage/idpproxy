@@ -12,6 +12,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
+	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 )
 
 type fakeSessionValidator struct{}
@@ -26,7 +27,7 @@ func (fakeSessionValidator) Validate(
 func TestRegisterRoutes(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("registers_GitHub_callback_route", func(t *testing.T) {
+	t.Run("registers GitHub callback route", func(t *testing.T) {
 		r := gin.New()
 
 		require.NotPanics(t, func() {
@@ -40,7 +41,21 @@ func TestRegisterRoutes(t *testing.T) {
 		)
 	})
 
-	t.Run("panics_when_GitHub_callback_handler_is_missing", func(t *testing.T) {
+	t.Run("registers IDP proxy token route", func(t *testing.T) {
+		r := gin.New()
+
+		require.NotPanics(t, func() {
+			RegisterRoutes(r, testRouterDeps())
+		})
+
+		require.True(
+			t,
+			hasRoute(r.Routes(), "POST", "/oauth/token"),
+			"IDP proxy token route was not registered",
+		)
+	})
+
+	t.Run("panics when GitHub callback handler is missing", func(t *testing.T) {
 		r := gin.New()
 		d := testRouterDeps()
 		d.GitHubCallback = nil
@@ -54,7 +69,7 @@ func TestRegisterRoutes(t *testing.T) {
 		)
 	})
 
-	t.Run("panics_when_GitHub_me_handler_is_missing", func(t *testing.T) {
+	t.Run("panics when GitHub me handler is missing", func(t *testing.T) {
 		r := gin.New()
 		d := testRouterDeps()
 		d.GitHubMe = nil
@@ -68,10 +83,24 @@ func TestRegisterRoutes(t *testing.T) {
 		)
 	})
 
-	t.Run("panics_when_session_validator_is_missing", func(t *testing.T) {
+	t.Run("panics when session validator is missing", func(t *testing.T) {
 		r := gin.New()
 		d := testRouterDeps()
 		d.SessionValidator = nil
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
+
+	t.Run("panics when IDP proxy token handler is missing", func(t *testing.T) {
+		r := gin.New()
+		d := testRouterDeps()
+		d.IDPProxyToken = nil
 
 		require.PanicsWithValue(
 			t,
@@ -90,6 +119,7 @@ func testRouterDeps() RouterDeps {
 		GitHubCallback:   &callback.GitHubCallbackHandler{},
 		GitHubMe:         &githubme.GitHubMeHandler{},
 		SessionValidator: fakeSessionValidator{},
+		IDPProxyToken:    &idpproxytoken.Handler{},
 		Google:           &deps.GoogleDependencies{},
 		Logger:           zap.NewNop(),
 		System:           &deps.SystemDependencies{},
