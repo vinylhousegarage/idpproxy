@@ -10,8 +10,10 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 
+	authidtoken "github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	firesessionstore "github.com/vinylhousegarage/idpproxy/internal/auth/sessionstore/firestore"
+	authsigner "github.com/vinylhousegarage/idpproxy/internal/auth/signer"
 	authuser "github.com/vinylhousegarage/idpproxy/internal/auth/user"
 	authcodeservice "github.com/vinylhousegarage/idpproxy/internal/authcode/service"
 	authcodestore "github.com/vinylhousegarage/idpproxy/internal/authcode/store"
@@ -22,6 +24,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
+	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 	"github.com/vinylhousegarage/idpproxy/public"
@@ -50,6 +53,24 @@ func main() {
 			"failed to load Firebase config",
 			zap.Error(err),
 		)
+	}
+
+	idTokenCfg, err := config.LoadIDTokenConfig()
+	if err != nil {
+		logger.Fatal(
+			"failed to load ID token config",
+			zap.Error(err),
+		)
+	}
+
+	idTokenHMACSigner := authsigner.NewHMACSigner(
+		idTokenCfg.HMACKey,
+		idTokenCfg.HMACKeyID,
+	)
+
+	idTokenIssuer := &authidtoken.IssueIDTokenUsecase{
+		Issuer: idTokenCfg.Issuer,
+		Signer: authidtoken.NewHMACSignerAdapter(idTokenHMACSigner),
 	}
 
 	app, err := firebaseutil.NewFirebaseApp(
@@ -194,8 +215,26 @@ func main() {
 
 	githubUserService := authuser.NewService(authClient)
 
+	proxyCodeStore := authcodestore.NewMemoryStore()
+
 	proxyCodeService := authcodeservice.NewService(
-		authcodestore.NewMemoryStore(),
+		proxyCodeStore,
+	)
+
+	tokenAuthCodeStore := idpproxytoken.NewAuthCodeServiceAdapter(
+		proxyCodeService,
+	)
+
+	tokenService := &idpproxytoken.Service{
+		Store:         tokenAuthCodeStore,
+		Clock:         idpproxytoken.SystemClock{},
+		IDTokenIssuer: idTokenIssuer,
+		IDTokenTTL:    idTokenCfg.TTL,
+	}
+
+	tokenHandler := idpproxytoken.NewHandler(
+		tokenService,
+		logger,
 	)
 
 	githubCallbackHandler := callback.NewGitHubCallbackHandler(
@@ -221,6 +260,7 @@ func main() {
 		githubCallbackHandler,
 		githubMeHandler,
 		sessionUsecase,
+		tokenHandler,
 		googleDeps,
 		logger,
 		systemDeps,

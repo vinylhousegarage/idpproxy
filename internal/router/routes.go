@@ -21,6 +21,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		d.GitHubCallback == nil ||
 		d.GitHubMe == nil ||
 		d.SessionValidator == nil ||
+		d.IDPProxyToken == nil ||
 		d.Google == nil ||
 		d.Logger == nil ||
 		d.System == nil {
@@ -50,6 +51,9 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		d.GitHubMe,
 		d.SessionValidator,
 	)
+
+	// IDP Proxy
+	r.POST("/oauth/token", gin.WrapH(d.IDPProxyToken))
 
 	// Google
 	loginfirebase.RegisterRoutes(r, d.Google)
