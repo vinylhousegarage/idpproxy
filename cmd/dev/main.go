@@ -16,7 +16,7 @@ import (
 	authsigner "github.com/vinylhousegarage/idpproxy/internal/auth/signer"
 	authuser "github.com/vinylhousegarage/idpproxy/internal/auth/user"
 	authcodeservice "github.com/vinylhousegarage/idpproxy/internal/authcode/service"
-	authcodestore "github.com/vinylhousegarage/idpproxy/internal/authcode/store"
+	fireauthcodestore "github.com/vinylhousegarage/idpproxy/internal/authcode/store/firestore"
 	"github.com/vinylhousegarage/idpproxy/internal/config"
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	firebaseutil "github.com/vinylhousegarage/idpproxy/internal/firebase"
@@ -31,9 +31,10 @@ import (
 )
 
 const (
-	sessionCollectionName = "sessions"
-	sessionTTL            = 24 * time.Hour
-	sessionIDBytes        = 32
+	proxyCodeCollectionName = "proxy_codes"
+	sessionCollectionName   = "sessions"
+	sessionTTL              = 24 * time.Hour
+	sessionIDBytes          = 32
 )
 
 func main() {
@@ -215,7 +216,10 @@ func main() {
 
 	githubUserService := authuser.NewService(authClient)
 
-	proxyCodeStore := authcodestore.NewMemoryStore()
+	proxyCodeStore := fireauthcodestore.NewRepository(
+		firestoreClient,
+		proxyCodeCollectionName,
+	)
 
 	proxyCodeService := authcodeservice.NewService(
 		proxyCodeStore,

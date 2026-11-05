@@ -33,9 +33,9 @@ jobs:
       - name: Ensure netcat
         run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
 
-      - name: Start Firestore emulator (Java21 base)
+      - name: Start Firestore emulator (Java25 base)
         run: |
-          docker run -d --name fs-emu -p 9010:8080 eclipse-temurin:21-jre \
+          docker run -d --name fs-emu -p 9010:8080 eclipse-temurin:25-jre \
             bash -lc "set -euo pipefail
                       apt-get update
                       apt-get install -y curl gnupg
