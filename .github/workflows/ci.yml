@@ -51,7 +51,6 @@ jobs:
         run: |
           for i in {1..180}; do
             if nc -z 127.0.0.1 9010; then
-              # 少し余裕
               sleep 2
               exit 0
             fi
