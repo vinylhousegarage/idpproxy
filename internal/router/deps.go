@@ -10,6 +10,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 )
 
 type RouterDeps struct {
@@ -20,6 +21,7 @@ type RouterDeps struct {
 	GitHubMe         *githubme.GitHubMeHandler
 	SessionValidator authsession.SessionValidator
 	IDPProxyToken    *idpproxytoken.Handler
+	WhoAmI           *whoami.WhoAmIHandler
 	Google           *deps.GoogleDependencies
 	Logger           *zap.Logger
 	System           *deps.SystemDependencies
@@ -33,6 +35,7 @@ func NewRouterDeps(
 	githubMe *githubme.GitHubMeHandler,
 	sessionValidator authsession.SessionValidator,
 	idpProxyToken *idpproxytoken.Handler,
+	whoAmI *whoami.WhoAmIHandler,
 	google *deps.GoogleDependencies,
 	logger *zap.Logger,
 	system *deps.SystemDependencies,
@@ -45,6 +48,7 @@ func NewRouterDeps(
 		GitHubMe:         githubMe,
 		SessionValidator: sessionValidator,
 		IDPProxyToken:    idpProxyToken,
+		WhoAmI:           whoAmI,
 		Google:           google,
 		Logger:           logger,
 		System:           system,

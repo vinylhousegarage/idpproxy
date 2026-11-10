@@ -14,6 +14,7 @@ import (
 	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/public"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
@@ -111,6 +112,7 @@ func newWhoAmIRouter(
 			&idpproxytoken.Service{},
 			logger,
 		),
+		&whoami.WhoAmIHandler{},
 		testhelpers.NewMockGoogleDeps(logger),
 		logger,
 		testhelpers.NewMockSystemDeps(logger),

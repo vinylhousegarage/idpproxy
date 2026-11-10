@@ -13,6 +13,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 )
 
 type fakeSessionValidator struct{}
@@ -52,6 +53,20 @@ func TestRegisterRoutes(t *testing.T) {
 			t,
 			hasRoute(r.Routes(), "POST", "/oauth/token"),
 			"IDP proxy token route was not registered",
+		)
+	})
+
+	t.Run("registers whoami route", func(t *testing.T) {
+		r := gin.New()
+
+		require.NotPanics(t, func() {
+			RegisterRoutes(r, testRouterDeps())
+		})
+
+		require.True(
+			t,
+			hasRoute(r.Routes(), "GET", "/whoami"),
+			"WhoAmI route was not registered",
 		)
 	})
 
@@ -110,6 +125,20 @@ func TestRegisterRoutes(t *testing.T) {
 			},
 		)
 	})
+
+	t.Run("panics when whoami handler is missing", func(t *testing.T) {
+		r := gin.New()
+		d := testRouterDeps()
+		d.WhoAmI = nil
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
 }
 
 func testRouterDeps() RouterDeps {
@@ -120,6 +149,7 @@ func testRouterDeps() RouterDeps {
 		GitHubMe:         &githubme.GitHubMeHandler{},
 		SessionValidator: fakeSessionValidator{},
 		IDPProxyToken:    &idpproxytoken.Handler{},
+		WhoAmI:           &whoami.WhoAmIHandler{},
 		Google:           &deps.GoogleDependencies{},
 		Logger:           zap.NewNop(),
 		System:           &deps.SystemDependencies{},

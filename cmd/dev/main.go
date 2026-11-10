@@ -25,6 +25,7 @@ import (
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
 	"github.com/vinylhousegarage/idpproxy/internal/server"
 	"github.com/vinylhousegarage/idpproxy/public"
@@ -241,6 +242,8 @@ func main() {
 		logger,
 	)
 
+	whoAmIHandler := &whoami.WhoAmIHandler{}
+
 	githubCallbackHandler := callback.NewGitHubCallbackHandler(
 		githubOAuthDeps,
 		githubAPIDeps,
@@ -265,6 +268,7 @@ func main() {
 		githubMeHandler,
 		sessionUsecase,
 		tokenHandler,
+		whoAmIHandler,
 		googleDeps,
 		logger,
 		systemDeps,
