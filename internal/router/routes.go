@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/apierror"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/login"
@@ -22,6 +23,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		d.GitHubMe == nil ||
 		d.SessionValidator == nil ||
 		d.IDPProxyToken == nil ||
+		d.WhoAmI == nil ||
 		d.Google == nil ||
 		d.Logger == nil ||
 		d.System == nil {
@@ -54,6 +56,11 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 
 	// IDP Proxy
 	r.POST("/oauth/token", gin.WrapH(d.IDPProxyToken))
+	r.GET(
+		"/whoami",
+		authsession.RequireSession(d.SessionValidator),
+		d.WhoAmI.Serve,
+	)
 
 	// Google
 	loginfirebase.RegisterRoutes(r, d.Google)
