@@ -8,13 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
-	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
-	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
-	"github.com/vinylhousegarage/idpproxy/public"
-	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
+	"github.com/vinylhousegarage/idpproxy/test/routertest"
 )
 
 func TestTermsPage(t *testing.T) {
@@ -23,25 +18,7 @@ func TestTermsPage(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
-	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
-	googleDeps := testhelpers.NewMockGoogleDeps(logger)
-	systemDeps := testhelpers.NewMockSystemDeps(logger)
-	sessionValidator := testhelpers.NewMockSessionValidator()
-
-	d := router.NewRouterDeps(
-		public.PublicFS,
-		githubAPIDeps,
-		githubOAuthDeps,
-		&githubcallback.GitHubCallbackHandler{},
-		&githubme.GitHubMeHandler{},
-		sessionValidator,
-		&idpproxytoken.Handler{},
-		&whoami.WhoAmIHandler{},
-		googleDeps,
-		logger,
-		systemDeps,
-	)
+	d := routertest.NewMockRouterDeps(logger)
 	r := router.NewRouter(d)
 
 	req := httptest.NewRequest(http.MethodGet, "/terms", nil)

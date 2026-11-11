@@ -12,12 +12,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
-	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
-	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
-	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
-	"github.com/vinylhousegarage/idpproxy/public"
+	"github.com/vinylhousegarage/idpproxy/test/routertest"
 	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
 )
 
@@ -42,8 +38,8 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 	googleDeps := newMockGoogleDepsWithFunc(
 		logger,
 		func(
-			ctx context.Context,
-			idToken string,
+			_ context.Context,
+			_ string,
 		) (*firebaseauth.Token, error) {
 			return &firebaseauth.Token{
 				UID: "test-sub",
@@ -56,24 +52,9 @@ func TestMeRoute_Returns200AndResponse(t *testing.T) {
 		},
 	)
 
-	githubAPIDeps := testhelpers.NewMockGitHubAPIDeps(logger)
-	githubOAuthDeps := testhelpers.NewMockGitHubOAuthDeps(logger)
-	systemDeps := testhelpers.NewMockSystemDeps(logger)
-	sessionValidator := testhelpers.NewMockSessionValidator()
+	d := routertest.NewMockRouterDeps(logger)
+	d.Google = googleDeps
 
-	d := router.NewRouterDeps(
-		public.PublicFS,
-		githubAPIDeps,
-		githubOAuthDeps,
-		&githubcallback.GitHubCallbackHandler{},
-		&githubme.GitHubMeHandler{},
-		sessionValidator,
-		&idpproxytoken.Handler{},
-		&whoami.WhoAmIHandler{},
-		googleDeps,
-		logger,
-		systemDeps,
-	)
 	r := router.NewRouter(d)
 
 	req, err := http.NewRequest(http.MethodGet, "/me", nil)

@@ -16,13 +16,9 @@ import (
 	authidtoken "github.com/vinylhousegarage/idpproxy/internal/auth/idtoken"
 	authcodeservice "github.com/vinylhousegarage/idpproxy/internal/authcode/service"
 	authcodestore "github.com/vinylhousegarage/idpproxy/internal/authcode/store"
-	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
-	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
-	"github.com/vinylhousegarage/idpproxy/public"
-	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
+	"github.com/vinylhousegarage/idpproxy/test/routertest"
 )
 
 type fakeIDTokenIssuer struct {
@@ -171,19 +167,8 @@ func newTokenRouteRouter(
 		logger,
 	)
 
-	d := router.NewRouterDeps(
-		public.PublicFS,
-		testhelpers.NewMockGitHubAPIDeps(logger),
-		testhelpers.NewMockGitHubOAuthDeps(logger),
-		&githubcallback.GitHubCallbackHandler{},
-		&githubme.GitHubMeHandler{},
-		testhelpers.NewMockSessionValidator(),
-		tokenHandler,
-		&whoami.WhoAmIHandler{},
-		testhelpers.NewMockGoogleDeps(logger),
-		logger,
-		testhelpers.NewMockSystemDeps(logger),
-	)
+	d := routertest.NewMockRouterDeps(logger)
+	d.IDPProxyToken = tokenHandler
 
 	return router.NewRouter(d), proxyCodeService, issuer
 }
