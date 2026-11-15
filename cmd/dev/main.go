@@ -260,19 +260,19 @@ func main() {
 		logger,
 	)
 
-	d := router.NewRouterDeps(
-		public.PublicFS,
-		githubAPIDeps,
-		githubOAuthDeps,
-		githubCallbackHandler,
-		githubMeHandler,
-		sessionUsecase,
-		tokenHandler,
-		whoAmIHandler,
-		googleDeps,
-		logger,
-		systemDeps,
-	)
+	d := router.RouterDeps{
+		FS:               public.PublicFS,
+		GitHubAPI:        githubAPIDeps,
+		GitHubOAuth:      githubOAuthDeps,
+		GitHubCallback:   githubCallbackHandler,
+		GitHubMe:         githubMeHandler,
+		SessionValidator: sessionUsecase,
+		IDPProxyToken:    tokenHandler,
+		WhoAmI:           whoAmIHandler,
+		Google:           googleDeps,
+		Logger:           logger,
+		System:           systemDeps,
+	}
 
 	r := router.NewRouter(d)
 
