@@ -11,14 +11,10 @@ import (
 	"go.uber.org/zap"
 
 	authsession "github.com/vinylhousegarage/idpproxy/internal/auth/session"
-	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/response"
-	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
-	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
-	"github.com/vinylhousegarage/idpproxy/public"
-	"github.com/vinylhousegarage/idpproxy/test/testhelpers"
+	"github.com/vinylhousegarage/idpproxy/test/routertest"
 )
 
 type fakeGitHubMeService struct {
@@ -135,19 +131,9 @@ func newGitHubMeRouter(
 
 	logger := zap.NewNop()
 
-	d := router.NewRouterDeps(
-		public.PublicFS,
-		testhelpers.NewMockGitHubAPIDeps(logger),
-		testhelpers.NewMockGitHubOAuthDeps(logger),
-		&githubcallback.GitHubCallbackHandler{},
-		githubme.NewGitHubMeHandler(service),
-		validator,
-		&idpproxytoken.Handler{},
-		&whoami.WhoAmIHandler{},
-		testhelpers.NewMockGoogleDeps(logger),
-		logger,
-		testhelpers.NewMockSystemDeps(logger),
-	)
+	d := routertest.NewMockRouterDeps(logger)
+	d.GitHubMe = githubme.NewGitHubMeHandler(service)
+	d.SessionValidator = validator
 
 	return router.NewRouter(d)
 }
