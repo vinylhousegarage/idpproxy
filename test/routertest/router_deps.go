@@ -17,17 +17,17 @@ func NewMockRouterDeps(logger *zap.Logger) router.RouterDeps {
 		logger = zap.NewNop()
 	}
 
-	return router.NewRouterDeps(
-		public.PublicFS,
-		testhelpers.NewMockGitHubAPIDeps(logger),
-		testhelpers.NewMockGitHubOAuthDeps(logger),
-		&githubcallback.GitHubCallbackHandler{},
-		&githubme.GitHubMeHandler{},
-		testhelpers.NewMockSessionValidator(),
-		&idpproxytoken.Handler{},
-		&whoami.WhoAmIHandler{},
-		testhelpers.NewMockGoogleDeps(logger),
-		logger,
-		testhelpers.NewMockSystemDeps(logger),
-	)
+	return router.RouterDeps{
+		FS:               public.PublicFS,
+		GitHubAPI:        testhelpers.NewMockGitHubAPIDeps(logger),
+		GitHubOAuth:      testhelpers.NewMockGitHubOAuthDeps(logger),
+		GitHubCallback:   &githubcallback.GitHubCallbackHandler{},
+		GitHubMe:         &githubme.GitHubMeHandler{},
+		SessionValidator: testhelpers.NewMockSessionValidator(),
+		IDPProxyToken:    &idpproxytoken.Handler{},
+		WhoAmI:           &whoami.WhoAmIHandler{},
+		Google:           testhelpers.NewMockGoogleDeps(logger),
+		Logger:           logger,
+		System:           testhelpers.NewMockSystemDeps(logger),
+	}
 }
