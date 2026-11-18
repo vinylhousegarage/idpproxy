@@ -26,31 +26,3 @@ type RouterDeps struct {
 	Logger           *zap.Logger
 	System           *deps.SystemDependencies
 }
-
-func NewRouterDeps(
-	fsys fs.FS,
-	githubAPI *deps.GitHubAPIDependencies,
-	githubOAuth *deps.GitHubOAuthDependencies,
-	githubCallback *callback.GitHubCallbackHandler,
-	githubMe *githubme.GitHubMeHandler,
-	sessionValidator authsession.SessionValidator,
-	idpProxyToken *idpproxytoken.Handler,
-	whoAmI *whoami.WhoAmIHandler,
-	google *deps.GoogleDependencies,
-	logger *zap.Logger,
-	system *deps.SystemDependencies,
-) RouterDeps {
-	return RouterDeps{
-		FS:               fsys,
-		GitHubAPI:        githubAPI,
-		GitHubOAuth:      githubOAuth,
-		GitHubCallback:   githubCallback,
-		GitHubMe:         githubMe,
-		SessionValidator: sessionValidator,
-		IDPProxyToken:    idpProxyToken,
-		WhoAmI:           whoAmI,
-		Google:           google,
-		Logger:           logger,
-		System:           system,
-	}
-}
