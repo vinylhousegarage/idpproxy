@@ -9,6 +9,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/logout"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 )
@@ -22,6 +23,7 @@ type RouterDeps struct {
 	SessionValidator authsession.SessionValidator
 	IDPProxyToken    *idpproxytoken.Handler
 	WhoAmI           *whoami.WhoAmIHandler
+	Logout           *logout.Handler
 	Google           *deps.GoogleDependencies
 	Logger           *zap.Logger
 	System           *deps.SystemDependencies
