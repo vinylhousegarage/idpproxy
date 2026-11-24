@@ -5,6 +5,7 @@ import (
 
 	githubcallback "github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/logout"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
@@ -26,6 +27,7 @@ func NewMockRouterDeps(logger *zap.Logger) router.RouterDeps {
 		SessionValidator: testhelpers.NewMockSessionValidator(),
 		IDPProxyToken:    &idpproxytoken.Handler{},
 		WhoAmI:           &whoami.WhoAmIHandler{},
+		Logout:           logout.NewHandler(testhelpers.NewMockSessionInvalidator()),
 		Google:           testhelpers.NewMockGoogleDeps(logger),
 		Logger:           logger,
 		System:           testhelpers.NewMockSystemDeps(logger),

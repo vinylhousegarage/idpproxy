@@ -12,6 +12,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/deps"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/logout"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 )
@@ -23,6 +24,15 @@ func (fakeSessionValidator) Validate(
 	_ string,
 ) (*authsession.Session, error) {
 	return nil, nil
+}
+
+type fakeSessionInvalidator struct{}
+
+func (fakeSessionInvalidator) Invalidate(
+	_ context.Context,
+	_ string,
+) (*authsession.Session, error) {
+	return &authsession.Session{}, nil
 }
 
 func TestRegisterRoutes(t *testing.T) {
@@ -67,6 +77,20 @@ func TestRegisterRoutes(t *testing.T) {
 			t,
 			hasRoute(r.Routes(), "GET", "/whoami"),
 			"WhoAmI route was not registered",
+		)
+	})
+
+	t.Run("registers logout route", func(t *testing.T) {
+		r := gin.New()
+
+		require.NotPanics(t, func() {
+			RegisterRoutes(r, testRouterDeps())
+		})
+
+		require.True(
+			t,
+			hasRoute(r.Routes(), "POST", "/logout"),
+			"logout route was not registered",
 		)
 	})
 
@@ -139,6 +163,20 @@ func TestRegisterRoutes(t *testing.T) {
 			},
 		)
 	})
+
+	t.Run("panics when logout handler is missing", func(t *testing.T) {
+		r := gin.New()
+		d := testRouterDeps()
+		d.Logout = nil
+
+		require.PanicsWithValue(
+			t,
+			"router: missing dependencies",
+			func() {
+				RegisterRoutes(r, d)
+			},
+		)
+	})
 }
 
 func testRouterDeps() RouterDeps {
@@ -150,9 +188,12 @@ func testRouterDeps() RouterDeps {
 		SessionValidator: fakeSessionValidator{},
 		IDPProxyToken:    &idpproxytoken.Handler{},
 		WhoAmI:           &whoami.WhoAmIHandler{},
-		Google:           &deps.GoogleDependencies{},
-		Logger:           zap.NewNop(),
-		System:           &deps.SystemDependencies{},
+		Logout: logout.NewHandler(
+			fakeSessionInvalidator{},
+		),
+		Google: &deps.GoogleDependencies{},
+		Logger: zap.NewNop(),
+		System: &deps.SystemDependencies{},
 	}
 }
 

@@ -24,6 +24,7 @@ import (
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/github/callback"
 	githubme "github.com/vinylhousegarage/idpproxy/internal/oauth/github/me"
 	githubstore "github.com/vinylhousegarage/idpproxy/internal/oauth/github/store"
+	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/logout"
 	idpproxytoken "github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/token"
 	"github.com/vinylhousegarage/idpproxy/internal/oauth/idpproxy/whoami"
 	"github.com/vinylhousegarage/idpproxy/internal/router"
@@ -244,6 +245,8 @@ func main() {
 
 	whoAmIHandler := &whoami.WhoAmIHandler{}
 
+	logoutHandler := logout.NewHandler(sessionUsecase)
+
 	githubCallbackHandler := callback.NewGitHubCallbackHandler(
 		githubOAuthDeps,
 		githubAPIDeps,
@@ -269,6 +272,7 @@ func main() {
 		SessionValidator: sessionUsecase,
 		IDPProxyToken:    tokenHandler,
 		WhoAmI:           whoAmIHandler,
+		Logout:           logoutHandler,
 		Google:           googleDeps,
 		Logger:           logger,
 		System:           systemDeps,

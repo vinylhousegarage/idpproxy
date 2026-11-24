@@ -94,6 +94,33 @@ func NewMockSessionValidator() *MockSessionValidator {
 	return &MockSessionValidator{}
 }
 
+// ---- Session Invalidator mock ----
+
+type MockSessionInvalidator struct {
+	InvalidateFunc func(
+		ctx context.Context,
+		sessionID string,
+	) (*authsession.Session, error)
+}
+
+func (m *MockSessionInvalidator) Invalidate(
+	ctx context.Context,
+	sessionID string,
+) (*authsession.Session, error) {
+	if m.InvalidateFunc != nil {
+		return m.InvalidateFunc(ctx, sessionID)
+	}
+
+	return &authsession.Session{
+		SessionID: sessionID,
+		Status:    "inactive",
+	}, nil
+}
+
+func NewMockSessionInvalidator() *MockSessionInvalidator {
+	return &MockSessionInvalidator{}
+}
+
 // ---- GitHub OAuth deps mock ----
 
 func NewMockGitHubOAuthDeps(

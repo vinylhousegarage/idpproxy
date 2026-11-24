@@ -24,6 +24,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		d.SessionValidator == nil ||
 		d.IDPProxyToken == nil ||
 		d.WhoAmI == nil ||
+		d.Logout == nil ||
 		d.Google == nil ||
 		d.Logger == nil ||
 		d.System == nil {
@@ -61,6 +62,7 @@ func RegisterRoutes(r *gin.Engine, d RouterDeps) {
 		authsession.RequireSession(d.SessionValidator),
 		d.WhoAmI.Serve,
 	)
+	r.POST("/logout", gin.WrapH(d.Logout))
 
 	// Google
 	loginfirebase.RegisterRoutes(r, d.Google)
