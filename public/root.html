@@ -9,8 +9,13 @@
   <h1>idpproxy</h1>
 
   <form method="POST" action="/clients">
-    <label>Callback URL</label><br>
-    <input type="url" name="callback_url" required>
+    <label for="redirect_uri">Redirect URI</label><br>
+    <input
+      id="redirect_uri"
+      type="url"
+      name="redirect_uri"
+      required
+    >
     <button type="submit">Register</button>
   </form>
 </body>
